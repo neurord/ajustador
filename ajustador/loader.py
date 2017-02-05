@@ -24,16 +24,50 @@ from .signal_smooth import smooth
 from .detect import detect_peaks
 
 class vartype(object):
+    """A number with an uncertainty (σ)
+
+    >>> x = vartype(123, 5)
+    >>> y = vartype(8, 1)
+    >>> x + y
+    vartype(131.0, 5.1)
+    >>> x - y
+    vartype(115.0, 5.1)
+    >>> y / 3
+    vartype(2.67, 0.33)
+    >>> y < y
+    False
+    >>> print(y)
+    8±1
+    >>> print(x)
+    123±5
+    """
     def __init__(self, x, dev=0):
         self.x = x
         self.dev = dev
 
     @property
     def positive(self):
+        """Check if the number is greater than 3σ
+
+        >>> x = vartype(4, 1)
+        >>> x.positive
+        True
+        >>> y = x - vartype(3)
+        >>> y
+        vartype(1.0, 1.0)
+        >>> y.positive
+        False
+        """
         return self.x > self.dev*3
 
     @property
     def negative(self):
+        """Check if the number is smaller than -3σ
+
+        >>> x = vartype(-4, 1)
+        >>> x.negative
+        True
+        """
         return self.x < -self.dev*3
 
     def __nonzero__(self):
@@ -71,6 +105,17 @@ class vartype(object):
 
     @classmethod
     def average(cls, vect):
+        """Calculate a weighted average of an array
+
+        >>> items = [vartype(x, 1 + x/10) for x in range(5)]
+        >>> X = vartype.array(items)
+        >>> print(X)
+        rec.array([(0, 1.0), (1, 1.1), (2, 1.2), (3, 1.3), (4, 1.4)],
+                  dtype=[('x', '<i8'), ('dev', '<f8')])
+        >>> vartype.average(X)
+        vartype(1.66, 0.53)
+        """
+
         sq = vect.dev**-2
         var = 1 / sq.sum()
         x = (vect.x * sq * var).sum()
@@ -78,11 +123,26 @@ class vartype(object):
 
     @classmethod
     def array(cls, items):
+        """Create an array of vartypes
+
+        The array is a numpy structured array with .x and .dev attributes.
+
+        >>> items = [vartype(x, 1 + x/10) for x in range(5)]
+        >>> X = vartype.array(items)
+        >>> X
+        rec.array([(0, 1.0), (1, 1.1), (2, 1.2), (3, 1.3), (4, 1.4)],
+                  dtype=[('x', '<i8'), ('dev', '<f8')])
+        >>> X.x
+        array([0, 1, 2, 3, 4])
+        >>> X.dev
+        array([ 1. ,  1.1,  1.2,  1.3,  1.4])
+        """
         x = np.array([p.x for p in items])
         dev = np.array([p.dev for p in items])
         return np.rec.fromarrays((x, dev), names='x,dev')
 
 def load_dir(dir, timestep=1e-4):
+    "Load all .ibw files from a directory, in alphanumerical order"
     files = sorted(glob.glob(os.path.join(dir, '*.ibw')))
     inputs = (binarywave.load(file)['wave']['wData'] for file in files)
     datas = (np.rec.fromarrays((np.arange(input.size)*timestep, input), names='x,y')
@@ -97,10 +157,19 @@ def array_diff(wave, n=1):
     return np.rec.fromarrays(xy, names='x,y')
 
 def array_sub(reca, recb):
+    """Return the difference of two arrays
+
+    The uncertainty is calculated in the usual way.
+    """
     xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
     return np.rec.fromarrays(xy, names='x,dev')
 
 def array_rms(rec):
+    """Return the rms of an array
+
+    .. math::
+        \mathrm{rms} = \sqrt{\sum_i (x_i / \sigma_i)^2}
+    """
     return ((rec.x / rec.dev)**2).mean()**0.5
 
 def _find_baseline(wave, before=.2, after=0.75):
@@ -163,6 +232,8 @@ def _find_rectification(ccut, steady, window_len=11):
     return steady - bottom
 
 class Params(object):
+    """A set of parameters for extracting features from a wave
+    """
     baseline_before = .2
     baseline_after = 0.75
 
@@ -184,6 +255,27 @@ def _calculate_current(fileinfo, IV, IF):
     return start + inc * (fileinfo.number - 1)
 
 class IVCurve(object):
+    """
+    >>> mes = loader.Measurement('docs/static/recording/042811-6ivifcurves_Waves/')
+    >>> wave = mes[2]
+    >>> wave.baseline
+    vartype(-0.080227, 0.000085)
+    >>> print(wave.baseline)
+    -0.08023±0.00009
+    >>> wave.injection
+    -2.5e-10
+    >>> wave.time
+    0.89990000000000003
+    >>> type(wave.wave)
+    <class 'numpy.recarray'>
+    >>> wave.wave.x
+    array([  0.00000000e+00,   1.00000000e-04,   2.00000000e-04, ...,
+             8.99700000e-01,   8.99800000e-01,   8.99900000e-01])
+    >>> wave.wave.y
+    array([-0.0799375 , -0.08028125, -0.08028125, ..., -0.08025   ,
+           -0.08034375, -0.08034375], dtype=float32)
+    """
+
     def __init__(self, filename, fileinfo, injection, x, y, params):
         self.filename = filename
         self.fileinfo = fileinfo
@@ -386,6 +478,26 @@ class Attributable(object):
             return self.waves[index]
 
 class Measurement(Attributable):
+    """Load a series of recordings from a directory
+
+    >>> mes = loader.Measurement('docs/static/recording/042811-6ivifcurves_Waves')
+    >>> mes.waves
+    array([<ajustador.loader.IVCurve object at ...>,
+           <ajustador.loader.IVCurve object at ...>,
+           <ajustador.loader.IVCurve object at ...>,
+           <ajustador.loader.IVCurve object at ...>,
+           <ajustador.loader.IVCurve object at ...>], dtype=object)
+
+    >>> hyper = mes[mes.injection <= 0]
+    >>> depol = mes[mes.injection > 0]
+    >>> mes.injection
+    array([  0.00000000e+00,  -5.00000000e-10,  -2.50000000e-10,
+             2.20000000e-10,   3.20000000e-10])
+    >>> hyper.injection
+    array([  0.00000000e+00,  -5.00000000e-10,  -2.50000000e-10])
+    >>> depol.injection
+    array([  2.20000000e-10,   3.20000000e-10])
+    """
     def __init__(self, dirname,
                  IV=(-500e-12, 50e-12),
                  IF=(200e-12, 20e-12),

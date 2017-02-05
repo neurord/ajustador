@@ -14,6 +14,7 @@ def sub_mes_dev(reca, recb, min_dev=.005):
         return np.rec.fromarrays(xy, names='x,dev')
 
 def response_fitness(sim, measurement, full=False):
+    "Similarity of response to hyperpolarizing injection"
     x1 = sim.injection
     meas = measurement[measurement.injection <= 110e-12]
     x2 = meas.injection
@@ -23,6 +24,7 @@ def response_fitness(sim, measurement, full=False):
     return loader.array_rms(diff)
 
 def baseline_fitness(sim, measurement, full=False):
+    "Similarity of baselines"
     x1 = sim.injection
     x2 = measurement.injection
     fitting = np.abs(x1[:,None] - x2) < 1e-12

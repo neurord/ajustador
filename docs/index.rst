@@ -6,6 +6,7 @@ ajustador
 
    analysis
    fitnesses
+   loader
    utilities
    signal_smooth
    detect
