@@ -18,6 +18,3 @@ Loading a recording and detecting baseline and response
 
 .. plot:: loader_baseline.py
     :include-source:
-
-.. plot:: loader_spikes.py
-    :include-source:

@@ -21,7 +21,6 @@ from igor import binarywave
 
 from . import utilities
 from .signal_smooth import smooth
-from .detect import detect_peaks
 
 class vartype(object):
     """A number with an uncertainty (σ)
@@ -177,10 +176,6 @@ def _find_baseline(wave, before=.2, after=0.75):
     cutoffa, cutoffb = np.percentile(what, (5, 95))
     cut = what[(what > cutoffa) & (what < cutoffb)]
     return array_mean(cut)
-
-def _find_spikes(wave, min_height=0.0):
-    peaks = detect_peaks(wave.y, P_low=0.75, P_high=0.20)
-    return peaks[wave.y[peaks] > min_height]
 
 def _find_steady_state(wave, after=.25, before=0.6, cutoff_percentile=80):
     data = wave.y[(wave.x > after) & (wave.x < before)]

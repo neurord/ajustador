@@ -4,6 +4,7 @@ ajustador
 .. toctree::
    :maxdepth: 2
 
+   features
    analysis
    fitnesses
    loader
