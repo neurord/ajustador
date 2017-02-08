@@ -4,6 +4,7 @@ ajustador
 .. toctree::
    :maxdepth: 2
 
+   vartype
    features
    analysis
    fitnesses

@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import utilities, detect, loader
+from . import utilities, detect, vartype
 from .signal_smooth import smooth
 
 def _plot_line(ax, ranges, value, color):
@@ -9,13 +9,6 @@ def _plot_line(ax, ranges, value, color):
         ax.hlines(value.x, a, b, color, linestyles='-', zorder=3)
         ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
                   color, linestyles='--', zorder=3)
-
-def array_mean(data):
-    return loader.vartype(data.mean(), data.var(ddof=1)**0.5)
-
-def array_diff(wave, n=1):
-    xy = (wave.x[:n] + wave.x[n:])/n, np.diff(wave.y)
-    return np.rec.fromarrays(xy, names='x,y')
 
 class Feature:
     def __init__(self, obj):
@@ -54,7 +47,7 @@ class Baseline(Feature):
         what = wave.y[(wave.x < before) | (wave.x > after)]
         cutoffa, cutoffb = np.percentile(what, (5, 95))
         cut = what[(what > cutoffa) & (what < cutoffb)]
-        return array_mean(cut)
+        return vartype.array_mean(cut)
 
     @property
     @utilities.once
@@ -67,7 +60,7 @@ class Baseline(Feature):
         data = wave.y[(wave.x > after) & (wave.x < before)]
         cutoff = np.percentile(data, cutoff)
         cut = data[data < cutoff]
-        return array_mean(cut)
+        return vartype.array_mean(cut)
 
     @property
     @utilities.once
@@ -146,7 +139,7 @@ class Spikes(Feature):
 
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
-    d = array_diff(wave)
+    d = vartype.array_diff(wave)
     dd = smooth(d.y, window='hanning')[(d.x > after) & (d.x < before)]
     start = end = dd.argmin() + (d.x <= after).sum()
     while start > 0 and wave[start - 1].y > wave[start].y and wave[start].x > after:
