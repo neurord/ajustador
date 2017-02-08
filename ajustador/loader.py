@@ -20,7 +20,6 @@ from scipy import optimize
 from igor import binarywave
 
 from . import utilities
-from .signal_smooth import smooth
 
 class vartype(object):
     """A number with an uncertainty (σ)
@@ -148,13 +147,6 @@ def load_dir(dir, timestep=1e-4):
              for input in inputs)
     return np.vstack(datas).view(np.recarray)
 
-def array_mean(data):
-    return vartype(data.mean(), data.var(ddof=1)**0.5)
-
-def array_diff(wave, n=1):
-    xy = (wave.x[:n] + wave.x[n:])/n, np.diff(wave.y)
-    return np.rec.fromarrays(xy, names='x,y')
-
 def array_sub(reca, recb):
     """Return the difference of two arrays
 
@@ -171,17 +163,6 @@ def array_rms(rec):
     """
     return ((rec.x / rec.dev)**2).mean()**0.5
 
-def _find_baseline(wave, before=.2, after=0.75):
-    what = wave.y[(wave.x < before) | (wave.x > after)]
-    cutoffa, cutoffb = np.percentile(what, (5, 95))
-    cut = what[(what > cutoffa) & (what < cutoffb)]
-    return array_mean(cut)
-
-def _find_steady_state(wave, after=.25, before=0.6, cutoff_percentile=80):
-    data = wave.y[(wave.x > after) & (wave.x < before)]
-    cutoff = np.percentile(data, cutoff_percentile)
-    cut = data[data < cutoff]
-    return array_mean(cut)
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     d = array_diff(wave)
@@ -296,31 +277,28 @@ class IVCurve(object):
         return self.wave.x[-1]
 
     @property
-    @utilities.once
-    def baseline(self):
-        return _find_baseline(self.wave,
-                              before=self.params.baseline_before,
-                              after=self.params.baseline_after)
+    def baseline_before(self):
+        return self.params.baseline_before
 
     @property
-    @utilities.once
-    def steady(self):
-        return _find_steady_state(self.wave,
-                                  after=self.params.steady_after,
-                                  before=self.params.steady_before,
-                                  cutoff_percentile=self.params.steady_cutoff)
+    def baseline_after(self):
+        return self.params.baseline_after
 
     @property
-    @utilities.once
-    def response(self):
-        return self.steady - self.baseline
+    def steady_after(self):
+        return self.params.steady_after
 
     @property
-    @utilities.once
-    def falling_curve(self):
-        return _find_falling_curve(self.wave,
-                                   window=self.params.falling_curve_window,
-                                   before=self.params.steady_before)
+    def steady_before(self):
+        return self.params.steady_before
+
+    @property
+    def steady_cutoff(self):
+        return self.params.steady_cutoff
+
+    @property
+    def falling_curve_window(self):
+        return self.params.falling_curve_window
 
     @property
     @utilities.once
@@ -333,20 +311,6 @@ class IVCurve(object):
         return _find_rectification(self.falling_curve,
                                    self.steady,
                                    window_len=self.params.rectification_window)
-
-    @property
-    @utilities.once
-    def _spike_i(self):
-        return _find_spikes(self.wave)
-
-    @property
-    @utilities.once
-    def spikes(self):
-        return self.wave[self._spike_i]
-
-    @property
-    def spike_count(self):
-        return len(self.spikes)
 
     @property
     @utilities.once

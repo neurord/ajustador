@@ -8,6 +8,6 @@ dirname = basename / 'recording/042811-6ivifcurves_Waves'
 mes = loader.Measurement(str(dirname))
 
 fig = plt.figure()
-features.Spikes(mes[-1]).plot(figure=fig)
+features.Baseline(mes[1]).plot(figure=fig)
 
 plt.show()
