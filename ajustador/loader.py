@@ -163,23 +163,6 @@ def array_rms(rec):
     """
     return ((rec.x / rec.dev)**2).mean()**0.5
 
-
-def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
-    d = array_diff(wave)
-    dd = smooth(d.y, window='hanning')[(d.x > after) & (d.x < before)]
-    start = end = dd.argmin() + (d.x <= after).sum()
-    while start > 0 and wave[start - 1].y > wave[start].y and wave[start].x > after:
-        start -= 1
-    sm = smooth(wave.y, window='hanning')
-    smallest = sm[end]
-    # find minimum
-    while (end+window < wave.size and wave[end+window].x < before
-           and sm[end:end + window].min() < smallest):
-        smallest = sm[end]
-        end += window // 2
-    ccut = wave[start + 1 : end]
-    return ccut
-
 simple_exp = lambda x, amp, tau: amp * np.exp(-(x-x[0]) / tau)
 negative_exp = lambda x, amp, tau: amp * (1-np.exp(-(x-x[0]) / tau))
 falling_param = namedtuple('falling_param', 'amp tau')
