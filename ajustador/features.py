@@ -7,9 +7,10 @@ from .signal_smooth import smooth
 
 def _plot_line(ax, ranges, value, color):
     for (a,b) in ranges:
-        ax.hlines(value.x, a, b, color, linestyles='-', zorder=3)
-        ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
-                  color, linestyles='--', zorder=3)
+        ax.hlines(float(value), a, b, color, linestyles='-', zorder=3)
+        if isinstance(value, vartype.vartype):
+            ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
+                      color, linestyles='--', zorder=3)
 
 class Feature:
     def __init__(self, obj):
@@ -203,14 +204,62 @@ class FallingCurve(Feature):
         ccut = self.falling_curve
         baseline = self._obj.baseline
         steady = self._obj.steady
-        # rect = curve.rectification
         ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
         ax.set_xlim(self._obj.baseline_before - 0.005, ccut.x.max() + .01)
 
         func, popt = self.falling_curve_fit
         label = 'fitted {}'.format(func.__name__)
         ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--', label=label)
-        # ax.hlines([steady.x, steady.x-rect.x], 0.20, 0.40)
+
+        ax.legend(loc='upper right')
+        figure.tight_layout()
+
+
+class Rectification(Feature):
+    requires = ('baseline_before', 'steady_after', 'steady_before',
+                'falling_curve', 'steady')
+    provides = 'rectification',
+
+    window_len = 11
+
+    @property
+    @utilities.once
+    def rectification(self):
+        ccut = self._obj.falling_curve
+        steady = self._obj.steady
+
+        if ccut.size < self.window_len + 1:
+            return vartype.vartype(np.nan)
+        pos = ccut.y.argmin()
+        end = max(pos + self.window_len//2, ccut.size-1)
+        bottom = vartype.array_mean(ccut[end-self.window_len : end+self.window_len+1].y)
+        return steady - bottom
+
+    def plot(self, figure):
+        ax = super().plot(figure)
+
+        ccut = self._obj.falling_curve
+        after = self._obj.steady_after
+        before = self._obj.steady_before
+        steady = self._obj.steady
+
+        ax.set_xlim(self._obj.baseline_before - 0.005, before)
+
+        _plot_line(ax,
+                   [(after, before)],
+                   steady,
+                   'r')
+        right = (after + before) / 2
+        bottom = steady.x - self.rectification.x
+        _plot_line(ax,
+                   [(after, right)],
+                   bottom,
+                   'g')
+        ax.annotate('rectification',
+                    xytext=(right, bottom),
+                    xy=(right, self._obj.steady.x),
+                    arrowprops=dict(facecolor='black'),
+                    horizontalalignment='center', verticalalignment='top')
 
         ax.legend(loc='upper right')
         figure.tight_layout()

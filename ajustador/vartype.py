@@ -83,7 +83,7 @@ class vartype(object):
         return '{0.__class__.__name__}({0.x:.{1}f}, {0.dev:.{1}f})'.format(self, prec)
 
     def __float__(self):
-        return self.x
+        return float(self.x)
 
     @classmethod
     def average(cls, vect):

@@ -27,14 +27,6 @@ def load_dir(dir, timestep=1e-4):
              for input in inputs)
     return np.vstack(datas).view(np.recarray)
 
-def _find_rectification(ccut, steady, window_len=11):
-    if ccut.size < window_len + 1:
-        return vartype(np.nan)
-    pos = ccut.y.argmin()
-    end = max(pos + window_len//2, ccut.size-1)
-    bottom = array_mean(ccut[end-window_len : end+window_len+1].y)
-    return steady - bottom
-
 class Params(object):
     """A set of parameters for extracting features from a wave
     """
@@ -132,13 +124,6 @@ class IVCurve(object):
     @property
     def time(self):
         return self.wave.x[-1]
-
-    @property
-    @utilities.once
-    def rectification(self):
-        return _find_rectification(self.falling_curve,
-                                   self.steady,
-                                   window_len=self.params.rectification_window)
 
     @property
     @utilities.once
@@ -300,6 +285,7 @@ class Measurement(Attributable):
                 features.Baseline,
                 features.Spikes,
                 features.FallingCurve,
+                features.Rectification,
         ]
 
         ls = sorted(os.listdir(dirname))
