@@ -99,7 +99,7 @@ def _find_spikes(wave, min_height=0.0):
 class Spikes(Feature):
     """Find the position and height of spikes
     """
-    requires = 'wave'
+    requires = 'wave',
     provides = 'spike_i', 'spikes', 'spike_count'
 
     @property
@@ -159,7 +159,7 @@ class FallingCurve(Feature):
     requires = ('wave', 'baseline',
                 'steady_before', 'baseline_before',
                 'falling_curve_window')
-    provides = 'falling_curve'
+    provides = 'falling_curve',
 
     @property
     @utilities.once
@@ -173,7 +173,7 @@ class FallingCurve(Feature):
 
         ccut = self.falling_curve
         # baseline = self._obj.baseline
-        # steady = curve.steady
+        # steady = self._obj.steady
         # rect = curve.rectification
         ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
         ax.set_xlim(self._obj.baseline_before - 0.005, ccut.x.max() + .01)

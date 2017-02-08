@@ -10,7 +10,6 @@ import glob
 import contextlib
 import functools
 import os
-import math
 import operator
 import copy
 from collections import namedtuple
@@ -18,7 +17,7 @@ import numpy as np
 from scipy import optimize
 from igor import binarywave
 
-from . import utilities
+from . import utilities, features
 from .vartype import vartype
 
 def load_dir(dir, timestep=1e-4):
@@ -59,6 +58,12 @@ def _find_rectification(ccut, steady, window_len=11):
 class Params(object):
     """A set of parameters for extracting features from a wave
     """
+    requires = ()
+    provides = ('baseline_before', 'baseline_after',
+                'steady_after', 'steady_before', 'steady_cutoff',
+                'falling_curve_window', 'rectification_window',
+                'spike_assymetry_multiplier')
+
     baseline_before = .2
     baseline_after = 0.75
 
@@ -101,15 +106,40 @@ class IVCurve(object):
            -0.08034375, -0.08034375], dtype=float32)
     """
 
-    def __init__(self, filename, fileinfo, injection, x, y, params):
+    def __init__(self, filename, fileinfo, injection, x, y, features):
         self.filename = filename
         self.fileinfo = fileinfo
         self.injection = injection
-        self.params = params
         self.wave = np.rec.fromarrays((x, y), names='x,y')
 
+        self._attributes = {'wave':self}
+        for feature in features:
+            self.register_feature(feature)
+
+    def register_feature(self, feature):
+        # check requirements and provides
+        missing = set(feature.requires) - set(self._attributes)
+        print(feature.requires, self._attributes.keys())
+        if missing:
+            raise ValueError('Unknown attribute: ' + ', '.join(sorted(missing)))
+        doubled = set(feature.provides).intersection(self._attributes)
+        if doubled:
+            raise ValueError('Doubled attribute: ' + ', '.join(sorted(doubled)))
+
+        # register
+        print('registering {} on {}'.format(feature, self))
+        obj = feature(self) if isinstance(feature, type) else feature
+        for p in feature.provides:
+            self._attributes[p] = obj
+
+    def __getattr__(self, name):
+        if name in self._attributes:
+            return getattr(self._attributes[name], name)
+        else:
+            raise AttributeError
+
     @classmethod
-    def load(cls, dirname, filename, IV, IF, params, time):
+    def load(cls, dirname, filename, IV, IF, time, features):
         path = os.path.join(dirname, filename)
         data = binarywave.load(path)['wave']['wData']
         time = np.linspace(0, time, num=data.size, endpoint=False)
@@ -119,35 +149,11 @@ class IVCurve(object):
 
         injection = _calculate_current(fileinfo, IV, IF)
 
-        return cls(filename, fileinfo, injection, time, data, params)
+        return cls(filename, fileinfo, injection, time, data, features)
 
     @property
     def time(self):
         return self.wave.x[-1]
-
-    @property
-    def baseline_before(self):
-        return self.params.baseline_before
-
-    @property
-    def baseline_after(self):
-        return self.params.baseline_after
-
-    @property
-    def steady_after(self):
-        return self.params.steady_after
-
-    @property
-    def steady_before(self):
-        return self.params.steady_before
-
-    @property
-    def steady_cutoff(self):
-        return self.params.steady_cutoff
-
-    @property
-    def falling_curve_window(self):
-        return self.params.falling_curve_window
 
     @property
     @utilities.once
@@ -317,8 +323,14 @@ class Measurement(Attributable):
         self.name = os.path.basename(dirname)
         self.params = Params()
 
+        fefs = [self.params,
+                features.Baseline,
+                features.Spikes,
+                features.FallingCurve,
+        ]
+
         ls = sorted(os.listdir(dirname))
-        waves = [IVCurve.load(dirname, f, IV, IF, self.params, time=time)
+        waves = [IVCurve.load(dirname, f, IV, IF, features=fefs, time=time)
                  for f in ls]
         self.waves = np.array([wave for wave in waves
                                if wave.fileinfo.extra not in bad_extra])

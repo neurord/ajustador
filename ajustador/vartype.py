@@ -1,4 +1,5 @@
 import numbers
+import math
 import numpy as np
 
 class vartype(object):
