@@ -1,11 +1,12 @@
+from collections import namedtuple
 import numpy as np
+from scipy import optimize
 
 from . import utilities, detect, vartype
 from .signal_smooth import smooth
 
 def _plot_line(ax, ranges, value, color):
     for (a,b) in ranges:
-        print(a, b, value, color)
         ax.hlines(value.x, a, b, color, linestyles='-', zorder=3)
         ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
                   color, linestyles='--', zorder=3)
@@ -154,11 +155,34 @@ def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     ccut = wave[start + 1 : end]
     return ccut
 
+def simple_exp(x, amp, tau):
+    return float(amp) * np.exp(-(x-x[0]) / float(tau))
+def negative_exp(x, amp, tau):
+    return float(amp) * (1-np.exp(-(x-x[0]) / float(tau)))
+
+falling_param = namedtuple('falling_param', 'amp tau')
+function_fit = namedtuple('function_fit', 'function params')
+
+def _fit_falling_curve(ccut, baseline, steady):
+    if ccut.size < 5:
+        func = None
+        params = falling_param(vartype(np.nan, np.nan),
+                               vartype(np.nan, np.nan))
+    else:
+        init = (ccut.y.min()-baseline.x, ccut.x.ptp())
+        func = negative_exp if (steady-baseline).negative else simple_exp
+        popt, pcov = optimize.curve_fit(func, ccut.x, ccut.y-baseline.x, (-1,1))
+        pcov = np.zeros((2,2)) + pcov
+        params = falling_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
+                               vartype.vartype(popt[1], pcov[1,1]**0.5))
+    return function_fit(func, params)
+
 
 class FallingCurve(Feature):
-    requires = ('wave', 'baseline',
+    requires = ('wave',
                 'steady_before', 'baseline_before',
-                'falling_curve_window')
+                'falling_curve_window',
+                 'baseline', 'steady')
     provides = 'falling_curve',
 
     @property
@@ -168,22 +192,24 @@ class FallingCurve(Feature):
                                    window=self._obj.falling_curve_window,
                                    before=self._obj.steady_before)
 
+    @property
+    @utilities.once
+    def falling_curve_fit(self):
+        return _fit_falling_curve(self.falling_curve, self._obj.baseline, self._obj.steady)
+
     def plot(self, figure):
         ax = super().plot(figure)
 
         ccut = self.falling_curve
-        # baseline = self._obj.baseline
-        # steady = self._obj.steady
+        baseline = self._obj.baseline
+        steady = self._obj.steady
         # rect = curve.rectification
         ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
         ax.set_xlim(self._obj.baseline_before - 0.005, ccut.x.max() + .01)
 
-        # try:
-        #     func, popt = curve.falling_curve_fit
-        # except Exception:
-        #     print("Failed to get fit")
-        # else:
-        #     ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--')
+        func, popt = self.falling_curve_fit
+        label = 'fitted {}'.format(func.__name__)
+        ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--', label=label)
         # ax.hlines([steady.x, steady.x-rect.x], 0.20, 0.40)
 
         ax.legend(loc='upper right')

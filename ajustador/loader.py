@@ -14,7 +14,6 @@ import operator
 import copy
 from collections import namedtuple
 import numpy as np
-from scipy import optimize
 from igor import binarywave
 
 from . import utilities, features
@@ -27,25 +26,6 @@ def load_dir(dir, timestep=1e-4):
     datas = (np.rec.fromarrays((np.arange(input.size)*timestep, input), names='x,y')
              for input in inputs)
     return np.vstack(datas).view(np.recarray)
-
-simple_exp = lambda x, amp, tau: amp * np.exp(-(x-x[0]) / tau)
-negative_exp = lambda x, amp, tau: amp * (1-np.exp(-(x-x[0]) / tau))
-falling_param = namedtuple('falling_param', 'amp tau')
-function_fit = namedtuple('function_fit', 'function params')
-
-def _fit_falling_curve(ccut, baseline, steady):
-    if ccut.size < 5:
-        func = None
-        params = falling_param(vartype(np.nan, np.nan),
-                               vartype(np.nan, np.nan))
-    else:
-        init = (ccut.y.min()-baseline.x, ccut.x.ptp())
-        func = negative_exp if (steady-baseline).negative else simple_exp
-        popt, pcov = optimize.curve_fit(func, ccut.x, ccut.y-baseline.x, (-1,1))
-        pcov = np.zeros((2,2)) + pcov
-        params = falling_param(vartype(popt[0], pcov[0,0]**0.5),
-                               vartype(popt[1], pcov[1,1]**0.5))
-    return function_fit(func, params)
 
 def _find_rectification(ccut, steady, window_len=11):
     if ccut.size < window_len + 1:
@@ -119,7 +99,6 @@ class IVCurve(object):
     def register_feature(self, feature):
         # check requirements and provides
         missing = set(feature.requires) - set(self._attributes)
-        print(feature.requires, self._attributes.keys())
         if missing:
             raise ValueError('Unknown attribute: ' + ', '.join(sorted(missing)))
         doubled = set(feature.provides).intersection(self._attributes)
@@ -127,7 +106,6 @@ class IVCurve(object):
             raise ValueError('Doubled attribute: ' + ', '.join(sorted(doubled)))
 
         # register
-        print('registering {} on {}'.format(feature, self))
         obj = feature(self) if isinstance(feature, type) else feature
         for p in feature.provides:
             self._attributes[p] = obj
@@ -154,11 +132,6 @@ class IVCurve(object):
     @property
     def time(self):
         return self.wave.x[-1]
-
-    @property
-    @utilities.once
-    def falling_curve_fit(self):
-        return _fit_falling_curve(self.falling_curve, self.baseline, self.steady)
 
     @property
     @utilities.once

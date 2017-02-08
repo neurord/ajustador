@@ -6,6 +6,7 @@ ajustador.features
 
    features_baseline_more
    features_spikes_more
+   features_falling_curve_more
 
 .. autoclass:: ajustador.features.Baseline
     :members:
@@ -32,4 +33,4 @@ ajustador.features
 
     .. plot:: features_falling_curve.py
 
-    .. :doc:`features_baseline_more`
+    :doc:`features_falling_curve_more`

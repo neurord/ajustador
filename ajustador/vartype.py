@@ -82,6 +82,9 @@ class vartype(object):
         prec = -min(preca, precb, 0) + 1
         return '{0.__class__.__name__}({0.x:.{1}f}, {0.dev:.{1}f})'.format(self, prec)
 
+    def __float__(self):
+        return self.x
+
     @classmethod
     def average(cls, vect):
         """Calculate a weighted average of an array
