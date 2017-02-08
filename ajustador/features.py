@@ -37,16 +37,17 @@ class Spikes:
         ax.set_ylabel('membrane potential / V')
 
         ax.vlines(self.spikes.x, -0.06, self.spikes.y, 'r')
-        ax.text(0.05, 0.5, '{} spikes'.format(len(self.spikes)),
+        ax.text(0.05, 0.5, '{} spikes'.format(self.spike_count),
                 horizontalalignment='left',
                 transform=ax.transAxes)
 
         ax.set_title('Depolarizing injection response')
         figure.tight_layout()
 
-        ax2 = figure.add_axes([.7, .45, .25, .4])
-        ax2.set_xlim(self.spikes.x[0] - 0.001, self.spikes.x[0] + 0.0015)
-        ax2.plot(self._wave.x, self._wave.y, label='recording')
-        ax2.vlines(self.spikes.x[:1], -0.06, self.spikes.y, 'r')
-        ax2.tick_params(labelbottom='off', labelleft='off')
-        ax2.set_title('first spike', fontsize='smaller')
+        if self.spike_count > 0:
+            ax2 = figure.add_axes([.7, .45, .25, .4])
+            ax2.set_xlim(self.spikes.x[0] - 0.001, self.spikes.x[0] + 0.0015)
+            ax2.plot(self._wave.x, self._wave.y, label='recording')
+            ax2.vlines(self.spikes.x[:1], -0.06, self.spikes.y, 'r')
+            ax2.tick_params(labelbottom='off', labelleft='off')
+            ax2.set_title('first spike', fontsize='smaller')

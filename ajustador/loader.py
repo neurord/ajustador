@@ -472,6 +472,9 @@ class Attributable(object):
         else:
             return self.waves[index]
 
+    def __len__(self):
+        return len(self.waves)
+
 class Measurement(Attributable):
     """Load a series of recordings from a directory
 
