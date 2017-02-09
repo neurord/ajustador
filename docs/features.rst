@@ -4,19 +4,19 @@ ajustador.features
 .. toctree::
    :hidden:
 
-   features_baseline_more
+   features_steady_state_more
    features_spikes_more
    features_falling_curve_more
    features_rectification_more
 
-.. autoclass:: ajustador.features.Baseline
+.. autoclass:: ajustador.features.SteadyState
     :members:
     :undoc-members:
     :member-order: bysource
 
-    .. plot:: features_baseline.py
+    .. plot:: features_steady_state.py
 
-    :doc:`features_baseline_more`
+    :doc:`features_steady_state_more`
 
 .. autoclass:: ajustador.features.Spikes
     :members:

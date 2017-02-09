@@ -7,11 +7,11 @@ import measurements1
 try:
     n
 except NameError:
-    n = 1
+    n = 8
 
 rec = measurements1.waves042811[n]
 
 fig = plt.figure()
-features.Rectification(rec).plot(figure=fig)
+features.SteadyState(rec).plot(figure=fig)
 
 plt.show()

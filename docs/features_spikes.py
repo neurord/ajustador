@@ -1,13 +1,17 @@
 import pathlib
 import matplotlib.pyplot as plt
 
-from ajustador import loader, features
+from ajustador import features
+import measurements1
 
-basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-dirname = basename / 'recording/042811-6ivifcurves_Waves'
-mes = loader.Measurement(str(dirname))
+try:
+    n
+except NameError:
+    n = -1
+
+rec = measurements1.waves042811[n]
 
 fig = plt.figure()
-features.Spikes(mes[-1]).plot(figure=fig)
+features.Spikes(rec).plot(figure=fig)
 
 plt.show()

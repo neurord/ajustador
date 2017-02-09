@@ -1,74 +1,1242 @@
 Additional plots for Rectification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. plot::
-
-   import pathlib
-   import matplotlib.pyplot as plt
-
-   from ajustador import loader, features
-
-   basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-   dirname = basename / 'recording/042811-6ivifcurves_Waves'
-   mes = loader.Measurement(str(dirname))
-
-   fig = plt.figure()
-   features.Rectification(mes[0]).plot(figure=fig)
+042811-6ivifcurves_Waves
+````````````````````````
 
 .. plot::
 
-   import pathlib
-   import matplotlib.pyplot as plt
-
-   from ajustador import loader, features
-
-   basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-   dirname = basename / 'recording/042811-6ivifcurves_Waves'
-   mes = loader.Measurement(str(dirname))
-
-   fig = plt.figure()
-   features.Rectification(mes[1]).plot(figure=fig)
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
 
 .. plot::
 
-   import pathlib
-   import matplotlib.pyplot as plt
-
-   from ajustador import loader, features
-
-   basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-   dirname = basename / 'recording/042811-6ivifcurves_Waves'
-   mes = loader.Measurement(str(dirname))
-
-   fig = plt.figure()
-   features.Rectification(mes[2]).plot(figure=fig)
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
 
 .. plot::
 
-   import pathlib
-   import matplotlib.pyplot as plt
-
-   from ajustador import loader, features
-
-   basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-   dirname = basename / 'recording/042811-6ivifcurves_Waves'
-   mes = loader.Measurement(str(dirname))
-
-   fig = plt.figure()
-   features.Rectification(mes[3]).plot(figure=fig)
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
 
 .. plot::
 
-   import pathlib
-   import matplotlib.pyplot as plt
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
 
-   from ajustador import loader, features
+.. plot::
 
-   basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-   dirname = basename / 'recording/042811-6ivifcurves_Waves'
-   mes = loader.Measurement(str(dirname))
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
 
-   fig = plt.figure()
-   features.Rectification(mes[4]).plot(figure=fig)
-   # make sure we got all of them
-   assert len(mes) == 5
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+042911-10ivifcurves_Waves
+`````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+050311-4ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+050411-7ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+050511-3ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+050611-5ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+051311-9ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+051411-5ivifcurves_Waves
+````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+051811-13ivifcurves_Waves
+`````````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 15
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 16
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 17
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 18
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 19
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 20
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 21
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 22
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 23
+   exec(open('features_rectification.py').read())
+
+090612-1ivcurves_Waves
+``````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+
+091312-4ivcurves_Waves
+``````````````````````
+
+.. plot::
+
+   import os
+   n = 0
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 1
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 2
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 3
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 4
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 5
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 6
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 7
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 8
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 9
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 10
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 11
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 12
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 13
+   exec(open('features_rectification.py').read())
+
+.. plot::
+
+   import os
+   n = 14
+   exec(open('features_rectification.py').read())
+

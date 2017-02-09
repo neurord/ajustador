@@ -25,7 +25,7 @@ class Feature:
         ax.set_ylabel('membrane potential / V')
         return ax
 
-class Baseline(Feature):
+class SteadyState(Feature):
     """Find the baseline and injection steady states
 
     The range *before* `baseline_before` and *after* `baseline_after`

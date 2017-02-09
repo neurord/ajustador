@@ -51,7 +51,6 @@ class Params(object):
 Fileinfo = namedtuple('fileinfo', 'group ident experiment protocol number extra')
 
 def _calculate_current(fileinfo, IV, IF):
-    print(fileinfo)
     assert fileinfo.experiment == 1
     start, inc = IV if fileinfo.protocol == 1 else IF
     return start + inc * (fileinfo.number - 1)
@@ -282,7 +281,7 @@ class Measurement(Attributable):
         self.params = Params()
 
         fefs = [self.params,
-                features.Baseline,
+                features.SteadyState,
                 features.Spikes,
                 features.FallingCurve,
                 features.Rectification,
