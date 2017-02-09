@@ -263,3 +263,56 @@ class Rectification(Feature):
 
         ax.legend(loc='upper right')
         figure.tight_layout()
+
+
+class ChargingCurve(Feature):
+    requires = ('wave', 'steady_after', 'steady', 'spikes', 'spike_count')
+    provides = 'charging_curve_halfheight',
+
+    @property
+    @utilities.once
+    def charging_curve_halfheight(self):
+        "The height in the middle between depolarization start and first spike"
+        if self._obj.spike_count < 1:
+            return np.nan
+        else:
+            wave = self._obj.wave
+            steady_after = self._obj.steady_after
+            spike0 = self._obj.spikes[0]
+
+            what = wave[(wave.x > steady_after) & (wave.x < spike0.x)]
+            return np.median(what.y)
+
+    def plot(self, figure):
+        ax = super().plot(figure)
+
+        after = self._obj.steady_after
+        steady = self._obj.steady
+
+        if np.isnan(self.charging_curve_halfheight):
+            ax.text(0.5, 0.5, 'cannot determine')
+            before = self._obj.wave.x[-1]
+        else:
+            before = self._obj.spikes[0].x
+            ax.set_xlim(after - 0.005, before + 0.005)
+            _plot_line(ax,
+                       [(after, before)],
+                       self.charging_curve_halfheight,
+                       'g')
+
+        _plot_line(ax,
+                   [(after, before)],
+                   steady,
+                   'r')
+
+        ax.legend(loc='upper right')
+        figure.tight_layout()
+
+
+standard_features = (
+                SteadyState,
+                Spikes,
+                FallingCurve,
+                Rectification,
+                ChargingCurve,
+    )

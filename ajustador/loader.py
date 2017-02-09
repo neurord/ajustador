@@ -125,17 +125,6 @@ class IVCurve(object):
         return self.wave.x[-1]
 
     @property
-    @utilities.once
-    def charging_curve_halfheight(self):
-        "The height in the middle between depolarization and first spike"
-        if self.spike_count < 1:
-            return np.nan
-        else:
-            what = self.wave[(self.wave.x > self.params.steady_after)
-                             & (self.wave.x < self.spikes[0].x)]
-            return np.median(what.y)
-
-    @property
     def depolarization_interval(self):
         return self.params.steady_before - self.params.steady_after
 
@@ -280,13 +269,7 @@ class Measurement(Attributable):
         self.name = os.path.basename(dirname)
         self.params = Params()
 
-        fefs = [self.params,
-                features.SteadyState,
-                features.Spikes,
-                features.FallingCurve,
-                features.Rectification,
-        ]
-
+        fefs = (self.params,) + features.standard_features
         ls = os.listdir(dirname)
         waves = [IVCurve.load(dirname, f, IV, IF, features=fefs, time=time)
                  for f in ls]

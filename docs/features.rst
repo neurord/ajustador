@@ -8,6 +8,7 @@ ajustador.features
    features_spikes_more
    features_falling_curve_more
    features_rectification_more
+   features_charging_curve_more
 
 .. autoclass:: ajustador.features.SteadyState
     :members:
@@ -44,3 +45,12 @@ ajustador.features
     .. plot:: features_rectification.py
 
     :doc:`features_rectification_more`
+
+.. autoclass:: ajustador.features.ChargingCurve
+    :members:
+    :undoc-members:
+    :member-order: bysource
+
+    .. plot:: features_charging_curve.py
+
+    :doc:`features_charging_curve_more`

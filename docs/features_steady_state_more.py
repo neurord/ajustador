@@ -11,6 +11,7 @@ classnames = {'features_steady_state':'SteadyState',
               'features_spikes':'Spikes',
               'features_falling_curve':'FallingCurve',
               'features_rectification':'Rectification',
+              'features_charging_curve':'ChargingCurve',
              }
 section = 'Additional plots for ' + classnames[basename]
 title = header(section, '~')
