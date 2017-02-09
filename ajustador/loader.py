@@ -288,8 +288,10 @@ class Measurement(Attributable):
                 features.Rectification,
         ]
 
-        ls = sorted(os.listdir(dirname))
+        ls = os.listdir(dirname)
         waves = [IVCurve.load(dirname, f, IV, IF, features=fefs, time=time)
                  for f in ls]
-        self.waves = np.array([wave for wave in waves
-                               if wave.fileinfo.extra not in bad_extra])
+        waves = np.array([wave for wave in waves
+                          if wave.fileinfo.extra not in bad_extra])
+        order = np.argsort([wave.injection for wave in waves])
+        self.waves = waves[order]

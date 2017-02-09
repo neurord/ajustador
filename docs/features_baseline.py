@@ -1,13 +1,12 @@
 import pathlib
 import matplotlib.pyplot as plt
 
-from ajustador import loader, features
+import measurements1
+from ajustador import features
 
-basename = pathlib.Path(loader.__file__).parent.parent / 'docs/static'
-dirname = basename / 'recording/042811-6ivifcurves_Waves'
-mes = loader.Measurement(str(dirname))
+rec = measurements1.waves042811[8]
 
 fig = plt.figure()
-features.Baseline(mes[1]).plot(figure=fig)
+features.Baseline(rec).plot(figure=fig)
 
 plt.show()
