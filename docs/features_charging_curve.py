@@ -5,11 +5,11 @@ from ajustador import features
 import measurements1
 
 try:
-    n
+    wavename
 except NameError:
-    n = -1
+    wavename, n = 'waves042811', 0
 
-rec = measurements1.waves042811[n]
+rec = measurements1.waves[wavename][n]
 
 fig = plt.figure()
 features.ChargingCurve(rec).plot(figure=fig)

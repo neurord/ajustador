@@ -18,14 +18,14 @@ title = header(section, '~')
 
 with open(stem + '_more.rst', 'w') as f:
     print(title, file=f)
-    for mes in measurements1.waves:
+    for ident, mes in measurements1.waves.items():
         print(header(mes.name, '`'), file=f)
         for n in range(len(mes)):
             print('''\
 .. plot::
 
    import os
-   n = {}
+   wavename, n = {!r}, {}
    exec(open('{}').read())
-'''.format(n, basename + '.py'), file=f)
+'''.format(ident, n, basename + '.py'), file=f)
     print('{} is written ({})'.format(f.name, section))
