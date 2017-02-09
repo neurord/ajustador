@@ -12,6 +12,9 @@ def _plot_line(ax, ranges, value, color):
             ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
                       color, linestyles='--', zorder=3)
 
+def plural(n, word):
+    return '{} {}{}'.format(n, word, '' if n == 1 else 's')
+
 class Feature:
     def __init__(self, obj):
         self._obj = obj
@@ -87,7 +90,8 @@ class SteadyState(Feature):
         ax.annotate('response',
                     xy=(time/2, self.steady.x),
                     xytext=(time/2, self.baseline.x),
-                    arrowprops=dict(facecolor='black'),
+                    arrowprops=dict(facecolor='black',
+                                    shrink=0),
                     horizontalalignment='center', verticalalignment='bottom')
 
         ax.legend(loc='center right')
@@ -126,7 +130,7 @@ class Spikes(Feature):
         ax = super().plot(figure)
 
         ax.vlines(self.spikes.x, -0.06, self.spikes.y, 'r')
-        ax.text(0.05, 0.5, '{} spikes'.format(self.spike_count),
+        ax.text(0.05, 0.5, plural(self.spike_count, 'spike'),
                 horizontalalignment='left',
                 transform=ax.transAxes)
         figure.tight_layout()
@@ -290,7 +294,9 @@ class ChargingCurve(Feature):
         steady = self._obj.steady
 
         if np.isnan(self.charging_curve_halfheight):
-            ax.text(0.5, 0.5, 'cannot determine')
+            ax.text(0.05, 0.5, 'cannot determine charging curve',
+                    horizontalalignment='left',
+                    transform=ax.transAxes)
             before = self._obj.wave.x[-1]
         else:
             before = self._obj.spikes[0].x
