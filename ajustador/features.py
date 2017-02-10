@@ -106,7 +106,8 @@ class Spikes(Feature):
     """Find the position and height of spikes
     """
     requires = 'wave',
-    provides = 'spike_i', 'spikes', 'spike_count'
+    provides = ('spike_i', 'spikes', 'spike_count',
+                'mean_isi', 'isi_spread')
 
     @property
     @utilities.once
@@ -124,6 +125,57 @@ class Spikes(Feature):
     def spike_count(self):
         "The number of spikes"
         return len(self.spike_i)
+
+    mean_isi_fallback_variance = 0.001
+
+    @property
+    @utilities.once
+    def mean_isi(self):
+        """The mean interval between spikes
+
+        Defined as:
+
+        * :math:`<x_{i+1} - x_i>`, if there are at least two spikes,
+        * the length of the depolarization interval otherwise (`depolarization_interval`)
+
+        If there less than three spikes, the variance is fixed as
+        `mean_isi_fallback_variance`.
+        """
+        if self.spike_count > 2:
+            return vartype.array_mean(np.diff(self.spikes.x))
+        elif self.spike_count == 2:
+            d = self.spikes.x[1]-self.spikes.x[0]
+            return vartype.vartype(d, 0.001)
+        else:
+            return vartype.vartype(self._obj.depolarization_interval, 0.001)
+
+    @property
+    @utilities.once
+    def isi_spread(self):
+        """The difference between the largest and smallest inter-spike intervals
+
+        Only defined when `spike_count` is at least 3.
+        """
+        if len(self.spikes) > 2:
+            diff = np.diff(self.spikes.x)
+            return diff.ptp()
+        else:
+            return np.nan
+
+    @property
+    @utilities.once
+    def spike_latency(self):
+        "Latency until the first spike or end of injection if no spikes"
+        if len(self.spikes) > 0:
+            return self.spikes[0].x
+        else:
+            return self.wave.x[-1]
+
+    @property
+    @utilities.once
+    def mean_spike_height(self):
+        "The mean absolute position of spike vertices"
+        return vartype.array_mean(self.spikes.y)
 
     def plot(self, figure):
         wave = self._obj.wave

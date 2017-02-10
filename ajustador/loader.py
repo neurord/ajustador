@@ -130,41 +130,6 @@ class IVCurve(object):
 
     @property
     @utilities.once
-    def mean_isi(self):
-        if self.spike_count > 2:
-            return array_mean(np.diff(self.spikes.x))
-        elif self.spike_count == 2:
-            d = self.spikes.x[1]-self.spikes.x[0]
-            return vartype(d, 0.001)
-        else:
-            return vartype(self.depolarization_interval, 0.001)
-
-    @property
-    @utilities.once
-    def isi_spread(self):
-        spikes = self.spikes
-        if len(spikes) > 2:
-            diff = np.diff(self.spikes.x)
-            return diff.ptp()
-        else:
-            return np.nan
-
-    @property
-    @utilities.once
-    def spike_latency(self):
-        "Latency until the first spike or end of injection if no spikes"
-        if len(self.spikes) > 0:
-            return self.spikes[0].x
-        else:
-            return self.time
-
-    @property
-    @utilities.once
-    def mean_spike_height(self):
-        return array_mean(self.spikes.y)
-
-    @property
-    @utilities.once
     def spike_width(self):
         steady = self.steady.x
         spikes = self._spike_i
