@@ -24,7 +24,7 @@ ajustador.basic_simulation
    :func: option_parser
    :prog: basic_simulation
 
-:ref: `utilities`
+:ref: :doc:`utilities`
 
 Indices and tables
 ==================
