@@ -96,8 +96,8 @@ exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-#
-# default_role = None
+
+default_role = 'any'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #
