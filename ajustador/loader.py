@@ -16,29 +16,8 @@ from collections import namedtuple
 import numpy as np
 from igor import binarywave
 
-from . import utilities, features
+from . import utilities
 from .vartype import vartype
-
-class Params(object):
-    """A set of parameters for extracting features from a wave
-    """
-    requires = ()
-    provides = ('baseline_before', 'baseline_after',
-                'steady_after', 'steady_before', 'steady_cutoff',
-                'falling_curve_window', 'rectification_window',
-                'spike_assymetry_multiplier')
-
-    baseline_before = .2
-    baseline_after = 0.75
-
-    steady_after = .25
-    steady_before = .6
-    steady_cutoff = 80
-
-    falling_curve_window = 20
-    rectification_window = 11
-
-    spike_assymetry_multiplier = 10
 
 Fileinfo = namedtuple('fileinfo', 'group ident experiment protocol number extra')
 
@@ -115,10 +94,6 @@ class IVCurve(object):
     @property
     def time(self):
         return self.wave.x[-1]
-
-    @property
-    def depolarization_interval(self):
-        return self.params.steady_before - self.params.steady_after
 
     @property
     @utilities.once
@@ -200,7 +175,7 @@ class Measurement(Attributable):
     >>> depol.injection
     array([  2.20000000e-10,   3.20000000e-10])
     """
-    def __init__(self, dirname,
+    def __init__(self, dirname, params, features=None,
                  IV=(-500e-12, 50e-12),
                  IF=(200e-12, 20e-12),
                  time=.9,
@@ -209,15 +184,18 @@ class Measurement(Attributable):
         self.bad_extra = bad_extra
         self.dirname = dirname
         self.name = os.path.basename(dirname)
-        self.params = Params()
+        if features is None:
+            from . import features
+            features = features.standard_features
+
+        self._features = (params, *features)
 
     @property
     @utilities.once
     def waves(self):
-        fefs = (self.params,) + features.standard_features
         ls = os.listdir(self.dirname)
 
-        waves = [IVCurve.load(self.dirname, f, features=fefs, **self._args)
+        waves = [IVCurve.load(self.dirname, f, features=self._features, **self._args)
                  for f in ls]
         waves = np.array([wave for wave in waves
                           if wave.fileinfo.extra not in self.bad_extra])
