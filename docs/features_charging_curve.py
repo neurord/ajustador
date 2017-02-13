@@ -7,7 +7,7 @@ import measurements1
 try:
     wavename
 except NameError:
-    wavename, n = 'waves042811', 0
+    wavename, n = 'waves042811', 8
 
 rec = measurements1.waves[wavename][n]
 

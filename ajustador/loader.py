@@ -122,24 +122,6 @@ class IVCurve(object):
 
     @property
     @utilities.once
-    def spike_width(self):
-        steady = self.steady.x
-        spikes = self._spike_i
-        ans = np.empty_like(spikes, dtype=float)
-        x = self.wave.x
-        y = self.wave.y
-        halfheight = (self.spikes.y - steady) / 2 + steady
-        for i, k in enumerate(spikes):
-            beg = end = k
-            while beg > 1 and y[beg - 1] > halfheight[i]:
-                beg -= 1
-            while end + 2 < y.size and y[end + 1] > halfheight[i]:
-                end += 1
-            ans[i] = (x[end] + x[end+1] - x[beg] - x[beg-1]) / 2
-        return ans
-
-    @property
-    @utilities.once
     def spike_ahp(self):
         spikes = self.spikes
         widths = self.spike_width * self.params.spike_assymetry_multiplier

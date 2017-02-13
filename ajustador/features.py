@@ -5,12 +5,12 @@ from scipy import optimize
 from . import utilities, detect, vartype
 from .signal_smooth import smooth
 
-def _plot_line(ax, ranges, value, color):
+def _plot_line(ax, ranges, value, color, zorder=3):
     for (a,b) in ranges:
-        ax.hlines(float(value), a, b, color, linestyles='-', zorder=3)
+        ax.hlines(float(value), a, b, color, linestyles='-', zorder=zorder)
         if isinstance(value, vartype.vartype):
             ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
-                      color, linestyles='--', zorder=3)
+                      color, linestyles='--', zorder=zorder)
 
 def plural(n, word):
     return '{} {}{}'.format(n, word, '' if n == 1 else 's')
@@ -107,7 +107,10 @@ class Spikes(Feature):
     """
     requires = 'wave',
     provides = ('spike_i', 'spikes', 'spike_count',
-                'mean_isi', 'isi_spread')
+                'mean_isi', 'isi_spread',
+                'spike_latency',
+                'spike_bounds', 'spike_width',
+                'mean_spike_height')
 
     @property
     @utilities.once
@@ -166,6 +169,7 @@ class Spikes(Feature):
     @utilities.once
     def spike_latency(self):
         "Latency until the first spike or end of injection if no spikes"
+        # TODO: add spike_latency to plot
         if len(self.spikes) > 0:
             return self.spikes[0].x
         else:
@@ -173,28 +177,65 @@ class Spikes(Feature):
 
     @property
     @utilities.once
+    def spike_bounds(self):
+        "The halfheight left and right positions of spikes"
+        steady = self._obj.steady.x
+
+        ans = np.empty((self.spike_count, 2), dtype=float)
+        x = self._obj.wave.x
+        y = self._obj.wave.y
+        halfheight = (self.spikes.y - steady) / 2 + steady
+
+        for i, k in enumerate(self.spike_i):
+            beg = end = k
+            while beg > 1 and y[beg - 1] > halfheight[i]:
+                beg -= 1
+            while end + 2 < y.size and y[end + 1] > halfheight[i]:
+                end += 1
+            ans[i] = (x[beg-1] + x[beg])/2, (x[end] + x[end+1])/2
+        return ans
+
+    @property
+    @utilities.once
+    def spike_width(self):
+        return self.spike_bounds[:, 1] - self.spike_bounds[:, 0]
+
+    @property
+    @utilities.once
     def mean_spike_height(self):
         "The mean absolute position of spike vertices"
+        # TODO: is the variance too big?
         return vartype.array_mean(self.spikes.y)
 
     def plot(self, figure):
         wave = self._obj.wave
         ax = super().plot(figure)
+        bottom = -0.06 # self._obj.steady.x
+                       # Doing the "proper" thing makes the plot hard to read
 
-        ax.vlines(self.spikes.x, -0.06, self.spikes.y, 'r')
+        ax.vlines(self.spikes.x, bottom, self.spikes.y, 'r')
         ax.text(0.05, 0.5, plural(self.spike_count, 'spike'),
                 horizontalalignment='left',
                 transform=ax.transAxes)
+
+        _plot_line(ax,
+                   [(self._obj.steady_after, self._obj.steady_before)],
+                   self.mean_spike_height,
+                   'y', zorder=0)
+
         figure.tight_layout()
 
         if self.spike_count > 0:
+            x = self.spikes.x
             ax2 = figure.add_axes([.7, .45, .25, .4])
-            ax2.set_xlim(self.spikes.x[0] - 0.001, self.spikes.x[0] + 0.0015)
+            ax2.set_xlim(x[0] - 0.001, x[0] + 0.0015)
             ax2.plot(wave.x, wave.y, label='recording')
-            ax2.vlines(self.spikes.x[:1], -0.06, self.spikes.y, 'r')
+            ax2.vlines(x[:1], bottom, self.spikes.y, 'r', zorder=3)
             ax2.tick_params(labelbottom='off', labelleft='off')
             ax2.set_title('first spike', fontsize='smaller')
 
+            w = self.spike_bounds
+            ax2.axvspan(*w[0], alpha=0.3, color='cyan')
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     d = vartype.array_diff(wave)
