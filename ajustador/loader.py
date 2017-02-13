@@ -205,14 +205,21 @@ class Measurement(Attributable):
                  IF=(200e-12, 20e-12),
                  time=.9,
                  bad_extra=()):
+        self._args = dict(IV=IV, IF=IF, time=time)
+        self.bad_extra = bad_extra
+        self.dirname = dirname
         self.name = os.path.basename(dirname)
         self.params = Params()
 
+    @property
+    @utilities.once
+    def waves(self):
         fefs = (self.params,) + features.standard_features
-        ls = os.listdir(dirname)
-        waves = [IVCurve.load(dirname, f, IV, IF, features=fefs, time=time)
+        ls = os.listdir(self.dirname)
+
+        waves = [IVCurve.load(self.dirname, f, features=fefs, **self._args)
                  for f in ls]
         waves = np.array([wave for wave in waves
-                          if wave.fileinfo.extra not in bad_extra])
+                          if wave.fileinfo.extra not in self.bad_extra])
         order = np.argsort([wave.injection for wave in waves])
-        self.waves = waves[order]
+        return waves[order]
