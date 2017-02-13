@@ -19,14 +19,6 @@ from igor import binarywave
 from . import utilities, features
 from .vartype import vartype
 
-def load_dir(dir, timestep=1e-4):
-    "Load all .ibw files from a directory, in alphanumerical order"
-    files = sorted(glob.glob(os.path.join(dir, '*.ibw')))
-    inputs = (binarywave.load(file)['wave']['wData'] for file in files)
-    datas = (np.rec.fromarrays((np.arange(input.size)*timestep, input), names='x,y')
-             for input in inputs)
-    return np.vstack(datas).view(np.recarray)
-
 class Params(object):
     """A set of parameters for extracting features from a wave
     """
