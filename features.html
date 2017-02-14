@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.features &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="Additional plots for SteadyState" href="features_steady_state_more.html" />
+    <link rel="prev" title="ajustador.vartype" href="vartype.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ajustador-features">
+<h1>ajustador.features<a class="headerlink" href="#ajustador-features" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="class">
+<dt id="ajustador.features.SteadyState">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">SteadyState</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the baseline and injection steady states</p>
+<p>The range <em>before</em> <code class="xref any docutils literal"><span class="pre">baseline_before</span></code> and <em>after</em> <code class="xref any docutils literal"><span class="pre">baseline_after</span></code>
+is used for <a class="reference internal" href="#ajustador.features.SteadyState.baseline" title="ajustador.features.SteadyState.baseline"><code class="xref any py py-attr docutils literal"><span class="pre">baseline</span></code></a>.</p>
+<p>The range <em>between</em> <code class="xref any docutils literal"><span class="pre">steady_after</span></code> and <code class="xref any docutils literal"><span class="pre">steady_before</span></code> is used
+for <a class="reference internal" href="#ajustador.features.SteadyState.steady" title="ajustador.features.SteadyState.steady"><code class="xref any py py-attr docutils literal"><span class="pre">steady</span></code></a>.</p>
+<p>(<a class="reference external" href=".//features_steady_state.py">Source code</a>, <a class="reference external" href=".//features_steady_state.png">png</a>, <a class="reference external" href=".//features_steady_state.hires.png">hires.png</a>, <a class="reference external" href=".//features_steady_state.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_steady_state.png" src="_images/features_steady_state.png" />
+</div>
+<p><a class="reference internal" href="features_steady_state_more.html"><span class="doc">Additional plots for SteadyState</span></a></p>
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.requires">
+<code class="descname">requires</code><em class="property"> = ('wave', 'baseline_before', 'baseline_after', 'steady_after', 'steady_before', 'steady_cutoff')</em><a class="headerlink" href="#ajustador.features.SteadyState.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.provides">
+<code class="descname">provides</code><em class="property"> = ('baseline', 'steady', 'response')</em><a class="headerlink" href="#ajustador.features.SteadyState.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.baseline">
+<code class="descname">baseline</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.steady">
+<code class="descname">steady</code><a class="headerlink" href="#ajustador.features.SteadyState.steady" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.response">
+<code class="descname">response</code><a class="headerlink" href="#ajustador.features.SteadyState.response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.SteadyState.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.features.Spikes">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">Spikes</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the position and height of spikes</p>
+<p>(<a class="reference external" href=".//features_spikes.py">Source code</a>, <a class="reference external" href=".//features_spikes.png">png</a>, <a class="reference external" href=".//features_spikes.hires.png">hires.png</a>, <a class="reference external" href=".//features_spikes.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_spikes.png" src="_images/features_spikes.png" />
+</div>
+<p><a class="reference internal" href="features_spikes_more.html"><span class="doc">Additional plots for Spikes</span></a></p>
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.requires">
+<code class="descname">requires</code><em class="property"> = ('wave', 'depolarization_interval')</em><a class="headerlink" href="#ajustador.features.Spikes.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.provides">
+<code class="descname">provides</code><em class="property"> = ('spike_i', 'spikes', 'spike_count', 'mean_isi', 'isi_spread', 'spike_latency', 'spike_bounds', 'spike_width', 'mean_spike_height')</em><a class="headerlink" href="#ajustador.features.Spikes.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_i">
+<code class="descname">spike_i</code><a class="headerlink" href="#ajustador.features.Spikes.spike_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indices of spike maximums in the wave.x, wave.y arrays</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spikes">
+<code class="descname">spikes</code><a class="headerlink" href="#ajustador.features.Spikes.spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array with .x and .y components marking the spike maximums</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_count">
+<code class="descname">spike_count</code><a class="headerlink" href="#ajustador.features.Spikes.spike_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of spikes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.mean_isi_fallback_variance">
+<code class="descname">mean_isi_fallback_variance</code><em class="property"> = 0.001</em><a class="headerlink" href="#ajustador.features.Spikes.mean_isi_fallback_variance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.mean_isi">
+<code class="descname">mean_isi</code><a class="headerlink" href="#ajustador.features.Spikes.mean_isi" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mean interval between spikes</p>
+<p>Defined as:</p>
+<ul class="simple">
+<li><span class="math">\(&lt;x_{i+1} - x_i&gt;\)</span>, if there are at least two spikes,</li>
+<li>the length of the depolarization interval otherwise (<code class="xref any docutils literal"><span class="pre">depolarization_interval</span></code>)</li>
+</ul>
+<p>If there less than three spikes, the variance is fixed as
+<a class="reference internal" href="#ajustador.features.Spikes.mean_isi_fallback_variance" title="ajustador.features.Spikes.mean_isi_fallback_variance"><code class="xref any py py-attr docutils literal"><span class="pre">mean_isi_fallback_variance</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.isi_spread">
+<code class="descname">isi_spread</code><a class="headerlink" href="#ajustador.features.Spikes.isi_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>The difference between the largest and smallest inter-spike intervals</p>
+<p>Only defined when <a class="reference internal" href="#ajustador.features.Spikes.spike_count" title="ajustador.features.Spikes.spike_count"><code class="xref any py py-attr docutils literal"><span class="pre">spike_count</span></code></a> is at least 3.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_latency">
+<code class="descname">spike_latency</code><a class="headerlink" href="#ajustador.features.Spikes.spike_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Latency until the first spike or end of injection if no spikes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_bounds">
+<code class="descname">spike_bounds</code><a class="headerlink" href="#ajustador.features.Spikes.spike_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>The halfheight left and right positions of spikes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_width">
+<code class="descname">spike_width</code><a class="headerlink" href="#ajustador.features.Spikes.spike_width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.mean_spike_height">
+<code class="descname">mean_spike_height</code><a class="headerlink" href="#ajustador.features.Spikes.mean_spike_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mean absolute position of spike vertices</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.Spikes.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.features.AHP">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">AHP</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the depth of &#8220;after hyperpolarization&#8221;</p>
+<p>.... plot:: features_ahp.py</p>
+<dl class="attribute">
+<dt id="ajustador.features.AHP.requires">
+<code class="descname">requires</code><em class="property"> = ('wave', 'spike_bounds')</em><a class="headerlink" href="#ajustador.features.AHP.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.provides">
+<code class="descname">provides</code><em class="property"> = ('spike_ahp',)</em><a class="headerlink" href="#ajustador.features.AHP.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.spike_ahp">
+<code class="descname">spike_ahp</code><a class="headerlink" href="#ajustador.features.AHP.spike_ahp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.features.FallingCurve">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">FallingCurve</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#FallingCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.FallingCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<a class="reference external" href=".//features_falling_curve.py">Source code</a>, <a class="reference external" href=".//features_falling_curve.png">png</a>, <a class="reference external" href=".//features_falling_curve.hires.png">hires.png</a>, <a class="reference external" href=".//features_falling_curve.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_falling_curve.png" src="_images/features_falling_curve.png" />
+</div>
+<p><a class="reference internal" href="features_falling_curve_more.html"><span class="doc">Additional plots for FallingCurve</span></a></p>
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.requires">
+<code class="descname">requires</code><em class="property"> = ('wave', 'steady_before', 'baseline_before', 'falling_curve_window', 'baseline', 'steady')</em><a class="headerlink" href="#ajustador.features.FallingCurve.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.provides">
+<code class="descname">provides</code><em class="property"> = ('falling_curve',)</em><a class="headerlink" href="#ajustador.features.FallingCurve.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.falling_curve">
+<code class="descname">falling_curve</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.falling_curve_fit">
+<code class="descname">falling_curve_fit</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.FallingCurve.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#FallingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.FallingCurve.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.features.Rectification">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">Rectification</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Rectification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Rectification" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<a class="reference external" href=".//features_rectification.py">Source code</a>, <a class="reference external" href=".//features_rectification.png">png</a>, <a class="reference external" href=".//features_rectification.hires.png">hires.png</a>, <a class="reference external" href=".//features_rectification.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_rectification.png" src="_images/features_rectification.png" />
+</div>
+<p><a class="reference internal" href="features_rectification_more.html"><span class="doc">Additional plots for Rectification</span></a></p>
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.requires">
+<code class="descname">requires</code><em class="property"> = ('baseline_before', 'steady_after', 'steady_before', 'falling_curve', 'steady')</em><a class="headerlink" href="#ajustador.features.Rectification.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.provides">
+<code class="descname">provides</code><em class="property"> = ('rectification',)</em><a class="headerlink" href="#ajustador.features.Rectification.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.window_len">
+<code class="descname">window_len</code><em class="property"> = 11</em><a class="headerlink" href="#ajustador.features.Rectification.window_len" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.rectification">
+<code class="descname">rectification</code><a class="headerlink" href="#ajustador.features.Rectification.rectification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.Rectification.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Rectification.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Rectification.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.features.ChargingCurve">
+<em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">ChargingCurve</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#ChargingCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.ChargingCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>(<a class="reference external" href=".//features_charging_curve.py">Source code</a>, <a class="reference external" href=".//features_charging_curve.png">png</a>, <a class="reference external" href=".//features_charging_curve.hires.png">hires.png</a>, <a class="reference external" href=".//features_charging_curve.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_charging_curve.png" src="_images/features_charging_curve.png" />
+</div>
+<p><a class="reference internal" href="features_charging_curve_more.html"><span class="doc">Additional plots for ChargingCurve</span></a></p>
+<dl class="attribute">
+<dt id="ajustador.features.ChargingCurve.requires">
+<code class="descname">requires</code><em class="property"> = ('wave', 'steady_after', 'steady', 'spikes', 'spike_count')</em><a class="headerlink" href="#ajustador.features.ChargingCurve.requires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.ChargingCurve.provides">
+<code class="descname">provides</code><em class="property"> = ('charging_curve_halfheight',)</em><a class="headerlink" href="#ajustador.features.ChargingCurve.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.ChargingCurve.charging_curve_halfheight">
+<code class="descname">charging_curve_halfheight</code><a class="headerlink" href="#ajustador.features.ChargingCurve.charging_curve_halfheight" title="Permalink to this definition">¶</a></dt>
+<dd><p>The height in the middle between depolarization start and first spike</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.ChargingCurve.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#ChargingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.ChargingCurve.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="vartype.html" title="previous chapter">ajustador.vartype</a></li>
+      <li>Next: <a href="features_steady_state_more.html" title="next chapter">Additional plots for SteadyState</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/features.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/features.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

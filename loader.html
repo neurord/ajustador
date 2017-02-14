@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.loader &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="ajustador.utilities" href="utilities.html" />
+    <link rel="prev" title="ajustador.fitnesses" href="fitnesses.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajustador.loader">
+<span id="ajustador-loader"></span><h1>ajustador.loader<a class="headerlink" href="#module-ajustador.loader" title="Permalink to this headline">¶</a></h1>
+<dl class="attribute">
+<dt id="ajustador.loader.Fileinfo">
+<code class="descclassname">ajustador.loader.</code><code class="descname">Fileinfo</code><a class="headerlink" href="#ajustador.loader.Fileinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">fileinfo</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.loader.IVCurve">
+<em class="property">class </em><code class="descclassname">ajustador.loader.</code><code class="descname">IVCurve</code><span class="sig-paren">(</span><em>filename</em>, <em>fileinfo</em>, <em>injection</em>, <em>x</em>, <em>y</em>, <em>features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/loader.html#IVCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.loader.IVCurve" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mes</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">Measurement</span><span class="p">(</span><span class="s1">&#39;docs/static/recording/042811-6ivifcurves_Waves/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span> <span class="o">=</span> <span class="n">mes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span><span class="o">.</span><span class="n">baseline</span>
+<span class="go">vartype(-0.080227, 0.000085)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">baseline</span><span class="p">)</span>
+<span class="go">-0.08023±0.00009</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">-2.5e-10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span><span class="o">.</span><span class="n">time</span>
+<span class="go">0.89990000000000003</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">wave</span><span class="p">)</span>
+<span class="go">&lt;class &#39;numpy.recarray&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span>
+<span class="go">array([  0.00000000e+00,   1.00000000e-04,   2.00000000e-04, ...,</span>
+<span class="go">         8.99700000e-01,   8.99800000e-01,   8.99900000e-01])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wave</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span>
+<span class="go">array([-0.0799375 , -0.08028125, -0.08028125, ..., -0.08025   ,</span>
+<span class="go">       -0.08034375, -0.08034375], dtype=float32)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="ajustador.loader.IVCurve.register_feature">
+<code class="descname">register_feature</code><span class="sig-paren">(</span><em>feature</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/loader.html#IVCurve.register_feature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.loader.IVCurve.register_feature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ajustador.loader.IVCurve.load">
+<em class="property">classmethod </em><code class="descname">load</code><span class="sig-paren">(</span><em>dirname</em>, <em>filename</em>, <em>IV</em>, <em>IF</em>, <em>time</em>, <em>features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/loader.html#IVCurve.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.loader.IVCurve.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.loader.IVCurve.time">
+<code class="descname">time</code><a class="headerlink" href="#ajustador.loader.IVCurve.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.loader.Attributable">
+<em class="property">class </em><code class="descclassname">ajustador.loader.</code><code class="descname">Attributable</code><a class="reference internal" href="_modules/ajustador/loader.html#Attributable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.loader.Attributable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ajustador.loader.Measurement">
+<em class="property">class </em><code class="descclassname">ajustador.loader.</code><code class="descname">Measurement</code><span class="sig-paren">(</span><em>dirname</em>, <em>params</em>, <em>features=None</em>, <em>IV=(-5e-10</em>, <em>5e-11)</em>, <em>IF=(2e-10</em>, <em>2e-11)</em>, <em>time=0.9</em>, <em>bad_extra=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/loader.html#Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.loader.Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a series of recordings from a directory</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mes</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">Measurement</span><span class="p">(</span><span class="s1">&#39;docs/static/recording/042811-6ivifcurves_Waves&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mes</span><span class="o">.</span><span class="n">waves</span>
+<span class="go">array([&lt;ajustador.loader.IVCurve object at ...&gt;,</span>
+<span class="go">       &lt;ajustador.loader.IVCurve object at ...&gt;,</span>
+<span class="go">       &lt;ajustador.loader.IVCurve object at ...&gt;,</span>
+<span class="go">       &lt;ajustador.loader.IVCurve object at ...&gt;,</span>
+<span class="go">       &lt;ajustador.loader.IVCurve object at ...&gt;], dtype=object)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">hyper</span> <span class="o">=</span> <span class="n">mes</span><span class="p">[</span><span class="n">mes</span><span class="o">.</span><span class="n">injection</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depol</span> <span class="o">=</span> <span class="n">mes</span><span class="p">[</span><span class="n">mes</span><span class="o">.</span><span class="n">injection</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mes</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">array([  0.00000000e+00,  -5.00000000e-10,  -2.50000000e-10,</span>
+<span class="go">         2.20000000e-10,   3.20000000e-10])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hyper</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">array([  0.00000000e+00,  -5.00000000e-10,  -2.50000000e-10])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depol</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">array([  2.20000000e-10,   3.20000000e-10])</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="ajustador.loader.Measurement.waves">
+<code class="descname">waves</code><a class="headerlink" href="#ajustador.loader.Measurement.waves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fitnesses.html" title="previous chapter">ajustador.fitnesses</a></li>
+      <li>Next: <a href="utilities.html" title="next chapter">ajustador.utilities</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/loader.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/loader.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

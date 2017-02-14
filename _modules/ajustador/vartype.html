@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.vartype &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="ajustador 0.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ajustador.vartype</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="vartype"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.vartype">[docs]</a><span class="k">class</span> <span class="nc">vartype</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A number with an uncertainty (σ)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = vartype(123, 5)</span>
+<span class="sd">    &gt;&gt;&gt; y = vartype(8, 1)</span>
+<span class="sd">    &gt;&gt;&gt; x + y</span>
+<span class="sd">    vartype(131.0, 5.1)</span>
+<span class="sd">    &gt;&gt;&gt; x - y</span>
+<span class="sd">    vartype(115.0, 5.1)</span>
+<span class="sd">    &gt;&gt;&gt; y / 3</span>
+<span class="sd">    vartype(2.67, 0.33)</span>
+<span class="sd">    &gt;&gt;&gt; y &lt; y</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; print(y)</span>
+<span class="sd">    8±1</span>
+<span class="sd">    &gt;&gt;&gt; print(x)</span>
+<span class="sd">    123±5</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dev</span> <span class="o">=</span> <span class="n">dev</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">positive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if the number is greater than 3σ</span>
+
+<span class="sd">        &gt;&gt;&gt; x = vartype(4, 1)</span>
+<span class="sd">        &gt;&gt;&gt; x.positive</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; y = x - vartype(3)</span>
+<span class="sd">        &gt;&gt;&gt; y</span>
+<span class="sd">        vartype(1.0, 1.0)</span>
+<span class="sd">        &gt;&gt;&gt; y.positive</span>
+<span class="sd">        False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">negative</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if the number is smaller than -3σ</span>
+
+<span class="sd">        &gt;&gt;&gt; x = vartype(-4, 1)</span>
+<span class="sd">        &gt;&gt;&gt; x.negative</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">vartype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">vartype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">vartype</span><span class="p">(</span><span class="n">other</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">/</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">/</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">preca</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))))</span>
+        <span class="n">precb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="p">)))</span>
+        <span class="n">prec</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">preca</span><span class="p">,</span> <span class="n">precb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;{0.x:.</span><span class="si">{1}</span><span class="s1">f}±{0.dev:.</span><span class="si">{1}</span><span class="s1">f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prec</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">preca</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))))</span>
+        <span class="n">precb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="p">)))</span>
+        <span class="n">prec</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">preca</span><span class="p">,</span> <span class="n">precb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0.__class__.__name__}</span><span class="s1">({0.x:.</span><span class="si">{1}</span><span class="s1">f}, {0.dev:.</span><span class="si">{1}</span><span class="s1">f})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prec</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="vartype.average"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.vartype.average">[docs]</a>    <span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vect</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate a weighted average of an array</span>
+
+<span class="sd">        &gt;&gt;&gt; items = [vartype(x, 1 + x/10) for x in range(5)]</span>
+<span class="sd">        &gt;&gt;&gt; X = vartype.array(items)</span>
+<span class="sd">        &gt;&gt;&gt; print(X)</span>
+<span class="sd">        rec.array([(0, 1.0), (1, 1.1), (2, 1.2), (3, 1.3), (4, 1.4)],</span>
+<span class="sd">                  dtype=[(&#39;x&#39;, &#39;&lt;i8&#39;), (&#39;dev&#39;, &#39;&lt;f8&#39;)])</span>
+<span class="sd">        &gt;&gt;&gt; vartype.average(X)</span>
+<span class="sd">        vartype(1.66, 0.53)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sq</span> <span class="o">=</span> <span class="n">vect</span><span class="o">.</span><span class="n">dev</span><span class="o">**-</span><span class="mi">2</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">sq</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">vect</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="n">sq</span> <span class="o">*</span> <span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">var</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="vartype.array"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.vartype.array">[docs]</a>    <span class="k">def</span> <span class="nf">array</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create an array of vartypes</span>
+
+<span class="sd">        The array is a numpy structured array with .x and .dev attributes.</span>
+
+<span class="sd">        &gt;&gt;&gt; items = [vartype(x, 1 + x/10) for x in range(5)]</span>
+<span class="sd">        &gt;&gt;&gt; X = vartype.array(items)</span>
+<span class="sd">        &gt;&gt;&gt; X</span>
+<span class="sd">        rec.array([(0, 1.0), (1, 1.1), (2, 1.2), (3, 1.3), (4, 1.4)],</span>
+<span class="sd">                  dtype=[(&#39;x&#39;, &#39;&lt;i8&#39;), (&#39;dev&#39;, &#39;&lt;f8&#39;)])</span>
+<span class="sd">        &gt;&gt;&gt; X.x</span>
+<span class="sd">        array([0, 1, 2, 3, 4])</span>
+<span class="sd">        &gt;&gt;&gt; X.dev</span>
+<span class="sd">        array([ 1. ,  1.1,  1.2,  1.3,  1.4])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">items</span><span class="p">])</span>
+        <span class="n">dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">dev</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">items</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">dev</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,dev&#39;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="array_mean"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.array_mean">[docs]</a><span class="k">def</span> <span class="nf">array_mean</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">vartype</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">data</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="array_diff"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.array_diff">[docs]</a><span class="k">def</span> <span class="nf">array_diff</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">:])</span><span class="o">/</span><span class="n">n</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,y&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="array_sub"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.array_sub">[docs]</a><span class="k">def</span> <span class="nf">array_sub</span><span class="p">(</span><span class="n">reca</span><span class="p">,</span> <span class="n">recb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the difference of two arrays</span>
+
+<span class="sd">    The uncertainty is calculated in the usual way.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">reca</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">recb</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">reca</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">recb</span><span class="o">.</span><span class="n">dev</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,dev&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="array_rms"><a class="viewcode-back" href="../../vartype.html#ajustador.vartype.array_rms">[docs]</a><span class="k">def</span> <span class="nf">array_rms</span><span class="p">(</span><span class="n">rec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the rms of an array</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \mathrm{rms} = \sqrt{\sum_i (x_i / \sigma_i)^2}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">rec</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">rec</span><span class="o">.</span><span class="n">dev</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

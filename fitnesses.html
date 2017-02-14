@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.fitnesses &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="ajustador.loader" href="loader.html" />
+    <link rel="prev" title="Additional plots for ChargingCurve" href="features_charging_curve_more.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajustador.fitnesses">
+<span id="ajustador-fitnesses"></span><h1>ajustador.fitnesses<a class="headerlink" href="#module-ajustador.fitnesses" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="ajustador.fitnesses.baseline_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">baseline_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#baseline_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.baseline_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similarity of baselines</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.charging_curve_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">charging_curve_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#charging_curve_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.charging_curve_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.combined_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajustador.fitnesses.combined_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.falling_curve_time_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">falling_curve_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#falling_curve_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.falling_curve_time_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.find_best">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">find_best</code><span class="sig-paren">(</span><em>group</em>, <em>measurement</em>, <em>fitness</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#find_best"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.find_best" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.find_multi_best">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">find_multi_best</code><span class="sig-paren">(</span><em>group</em>, <em>measurement</em>, <em>fitness</em>, <em>similarity=0.1</em>, <em>debug=False</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#find_multi_best"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.find_multi_best" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.find_nonsimilar">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">find_nonsimilar</code><span class="sig-paren">(</span><em>group</em>, <em>measurement</em>, <em>fitness</em>, <em>similarity=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#find_nonsimilar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.find_nonsimilar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ajustador.fitnesses.find_nonsimilar_result">
+<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">find_nonsimilar_result</code><span class="sig-paren">(</span><em>group</em>, <em>scores</em>, <em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#ajustador.fitnesses.find_nonsimilar_result" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ajustador.fitnesses.find_nonsimilar_result.group">
+<code class="descname">group</code><a class="headerlink" href="#ajustador.fitnesses.find_nonsimilar_result.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.fitnesses.find_nonsimilar_result.params">
+<code class="descname">params</code><a class="headerlink" href="#ajustador.fitnesses.find_nonsimilar_result.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.fitnesses.find_nonsimilar_result.scores">
+<code class="descname">scores</code><a class="headerlink" href="#ajustador.fitnesses.find_nonsimilar_result.scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.fit_finished">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">fit_finished</code><span class="sig-paren">(</span><em>fitness</em>, <em>cutoff=0.01</em>, <em>window=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#fit_finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.fit_finished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.fit_sort">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">fit_sort</code><span class="sig-paren">(</span><em>group</em>, <em>measurement</em>, <em>fitness</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#fit_sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.fit_sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.hyperpol_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">hyperpol_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#hyperpol_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.hyperpol_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.isi_spread_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">isi_spread_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#isi_spread_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.isi_spread_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.mean_isi_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">mean_isi_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#mean_isi_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.mean_isi_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.measurement_to_spikes">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">measurement_to_spikes</code><span class="sig-paren">(</span><em>meas</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#measurement_to_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.measurement_to_spikes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.new_combined_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">new_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.normalize_dimensions">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">normalize_dimensions</code><span class="sig-paren">(</span><em>vect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#normalize_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.normalize_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.parametrized_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">parametrized_fitness</code><span class="sig-paren">(</span><em>response=1</em>, <em>baseline=0.3</em>, <em>rectification=1</em>, <em>falling_curve_param=1</em>, <em>mean_isi=1</em>, <em>spike_latency=1</em>, <em>spike_height=1</em>, <em>spike_width=1</em>, <em>spike_ahp=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#parametrized_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.parametrized_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.rectification_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">rectification_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#rectification_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.rectification_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.response_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">response_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#response_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.response_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similarity of response to hyperpolarizing injection</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.simple_combined_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">simple_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#simple_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.simple_combined_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_ahp_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_ahp_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_ahp_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_ahp_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_count_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_count_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_count_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_count_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_fitness_0">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness_0</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness_0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_height_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_height_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_height_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_height_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_latency_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_latency_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_latency_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_latency_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_onset_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_onset_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_onset_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_onset_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_time_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_time_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.spike_width_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_width_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_width_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_width_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.sub_mes_dev">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">sub_mes_dev</code><span class="sig-paren">(</span><em>reca</em>, <em>recb</em>, <em>min_dev=0.005</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#sub_mes_dev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.sub_mes_dev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="features_charging_curve_more.html" title="previous chapter">Additional plots for ChargingCurve</a></li>
+      <li>Next: <a href="loader.html" title="next chapter">ajustador.loader</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fitnesses.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/fitnesses.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
