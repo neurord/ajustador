@@ -28,6 +28,13 @@ ajustador.features
 
     :doc:`features_spikes_more`
 
+.. autoclass:: ajustador.features.AHP
+    :members:
+    :undoc-members:
+    :member-order: bysource
+
+    .. plot:: features_ahp.py
+
 .. autoclass:: ajustador.features.FallingCurve
     :members:
     :undoc-members:

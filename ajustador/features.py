@@ -1,3 +1,4 @@
+import math
 from collections import namedtuple
 import numpy as np
 from scipy import optimize
@@ -11,6 +12,14 @@ def _plot_line(ax, ranges, value, color, zorder=3):
         if isinstance(value, vartype.vartype):
             ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
                       color, linestyles='--', zorder=zorder)
+
+def _plot_spike(ax, wave, spikes, i, bottom=None, spike_bounds=None, lmargin=0.0010, rmargin=0.0015):
+    ax.set_xlim(spikes.x[i] - lmargin, spikes.x[i] + rmargin)
+    ax.plot(wave.x, wave.y, label='recording')
+    if bottom is not None:
+        ax.vlines(spikes.x[i:i+1], bottom, spikes.y, 'r', zorder=3)
+    if spike_bounds is not None:
+        ax.axvspan(*spike_bounds[i], alpha=0.3, color='cyan')
 
 def plural(n, word):
     return '{} {}{}'.format(n, word, '' if n == 1 else 's')
@@ -27,6 +36,31 @@ class Feature:
         ax.set_xlabel('time / s')
         ax.set_ylabel('membrane potential / V')
         return ax
+
+    def spike_plot(self, figure, bottom=None, spike_bounds=None,
+                   lmargin=0.0010, rmargin=0.0015, rowsize=3):
+        wave = self._obj.wave
+        spikes = self._obj.spikes
+
+        spike_count = len(spikes)
+        rows = math.ceil(spike_count / rowsize)
+        columns = min(spike_count, rowsize)
+
+        axes = []
+        sharey = None
+        for i in range(spike_count):
+            ax = figure.add_subplot(rows, columns, i+1, sharey=sharey)
+            if i == 0:
+                sharey = ax
+            else:
+                ax.tick_params(labelleft='off')
+            axes.append(ax)
+
+            _plot_spike(ax, wave, spikes, i, bottom=bottom, spike_bounds=spike_bounds,
+                        lmargin=lmargin, rmargin=rmargin)
+
+        figure.autofmt_xdate()
+        return axes
 
 class SteadyState(Feature):
     """Find the baseline and injection steady states
@@ -105,7 +139,7 @@ def _find_spikes(wave, min_height=0.0):
 class Spikes(Feature):
     """Find the position and height of spikes
     """
-    requires = 'wave',
+    requires = ('wave', 'depolarization_interval')
     provides = ('spike_i', 'spikes', 'spike_count',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
@@ -226,16 +260,77 @@ class Spikes(Feature):
         figure.tight_layout()
 
         if self.spike_count > 0:
-            x = self.spikes.x
             ax2 = figure.add_axes([.7, .45, .25, .4])
-            ax2.set_xlim(x[0] - 0.001, x[0] + 0.0015)
-            ax2.plot(wave.x, wave.y, label='recording')
-            ax2.vlines(x[:1], bottom, self.spikes.y, 'r', zorder=3)
             ax2.tick_params(labelbottom='off', labelleft='off')
             ax2.set_title('first spike', fontsize='smaller')
 
-            w = self.spike_bounds
-            ax2.axvspan(*w[0], alpha=0.3, color='cyan')
+            _plot_spike(ax2, wave, self.spikes,
+                        bottom=-0.6, spike_bounds=self.spike_bounds)
+
+class AHP(Feature):
+    """Find the depth of "after hyperpolarization"
+    """
+    requires = ('wave', 'steady_before',
+                'spikes', 'spike_count', 'spike_bounds')
+    provides = ('spike_ahp', )
+
+    @property
+    @utilities.once
+    def spike_ahp(self):
+        spikes = self._obj.spikes
+        bounds = self._obj.spike_bounds
+        steady_before = self._obj.steady_before
+
+        x = self._obj.wave.x
+        y = self._obj.wave.y
+        ans = np.empty((len(spikes), 4), dtype=float)
+        for i in range(len(spikes)):
+            lwidth = spikes[i].x - bounds[i, 0]
+            rwidth = bounds[i, 1] - spikes[i].x
+
+            beg = max(spikes[i - 1:i+1].x.mean() if i > 0 else -np.inf, spikes[i].x - lwidth*4)
+            end = min(spikes[i : i + 2].x.mean() if i < len(spikes)-1 else np.inf, steady_before)
+            left = y[(x >= beg) & (x < spikes[i].x-lwidth)].min()
+            right = y[(x <= end) & (x > spikes[i].x+rwidth)].min()
+            ans[i] = (beg, end, right, left)
+
+        return np.rec.fromarrays(ans.T, names='beg, end, lower, upper')
+
+    def _do_plots(self, axes):
+        spikes = self._obj.spikes
+        ahp = self.spike_ahp
+        low, high = np.inf, -np.inf
+
+        for ax, beg, end, lower, upper, x in zip(axes,
+                                                 ahp.beg, ahp.end,
+                                                 ahp.lower, ahp.upper,
+                                                 spikes.x):
+            _plot_line(ax, [(beg, x)], upper, 'red')
+            _plot_line(ax, [(x, end)], lower, 'magenta')
+
+            ax.annotate('AHP',
+                        xytext=((x + end)/2, lower),
+                        xy=((x + end)/2, upper),
+                        arrowprops=dict(facecolor='black',
+                                        shrink=0),
+                        horizontalalignment='center', verticalalignment='top')
+            diff = upper - lower
+            low = min(lower - diff*0.05, low)
+            high = max(upper + diff*0.05, high)
+
+            ax.set_ylim(low, high)
+
+    def plot(self, figure):
+        ax = super().plot(figure)
+        ax.set_xlim(self._obj.steady_after, self._obj.steady_before)
+        return self._do_plots([ax] * self._obj.spike_count)
+
+    def spike_plot(self, figure, **kwargs):
+        x = self._obj.spikes.x.mean()
+        lmargin = (x - self.spike_ahp.beg.mean()) * 1.05
+        rmargin = np.diff(self._obj.spikes.x).mean()*0.8
+        axes = super().spike_plot(figure, lmargin=lmargin, rmargin=rmargin, **kwargs)
+        return self._do_plots(axes)
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     d = vartype.array_diff(wave)
@@ -355,7 +450,8 @@ class Rectification(Feature):
         ax.annotate('rectification',
                     xytext=(right, bottom),
                     xy=(right, self._obj.steady.x),
-                    arrowprops=dict(facecolor='black'),
+                    arrowprops=dict(facecolor='black',
+                                    shrink=0),
                     horizontalalignment='center', verticalalignment='top')
 
         ax.legend(loc='upper right')
@@ -409,9 +505,10 @@ class ChargingCurve(Feature):
 
 
 standard_features = (
-                SteadyState,
-                Spikes,
-                FallingCurve,
-                Rectification,
-                ChargingCurve,
+    SteadyState,
+    Spikes,
+    AHP,
+    FallingCurve,
+    Rectification,
+    ChargingCurve,
     )

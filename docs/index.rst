@@ -5,10 +5,10 @@ ajustador
    :maxdepth: 2
 
    vartype
-   features
-   analysis
-   fitnesses
    loader
+   features
+   fitnesses
+   analysis
    utilities
    signal_smooth
    detect

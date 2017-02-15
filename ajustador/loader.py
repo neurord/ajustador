@@ -95,22 +95,6 @@ class IVCurve(object):
     def time(self):
         return self.wave.x[-1]
 
-    @property
-    @utilities.once
-    def spike_ahp(self):
-        spikes = self.spikes
-        widths = self.spike_width * self.params.spike_assymetry_multiplier
-        x = self.wave.x
-        y = self.wave.y
-        ans = np.empty_like(spikes, dtype=float)
-        for i in range(len(spikes)):
-            beg = max(spikes[i - 1:i+1].x.mean() if i > 0 else -np.inf, spikes[i].x - widths[i])
-            end = min(spikes[i : i + 2].x.mean() if i < len(spikes)-1 else np.inf, spikes[i].x + widths[i])
-            left = y[(x >= beg) & (x < spikes[i].x)].min()
-            right = y[(x <= end) & (x > spikes[i].x)].min()
-            ans[i] = right - left
-        return ans
-
 class Attributable(object):
     _MEAN_ATTRIBUTES = {'mean_baseline', 'mean_spike_height', 'mean_spike_width', 'mean_spike_ahp'}
     _VAR_ARRAY_ATTRIBUTES = {'baseline', 'steady', 'response', 'rectification',
