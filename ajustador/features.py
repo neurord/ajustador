@@ -139,7 +139,7 @@ def _find_spikes(wave, min_height=0.0):
 class Spikes(Feature):
     """Find the position and height of spikes
     """
-    requires = ('wave', 'depolarization_interval')
+    requires = ('wave', 'injection_interval')
     provides = ('spike_i', 'spikes', 'spike_count',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
@@ -173,7 +173,7 @@ class Spikes(Feature):
         Defined as:
 
         * :math:`<x_{i+1} - x_i>`, if there are at least two spikes,
-        * the length of the depolarization interval otherwise (`depolarization_interval`)
+        * the length of the depolarization interval otherwise (`injection_interval`)
 
         If there less than three spikes, the variance is fixed as
         `mean_isi_fallback_variance`.
@@ -184,7 +184,7 @@ class Spikes(Feature):
             d = self.spikes.x[1]-self.spikes.x[0]
             return vartype.vartype(d, 0.001)
         else:
-            return vartype.vartype(self._obj.depolarization_interval, 0.001)
+            return vartype.vartype(self._obj.injection_interval, 0.001)
 
     @property
     @utilities.once
@@ -270,7 +270,8 @@ class Spikes(Feature):
 class AHP(Feature):
     """Find the depth of "after hyperpolarization"
     """
-    requires = ('wave', 'steady_before',
+    requires = ('wave',
+                'injection_start', 'injection_end', 'injection_interval',
                 'spikes', 'spike_count', 'spike_bounds')
     provides = ('spike_ahp', )
 
@@ -279,7 +280,7 @@ class AHP(Feature):
     def spike_ahp(self):
         spikes = self._obj.spikes
         bounds = self._obj.spike_bounds
-        steady_before = self._obj.steady_before
+        injection_end = self._obj.injection_end
 
         x = self._obj.wave.x
         y = self._obj.wave.y
@@ -289,7 +290,7 @@ class AHP(Feature):
             rwidth = bounds[i, 1] - spikes[i].x
 
             beg = max(spikes[i - 1:i+1].x.mean() if i > 0 else -np.inf, spikes[i].x - lwidth*4)
-            end = min(spikes[i : i + 2].x.mean() if i < len(spikes)-1 else np.inf, steady_before)
+            end = min(spikes[i : i + 2].x.mean() if i < len(spikes)-1 else np.inf, injection_end)
             left = y[(x >= beg) & (x < spikes[i].x-lwidth)].min()
             right = y[(x <= end) & (x > spikes[i].x+rwidth)].min()
             ans[i] = (beg, end, right, left)
@@ -322,8 +323,14 @@ class AHP(Feature):
 
     def plot(self, figure):
         ax = super().plot(figure)
-        ax.set_xlim(self._obj.steady_after, self._obj.steady_before)
-        return self._do_plots([ax] * self._obj.spike_count)
+        ax.set_xlim(self._obj.injection_start - self._obj.injection_interval*0.05,
+                    self._obj.injection_end + self._obj.injection_interval*0.05)
+        if self._obj.spike_count == 0:
+            ax.text(0.5, 0.5, 'no spikes',
+                    horizontalalignment='center',
+                    transform=ax.transAxes)
+        else:
+            self._do_plots([ax] * self._obj.spike_count)
 
     def spike_plot(self, figure, **kwargs):
         x = self._obj.spikes.x.mean()
