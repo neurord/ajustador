@@ -331,6 +331,7 @@ class AHP(Feature):
                     transform=ax.transAxes)
         else:
             self._do_plots([ax] * self._obj.spike_count)
+        figure.tight_layout()
 
     def spike_plot(self, figure, **kwargs):
         x = self._obj.spikes.x.mean()
