@@ -77,8 +77,7 @@ class IVCurve(object):
     def __getattr__(self, name):
         if name in self._attributes:
             return getattr(self._attributes[name], name)
-        else:
-            raise AttributeError
+        raise AttributeError(name)
 
     @classmethod
     def load(cls, dirname, filename, IV, IF, time, features):
