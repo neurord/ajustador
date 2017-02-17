@@ -4,12 +4,12 @@ import collections
 import numpy as np
 import pandas as pd
 
-from . import loader
+from . import vartype
 
 def sub_mes_dev(reca, recb, min_dev=.005):
     xy = (reca.x - recb.x, (recb.dev**2 + min_dev**2)**0.5)
-    if isinstance(reca, loader.vartype):
-        return loader.vartype(*xy)
+    if isinstance(reca, vartype.vartype):
+        return vartype.vartype(*xy)
     else:
         return np.rec.fromarrays(xy, names='x,dev')
 
@@ -21,7 +21,7 @@ def response_fitness(sim, measurement, full=False):
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].response, meas[ind2].response)
-    return loader.array_rms(diff)
+    return vartype.array_rms(diff)
 
 def baseline_fitness(sim, measurement, full=False):
     "Similarity of baselines"
@@ -30,7 +30,7 @@ def baseline_fitness(sim, measurement, full=False):
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].baseline, measurement[ind2].baseline)
-    return loader.array_rms(diff)
+    return vartype.array_rms(diff)
 
 def rectification_fitness(sim, measurement, full=False):
     x1 = sim.injection
@@ -39,7 +39,7 @@ def rectification_fitness(sim, measurement, full=False):
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].rectification, meas[ind2].rectification)
-    return loader.array_rms(diff)
+    return vartype.array_rms(diff)
 
 def charging_curve_fitness(sim, measurement, full=False):
     x1 = sim.injection
@@ -56,13 +56,13 @@ def falling_curve_time_fitness(sim, measurement, full=False):
     x2 = meas.injection
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
-    lefts = loader.vartype.array([wave.falling_curve_fit.params.tau for wave in sim[ind1]])
-    rights = loader.vartype.array([wave.falling_curve_fit.params.tau for wave in measurement[ind2]])
+    lefts = vartype.vartype.array([wave.falling_curve_fit.params.tau for wave in sim[ind1]])
+    rights = vartype.vartype.array([wave.falling_curve_fit.params.tau for wave in measurement[ind2]])
     k = np.isnan(rights.x)
     rights[k].x = 0
     rights[k].dev = 1
-    diff = loader.array_sub(lefts, rights)
-    return loader.array_rms(diff)
+    diff = vartype.array_sub(lefts, rights)
+    return vartype.array_rms(diff)
 
 def mean_isi_fitness(sim, measurement, full=False):
     x1 = sim.injection
@@ -71,7 +71,7 @@ def mean_isi_fitness(sim, measurement, full=False):
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].mean_isi, meas[ind2].mean_isi)
-    return loader.array_rms(diff)
+    return vartype.array_rms(diff)
 
 def isi_spread_fitness(sim, measurement, full=False):
     x1 = sim.injection
@@ -98,7 +98,7 @@ def spike_time_fitness(sim, measurement):
     spikes2 = measurement_to_spikes(meas[ind2])
     diff = spikes1 - spikes2
     diff.pop('injection')
-    diff.fillna(sim[0].depolarization_interval, inplace=True)
+    diff.fillna(sim[0].injection_interval, inplace=True)
     return (diff.x**2).mean()**0.5
 
 def spike_count_fitness(sim, measurement):
