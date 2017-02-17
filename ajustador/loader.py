@@ -97,11 +97,6 @@ class IVCurve(object):
         return self.wave.x[-1]
 
 class Attributable(object):
-    # _ARRAY_ATTRIBUTES = {'filename', 'injection',
-    #                     'falling_curve_fit|params|amp', 'falling_curve_fit|params|tau',
-    #                     'falling_curve_fit|function',
-    #                     'charging_curve_halfheight'}
-
     def __init__(self, params, features=None):
         # TODO: check duplicates, check dependencies between mean_attrs and array_attrs
         self._array_attributes = {p
@@ -130,11 +125,6 @@ class Attributable(object):
             return vartype.average(self.__getattr__(attr[5:]))
 
         raise AttributeError(attr)
-
-        # elif attr in Attributable._ARRAY_ATTRIBUTES:
-        #     op = operator.attrgetter(attr.replace('|', '.'))
-        #     ans = [op(wave) for wave in self.waves]
-        #     return np.array(ans)
 
     def __getitem__(self, index):
         if isinstance(index, (slice, np.ndarray)):

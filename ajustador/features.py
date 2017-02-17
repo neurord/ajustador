@@ -408,7 +408,11 @@ class FallingCurve(Feature):
                 'steady_before', 'baseline_before',
                 'falling_curve_window',
                  'baseline', 'steady')
-    provides = 'falling_curve',
+    provides = ('falling_curve', 'falling_curve_fit',
+                'falling_curve_amp', 'falling_curve_tau',
+                'falling_curve_function')
+    array_attributes = ('falling_curve_amp', 'falling_curve_tau',
+                        'falling_curve_function')
 
     @property
     @utilities.once
@@ -421,6 +425,18 @@ class FallingCurve(Feature):
     @utilities.once
     def falling_curve_fit(self):
         return _fit_falling_curve(self.falling_curve, self._obj.baseline, self._obj.steady)
+
+    @property
+    def falling_curve_amp(self):
+        return self.falling_curve_fit.params.amp
+
+    @property
+    def falling_curve_tau(self):
+        return self.falling_curve_fit.params.tau
+
+    @property
+    def falling_curve_function(self):
+        return self.falling_curve_fit.function
 
     def plot(self, figure):
         ax = super().plot(figure)
@@ -495,6 +511,7 @@ class Rectification(Feature):
 class ChargingCurve(Feature):
     requires = ('wave', 'steady_after', 'steady', 'spikes', 'spike_count')
     provides = 'charging_curve_halfheight',
+    array_attributes = 'charging_curve_halfheight',
 
     @property
     @utilities.once
