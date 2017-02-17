@@ -25,6 +25,11 @@ def plural(n, word):
     return '{} {}{}'.format(n, word, '' if n == 1 else 's')
 
 class Feature:
+    requires = ()
+    provides = ()
+    array_attributes = ()
+    mean_attributes = ()
+
     def __init__(self, obj):
         self._obj = obj
 
@@ -74,7 +79,10 @@ class SteadyState(Feature):
     requires = ('wave',
                 'baseline_before', 'baseline_after',
                 'steady_after', 'steady_before', 'steady_cutoff')
-    provides = 'baseline', 'steady', 'response'
+    provides = ('baseline', 'steady', 'response')
+
+    mean_attributes = ('baseline', 'steady', 'response')
+    array_attributes = ('baseline', 'steady', 'response')
 
     @property
     @utilities.once
@@ -139,12 +147,20 @@ def _find_spikes(wave, min_height=0.0):
 class Spikes(Feature):
     """Find the position and height of spikes
     """
-    requires = ('wave', 'injection_interval')
+    requires = ('wave', 'injection_interval', 'injection_end', 'steady')
     provides = ('spike_i', 'spikes', 'spike_count',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
-                'spike_bounds', 'spike_width',
-                'mean_spike_height')
+                'spike_bounds',
+                'spike_height', 'spike_width',
+                'mean_spike_height', # TODO: is it OK to have mean_spike_height as
+                                     #       here and as an aggregated attribute?
+                )
+    array_attributes = ('spike_count',
+                        'spike_height', 'spike_width',
+                        'mean_isi', 'isi_spread',
+                        'spike_latency')
+    mean_attributes = ('spike_height', 'spike_width')
 
     @property
     @utilities.once
@@ -162,6 +178,12 @@ class Spikes(Feature):
     def spike_count(self):
         "The number of spikes"
         return len(self.spike_i)
+
+    @property
+    def spike_height(self):
+        "The difference between spike peaks and baseline?"
+        # TODO: baseline?
+        return self.spikes.y - self._obj.steady.x
 
     mean_isi_fallback_variance = 0.001
 
@@ -207,7 +229,7 @@ class Spikes(Feature):
         if len(self.spikes) > 0:
             return self.spikes[0].x
         else:
-            return self.wave.x[-1]
+            return self._obj.injection_end
 
     @property
     @utilities.once
@@ -274,6 +296,8 @@ class AHP(Feature):
                 'injection_start', 'injection_end', 'injection_interval',
                 'spikes', 'spike_count', 'spike_bounds')
     provides = ('spike_ahp', )
+    array_attributes = ('spike_ahp',)
+    mean_attributes = ('spike_ahp',)
 
     @property
     @utilities.once
@@ -419,6 +443,8 @@ class Rectification(Feature):
     requires = ('baseline_before', 'steady_after', 'steady_before',
                 'falling_curve', 'steady')
     provides = 'rectification',
+    array_attributes = 'rectification',
+    mean_attributes = 'rectification',
 
     window_len = 11
 

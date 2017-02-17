@@ -97,11 +97,15 @@ class vartype(object):
         >>> vartype.average(X)
         vartype(1.66, 0.53)
         """
-
-        sq = vect.dev**-2
-        var = 1 / sq.sum()
-        x = (vect.x * sq * var).sum()
-        return cls(x, var**0.5)
+        if len(vect) == 0:
+            return cls(np.nan, np.nan)
+        elif isinstance(vect[0], numbers.Number):
+            return array_mean(vect)
+        else:
+            sq = vect.dev**-2
+            var = 1 / sq.sum()
+            x = (vect.x * sq * var).sum()
+            return cls(x, var**0.5)
 
     @classmethod
     def array(cls, items):

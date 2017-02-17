@@ -54,7 +54,9 @@ class IVCurve(object):
         self.injection = injection
         self.wave = np.rec.fromarrays((x, y), names='x,y')
 
-        self._attributes = {'wave':self}
+        self._attributes = {'wave':self,
+                            'injection':self}
+
         for feature in features:
             self.register_feature(feature)
 
@@ -96,36 +98,44 @@ class IVCurve(object):
         return self.wave.x[-1]
 
 class Attributable(object):
-    _MEAN_ATTRIBUTES = {'mean_baseline', 'mean_spike_height', 'mean_spike_width', 'mean_spike_ahp'}
-    _VAR_ARRAY_ATTRIBUTES = {'baseline', 'steady', 'response', 'rectification',
-                             'mean_isi', 'spike_height'}
-    _ARRAY_ATTRIBUTES = {'filename', 'injection',
-                         'spike_latency', 'spike_count', 'spike_ahp',
-                         'falling_curve_fit|params|amp', 'falling_curve_fit|params|tau',
-                         'falling_curve_fit|function',
-                         'charging_curve_halfheight',
-                         'isi_spread'}
+    # _ARRAY_ATTRIBUTES = {'filename', 'injection',
+    #                     'falling_curve_fit|params|amp', 'falling_curve_fit|params|tau',
+    #                     'falling_curve_fit|function',
+    #                     'charging_curve_halfheight'}
 
-    def __getattribute__(self, attr):
-        if attr == 'mean_spike_height':
-            spikes = np.hstack([w.spikes for w in self])
-            return array_mean(spikes['y'])
-        elif attr == 'mean_spike_width':
-            widths = np.hstack([w.spike_width for w in self])
-            return array_mean(widths)
-        elif attr == 'mean_spike_ahp':
-            ahps = np.hstack([w.spike_ahp for w in self])
-            return array_mean(ahps)
-        elif attr in Attributable._MEAN_ATTRIBUTES:
-            return vartype.average(getattr(self, attr[5:]))
-        elif attr in Attributable._VAR_ARRAY_ATTRIBUTES:
-            return vartype.array([getattr(wave, attr) for wave in self.waves])
-        elif attr in Attributable._ARRAY_ATTRIBUTES:
-            op = operator.attrgetter(attr.replace('|', '.'))
-            ans = [op(wave) for wave in self.waves]
-            return np.array(ans)
-        else:
-            return super(Attributable, self).__getattribute__(attr)
+    def __init__(self, params, features=None):
+        # TODO: check duplicates, check dependencies between mean_attrs and array_attrs
+        self._array_attributes = {p
+                                  for feature in features
+                                  for p in feature.array_attributes} | \
+                                 {'injection', 'filename'} # FIXME
+        self._mean_attributes = {p
+                                 for feature in features
+                                 for p in feature.mean_attributes}
+
+    def __getattr__(self, attr):
+        if attr.startswith('__'):
+            # we get asked for __setstate__ by copy.copy before we're
+            # fully initalized. Just say no to all special names.
+            raise AttributeError(attr)
+
+        if attr in self._array_attributes:
+            arr = [getattr(wave, attr) for wave in self.waves]
+            if isinstance(arr[0], vartype):
+                return vartype.array(arr)
+            if isinstance(arr[0], np.ndarray):
+                return np.hstack(arr)
+            return np.array(arr)
+
+        if attr.startswith('mean_') and attr[5:] in self._mean_attributes:
+            return vartype.average(self.__getattr__(attr[5:]))
+
+        raise AttributeError(attr)
+
+        # elif attr in Attributable._ARRAY_ATTRIBUTES:
+        #     op = operator.attrgetter(attr.replace('|', '.'))
+        #     ans = [op(wave) for wave in self.waves]
+        #     return np.array(ans)
 
     def __getitem__(self, index):
         if isinstance(index, (slice, np.ndarray)):
@@ -164,15 +174,19 @@ class Measurement(Attributable):
                  IF=(200e-12, 20e-12),
                  time=.9,
                  bad_extra=()):
-        self._args = dict(IV=IV, IF=IF, time=time)
-        self.bad_extra = bad_extra
-        self.dirname = dirname
-        self.name = os.path.basename(dirname)
+
         if features is None:
             from . import features
             features = features.standard_features
 
+        super().__init__(params, features)
+
         self._features = (params, *features)
+
+        self._args = dict(IV=IV, IF=IF, time=time)
+        self.bad_extra = bad_extra
+        self.dirname = dirname
+        self.name = os.path.basename(dirname)
 
     @property
     @utilities.once
@@ -185,3 +199,7 @@ class Measurement(Attributable):
                           if wave.fileinfo.extra not in self.bad_extra])
         order = np.argsort([wave.injection for wave in waves])
         return waves[order]
+
+    @waves.setter
+    def waves(self, value):
+        self._waves_value = value
