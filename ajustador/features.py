@@ -295,13 +295,13 @@ class AHP(Feature):
     requires = ('wave',
                 'injection_start', 'injection_end', 'injection_interval',
                 'spikes', 'spike_count', 'spike_bounds')
-    provides = ('spike_ahp', )
-    array_attributes = ('spike_ahp',)
+    provides = ('spike_ahp_window', 'spike_ahp')
+    array_attributes = ('spike_ahp_window', 'spike_ahp')
     mean_attributes = ('spike_ahp',)
 
     @property
     @utilities.once
-    def spike_ahp(self):
+    def spike_ahp_window(self):
         spikes = self._obj.spikes
         bounds = self._obj.spike_bounds
         injection_end = self._obj.injection_end
@@ -321,14 +321,20 @@ class AHP(Feature):
 
         return np.rec.fromarrays(ans.T, names='beg, end, lower, upper')
 
+    @property
+    @utilities.once
+    def spike_ahp(self):
+        window = self.spike_ahp_window
+        return window.upper - window.lower
+
     def _do_plots(self, axes):
         spikes = self._obj.spikes
-        ahp = self.spike_ahp
+        window = self.spike_ahp_window
         low, high = np.inf, -np.inf
 
         for ax, beg, end, lower, upper, x in zip(axes,
-                                                 ahp.beg, ahp.end,
-                                                 ahp.lower, ahp.upper,
+                                                 window.beg, window.end,
+                                                 window.lower, window.upper,
                                                  spikes.x):
             _plot_line(ax, [(beg, x)], upper, 'red')
             _plot_line(ax, [(x, end)], lower, 'magenta')
@@ -359,7 +365,7 @@ class AHP(Feature):
 
     def spike_plot(self, figure, **kwargs):
         x = self._obj.spikes.x.mean()
-        lmargin = (x - self.spike_ahp.beg.mean()) * 1.05
+        lmargin = (x - self.spike_ahp_window.beg.mean()) * 1.05
         rmargin = np.diff(self._obj.spikes.x).mean()*0.8
         axes = super().spike_plot(figure, lmargin=lmargin, rmargin=rmargin, **kwargs)
         return self._do_plots(axes)
