@@ -192,3 +192,9 @@ class Measurement(Attributable):
     @waves.setter
     def waves(self, value):
         self._waves_value = value
+
+    def __lt__(self, other):
+        try:
+            return self.name < other.name
+        except AttributeError:
+            raise TypeError
