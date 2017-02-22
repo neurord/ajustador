@@ -110,7 +110,7 @@ class Attributable(object):
     def __getattr__(self, attr):
         if attr.startswith('__'):
             # we get asked for __setstate__ by copy.copy before we're
-            # fully initalized. Just say no to all special names.
+            # fully initialized. Just say no to all special names.
             raise AttributeError(attr)
 
         if attr in self._array_attributes:
