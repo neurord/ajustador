@@ -141,7 +141,7 @@ class SteadyState(Feature):
 
 
 def _find_spikes(wave, min_height=0.0):
-    peaks = detect.detect_peaks(wave.y, P_low=0.75, P_high=0.20)
+    peaks = detect.detect_peaks(wave.y, P_low=0.75, P_high=0.50)
     return peaks[wave.y[peaks] > min_height]
 
 class Spikes(Feature):
