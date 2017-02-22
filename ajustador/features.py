@@ -286,8 +286,8 @@ class Spikes(Feature):
             ax2.tick_params(labelbottom='off', labelleft='off')
             ax2.set_title('first spike', fontsize='smaller')
 
-            _plot_spike(ax2, wave, self.spikes,
-                        bottom=-0.6, spike_bounds=self.spike_bounds)
+            _plot_spike(ax2, wave, self.spikes, i=0,
+                        bottom=-0.06, spike_bounds=self.spike_bounds)
 
 class AHP(Feature):
     """Find the depth of "after hyperpolarization"
