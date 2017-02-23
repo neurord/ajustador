@@ -91,6 +91,11 @@ class SteadyState(Feature):
     @property
     @utilities.once
     def baseline(self):
+        """The mean voltage of the area outside of injection interval
+
+        Returns mean value of wave after excluding "outliers", values
+        > 95th or < 5th percentile.
+        """
         wave = self._obj.wave
         before = self._obj.baseline_before
         after = self._obj.baseline_after
@@ -103,6 +108,11 @@ class SteadyState(Feature):
     @property
     @utilities.once
     def steady(self):
+        """Returns mean value of wave between `steady_after` and `steady_before`.
+
+        "Outliers", values > 80th percentile (which is a parameter), are excluded.
+        80th percentile excludes the spikes.
+        """
         wave = self._obj.wave
         after = self._obj.steady_after
         before = self._obj.steady_before
@@ -144,14 +154,28 @@ class SteadyState(Feature):
         figure.tight_layout()
 
 
-def _find_spikes(wave, min_height=0.0):
+peak_and_threshold = namedtuple('peak_and_threshold', 'peaks thresholds')
+
+def _find_spikes(wave, min_height=0.0, max_charge_time=0.004, charge_threshold=0.02):
     peaks = detect.detect_peaks(wave.y, P_low=0.75, P_high=0.50)
-    return peaks[wave.y[peaks] > min_height]
+    peaks = peaks[wave.y[peaks] > min_height]
+
+    thresholds = np.empty(peaks.size)
+    for i in range(len(peaks)):
+        start = (wave.x >= wave.x[peaks[i]] - max_charge_time).argmax()
+        x = wave.x[start:peaks[i] + 1]
+        y = wave.y[start:peaks[i] + 1]
+        yderiv = np.diff(y)
+        #spike threshold is point where derivative is 2% of steepest
+        ythresh = charge_threshold * yderiv.max()
+        thresh = y[yderiv > ythresh].min()
+        thresholds[i] = thresh
+    return peak_and_threshold(peaks, thresholds)
 
 class Spikes(Feature):
     """Find the position and height of spikes
     """
-    requires = ('wave', 'injection_interval', 'injection_end', 'steady')
+    requires = ('wave', 'injection_interval', 'injection_start')
     provides = ('spike_i', 'spikes', 'spike_count',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
@@ -168,9 +192,19 @@ class Spikes(Feature):
 
     @property
     @utilities.once
-    def spike_i(self):
+    def spike_i_and_threshold(self):
         "Indices of spike maximums in the wave.x, wave.y arrays"
         return _find_spikes(self._obj.wave)
+
+    @property
+    def spike_i(self):
+        "Indices of spike maximums in the wave.x, wave.y arrays"
+        return self.spike_i_and_threshold.peaks
+
+    @property
+    def spike_threshold(self):
+        "Indices of spike maximums in the wave.x, wave.y arrays"
+        return self.spike_i_and_threshold.thresholds
 
     @property
     @utilities.once
@@ -182,12 +216,6 @@ class Spikes(Feature):
     def spike_count(self):
         "The number of spikes"
         return len(self.spike_i)
-
-    @property
-    def spike_height(self):
-        "The difference between spike peaks and baseline?"
-        # TODO: baseline?
-        return self.spikes.y - self._obj.steady.x
 
     mean_isi_fallback_variance = 0.001
 
@@ -228,23 +256,23 @@ class Spikes(Feature):
     @property
     @utilities.once
     def spike_latency(self):
-        "Latency until the first spike or end of injection if no spikes"
+        "Latency until the first spike or nan if no spikes"
         # TODO: add spike_latency to plot
         if len(self.spikes) > 0:
-            return self.spikes[0].x
+            return self.spikes[0].x - self._obj.injection_start
         else:
-            return self._obj.injection_end
+            return np.nan
 
     @property
     @utilities.once
     def spike_bounds(self):
         "The halfheight left and right positions of spikes"
-        steady = self._obj.steady.x
+        spikes, thresholds = self.spike_i_and_threshold
 
         ans = np.empty((self.spike_count, 2), dtype=float)
         x = self._obj.wave.x
         y = self._obj.wave.y
-        halfheight = (self.spikes.y - steady) / 2 + steady
+        halfheight = (self.spikes.y - thresholds) / 2 + thresholds
 
         for i, k in enumerate(self.spike_i):
             beg = end = k
@@ -254,6 +282,14 @@ class Spikes(Feature):
                 end += 1
             ans[i] = (x[beg-1] + x[beg])/2, (x[end] + x[end+1])/2
         return ans
+
+    @property
+    @utilities.once
+    def spike_height(self):
+        "The difference between spike peaks and spike threshold"
+        spikes, thresholds = self.spike_i_and_threshold
+        height = self.spikes.y - thresholds
+        return height
 
     @property
     @utilities.once
