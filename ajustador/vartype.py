@@ -71,14 +71,14 @@ class vartype(object):
             return NotImplemented
 
     def __str__(self):
-        preca = int(math.floor(math.log10(abs(self.x))))
-        precb = int(math.floor(math.log10(self.dev)))
+        preca = int(math.floor(math.log10(abs(self.x)))) if self.x < 0 or self.x > 0 else 0
+        precb = int(math.floor(math.log10(self.dev))) if self.dev > 0 else 0
         prec = -min(preca, precb, 0)
         return '{0.x:.{1}f}±{0.dev:.{1}f}'.format(self, prec)
 
     def __repr__(self):
-        preca = int(math.floor(math.log10(abs(self.x))))
-        precb = int(math.floor(math.log10(self.dev)))
+        preca = int(math.floor(math.log10(abs(self.x)))) if self.x < 0 or self.x > 0 else 0
+        precb = int(math.floor(math.log10(self.dev))) if self.dev > 0 else 0
         prec = -min(preca, precb, 0) + 1
         return '{0.__class__.__name__}({0.x:.{1}f}, {0.dev:.{1}f})'.format(self, prec)
 

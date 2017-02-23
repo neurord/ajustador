@@ -392,7 +392,7 @@ def negative_exp(x, amp, tau):
     return float(amp) * (1-np.exp(-(x-x[0]) / float(tau)))
 
 falling_param = namedtuple('falling_param', 'amp tau')
-function_fit = namedtuple('function_fit', 'function params')
+function_fit = namedtuple('function_fit', 'function params good')
 
 def _fit_falling_curve(ccut, baseline, steady):
     if ccut.size < 5:
@@ -406,7 +406,8 @@ def _fit_falling_curve(ccut, baseline, steady):
         pcov = np.zeros((2,2)) + pcov
         params = falling_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
                                vartype.vartype(popt[1], pcov[1,1]**0.5))
-    return function_fit(func, params)
+    good = params.amp.positive and params.tau.positive
+    return function_fit(func, params, good)
 
 
 class FallingCurve(Feature):
@@ -434,15 +435,18 @@ class FallingCurve(Feature):
 
     @property
     def falling_curve_amp(self):
-        return self.falling_curve_fit.params.amp
+        fit = self.falling_curve_fit
+        return fit.params.amp if fit.good else np.nan
 
     @property
     def falling_curve_tau(self):
-        return self.falling_curve_fit.params.tau
+        fit = self.falling_curve_fit
+        return fit.params.tau if fit.good else np.nan
 
     @property
     def falling_curve_function(self):
-        return self.falling_curve_fit.function
+        fit = self.falling_curve_fit
+        return fit.function if fit.good else None
 
     def plot(self, figure):
         ax = super().plot(figure)
@@ -453,9 +457,15 @@ class FallingCurve(Feature):
         ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
         ax.set_xlim(self._obj.baseline_before - 0.005, ccut.x.max() + .01)
 
-        func, popt = self.falling_curve_fit
-        label = 'fitted {}'.format(func.__name__)
-        ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--', label=label)
+        func, popt, good = self.falling_curve_fit
+        if good:
+            label = 'fitted {}'.format(func.__name__)
+            ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--', label=label)
+        else:
+            ax.text(0.2, 0.5, 'bad fit',
+                    horizontalalignment='center',
+                    transform=ax.transAxes,
+                    color='red')
 
         ax.legend(loc='upper right')
         figure.tight_layout()
@@ -499,16 +509,22 @@ class Rectification(Feature):
                    'r')
         right = (after + before) / 2
         bottom = steady.x - self.rectification.x
-        _plot_line(ax,
-                   [(after, right)],
-                   bottom,
-                   'g')
-        ax.annotate('rectification',
-                    xytext=(right, bottom),
-                    xy=(right, self._obj.steady.x),
-                    arrowprops=dict(facecolor='black',
-                                    shrink=0),
-                    horizontalalignment='center', verticalalignment='top')
+        if np.isnan(bottom):
+            ax.text(0.5, 0.5, 'rectification not detected',
+                    horizontalalignment='center',
+                    transform=ax.transAxes,
+                    color='red')
+        else:
+            _plot_line(ax,
+                       [(after, right)],
+                       bottom,
+                       'g')
+            ax.annotate('rectification',
+                        xytext=(right, bottom),
+                        xy=(right, self._obj.steady.x),
+                        arrowprops=dict(facecolor='black',
+                                        shrink=0),
+                        horizontalalignment='center', verticalalignment='top')
 
         ax.legend(loc='upper right')
         figure.tight_layout()
@@ -542,7 +558,8 @@ class ChargingCurve(Feature):
         if np.isnan(self.charging_curve_halfheight):
             ax.text(0.05, 0.5, 'cannot determine charging curve',
                     horizontalalignment='left',
-                    transform=ax.transAxes)
+                    transform=ax.transAxes,
+                    color='red')
             before = self._obj.wave.x[-1]
         else:
             before = self._obj.spikes[0].x
