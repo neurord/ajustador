@@ -329,6 +329,27 @@ class Spikes(Feature):
             _plot_spike(ax2, wave, self.spikes, i=0,
                         bottom=-0.06, spike_bounds=self.spike_bounds)
 
+    def spike_plot(self, figure, **kwargs):
+        x = self._obj.spikes.x.mean()
+        spike_bounds = self.spike_bounds
+        spikes, thresholds = self.spike_i_and_threshold
+        height = self.spike_height
+
+        lmargin = self.spike_width.max()
+        rmargin = self.spike_width.max() * 2
+
+        axes = super().spike_plot(figure,
+                                  spike_bounds=spike_bounds,
+                                  lmargin=lmargin, rmargin=rmargin,
+                                  **kwargs)
+
+        for i in range(self.spike_count):
+            _plot_line(axes[i],
+                       [(spike_bounds[i, 0], spike_bounds[i, 1])],
+                       thresholds[i] + height[i] / 2,
+                       'spike threshold', 'green')
+            axes[i].axhline(thresholds[i], color='green', linestyle='--')
+
 class AHP(Feature):
     """Find the depth of "after hyperpolarization"
     """
