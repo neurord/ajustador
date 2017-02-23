@@ -395,18 +395,19 @@ falling_param = namedtuple('falling_param', 'amp tau')
 function_fit = namedtuple('function_fit', 'function params good')
 
 def _fit_falling_curve(ccut, baseline, steady):
-    if ccut.size < 5:
+    if ccut.size < 5 or not (steady-baseline).negative:
         func = None
         params = falling_param(vartype(np.nan, np.nan),
                                vartype(np.nan, np.nan))
+        good = False
     else:
         init = (ccut.y.min()-baseline.x, ccut.x.ptp())
-        func = negative_exp if (steady-baseline).negative else simple_exp
+        func = negative_exp
         popt, pcov = optimize.curve_fit(func, ccut.x, ccut.y-baseline.x, (-1,1))
         pcov = np.zeros((2,2)) + pcov
         params = falling_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
                                vartype.vartype(popt[1], pcov[1,1]**0.5))
-    good = params.amp.positive and params.tau.positive
+        good = params.amp.negative and params.tau.positive
     return function_fit(func, params, good)
 
 
