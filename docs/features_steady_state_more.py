@@ -97,7 +97,6 @@ with open(stem + '_more.rst', 'w') as f:
             print('''\
 .. plot::
 
-   import os
    wavename, n = {!r}, {}
    exec(open('{}').read())
 '''.format(ident, n, basename + '.py'), file=f)
