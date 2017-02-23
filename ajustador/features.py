@@ -282,7 +282,7 @@ class Spikes(Feature):
                    [(self._obj.steady_after, self._obj.steady_before)],
                    self.mean_spike_height,
                    'spike_height', 'y', zorder=0)
-
+        ax.legend(loc='upper left')
         figure.tight_layout()
 
         if self.spike_count > 0:
