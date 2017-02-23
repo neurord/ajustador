@@ -6,12 +6,16 @@ from scipy import optimize
 from . import utilities, detect, vartype
 from .signal_smooth import smooth
 
-def _plot_line(ax, ranges, value, color, zorder=3):
+def _plot_line(ax, ranges, value, label, color, zorder=3):
     for (a,b) in ranges:
-        ax.hlines(float(value), a, b, color, linestyles='-', zorder=zorder)
+        ax.plot([a, b], [float(value)]*2,
+                label=label, color=color, linestyle='-', zorder=zorder)
+        label = None # we only need one line labeled
         if isinstance(value, vartype.vartype):
-            ax.hlines([value.x - 3*value.dev, value.x + 3*value.dev], a, b,
-                      color, linestyles='--', zorder=zorder)
+            ax.plot([a, b], [value.x - 3*value.dev]*2,
+                      color, linestyle='--', zorder=zorder)
+            ax.plot([a, b], [value.x + 3*value.dev]*2,
+                      color, linestyle='--', zorder=zorder)
 
 def _plot_spike(ax, wave, spikes, i, bottom=None, spike_bounds=None, lmargin=0.0010, rmargin=0.0015):
     ax.set_xlim(spikes.x[i] - lmargin, spikes.x[i] + rmargin)
@@ -124,11 +128,11 @@ class SteadyState(Feature):
         _plot_line(ax,
                    [(0, before), (after, time)],
                    self.baseline,
-                   'k')
+                   'baseline', 'k')
         _plot_line(ax,
                    [(after, before)],
                    self.steady,
-                   'r')
+                   'steady', 'r')
         ax.annotate('response',
                     xy=(time/2, self.steady.x),
                     xytext=(time/2, self.baseline.x),
@@ -277,7 +281,7 @@ class Spikes(Feature):
         _plot_line(ax,
                    [(self._obj.steady_after, self._obj.steady_before)],
                    self.mean_spike_height,
-                   'y', zorder=0)
+                   'spike_height', 'y', zorder=0)
 
         figure.tight_layout()
 
@@ -336,8 +340,8 @@ class AHP(Feature):
                                                  window.beg, window.end,
                                                  window.lower, window.upper,
                                                  spikes.x):
-            _plot_line(ax, [(beg, x)], upper, 'red')
-            _plot_line(ax, [(x, end)], lower, 'magenta')
+            _plot_line(ax, [(beg, x)], upper, 'AHP upper edge', 'red')
+            _plot_line(ax, [(x, end)], lower, 'AHP lower edge', 'magenta')
 
             ax.annotate('AHP',
                         xytext=((x + end)/2, lower),
@@ -507,7 +511,7 @@ class Rectification(Feature):
         _plot_line(ax,
                    [(after, before)],
                    steady,
-                   'r')
+                   'steady', 'r')
         right = (after + before) / 2
         bottom = steady.x - self.rectification.x
         if np.isnan(bottom):
@@ -519,7 +523,7 @@ class Rectification(Feature):
             _plot_line(ax,
                        [(after, right)],
                        bottom,
-                       'g')
+                       'rectification bottom', 'g')
             ax.annotate('rectification',
                         xytext=(right, bottom),
                         xy=(right, self._obj.steady.x),
@@ -568,12 +572,12 @@ class ChargingCurve(Feature):
             _plot_line(ax,
                        [(after, before)],
                        self.charging_curve_halfheight,
-                       'g')
+                       'charging curve bottom', 'g')
 
         _plot_line(ax,
                    [(after, before)],
                    steady,
-                   'r')
+                   'steady', 'r')
 
         ax.legend(loc='upper right')
         figure.tight_layout()
