@@ -23,7 +23,8 @@ def _plot_spike(ax, wave, spikes, i, bottom=None, spike_bounds=None, lmargin=0.0
     if bottom is not None:
         ax.vlines(spikes.x[i:i+1], bottom, spikes.y, 'r', zorder=3)
     if spike_bounds is not None:
-        ax.axvspan(*spike_bounds[i], alpha=0.3, color='cyan')
+        ax.axvspan(spike_bounds[i].hh_left, spike_bounds[i].hh_right,
+                   alpha=0.3, color='cyan')
 
 def plural(n, word):
     return '{} {}{}'.format(n, word, '' if n == 1 else 's')
@@ -168,15 +169,39 @@ def _find_spikes(wave, min_height=0.0, max_charge_time=0.004, charge_threshold=0
         yderiv = np.diff(y)
         #spike threshold is point where derivative is 2% of steepest
         ythresh = charge_threshold * yderiv.max()
-        thresh = y[yderiv > ythresh].min()
+        thresh = y[1:][yderiv > ythresh].min()
         thresholds[i] = thresh
     return peak_and_threshold(peaks, thresholds)
+
+class WaveRegion:
+    def __init__(self, wave, left_i, right_i):
+        self._wave = wave
+        self.left_i = left_i
+        self.right_i = right_i
+
+    @property
+    def left(self):
+        "x coordinate of the left edge of FWHM"
+        return self._wave.x[self.left_i-1:self.left_i+1].mean()
+
+    @property
+    def right(self):
+        "x coordinate of the right edge of FWHM"
+        return self._wave.x[self.right_i:self.right_i+2].mean()
+
+    @property
+    def width(self):
+        return self.right - self.left
+
+    def min(self):
+        return self._wave.y[self.left_i : self.right_i+1].min()
 
 class Spikes(Feature):
     """Find the position and height of spikes
     """
     requires = ('wave', 'injection_interval', 'injection_start')
     provides = ('spike_i', 'spikes', 'spike_count',
+                'spike_threshold',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
                 'spike_bounds',
@@ -266,11 +291,10 @@ class Spikes(Feature):
     @property
     @utilities.once
     def spike_bounds(self):
-        "The halfheight left and right positions of spikes"
+        "The FWHM box and other measurements for each spike"
         spikes, thresholds = self.spike_i_and_threshold
 
-        ans = np.empty((self.spike_count, 2), dtype=float)
-        x = self._obj.wave.x
+        ans = []
         y = self._obj.wave.y
         halfheight = (self.spikes.y - thresholds) / 2 + thresholds
 
@@ -280,7 +304,7 @@ class Spikes(Feature):
                 beg -= 1
             while end + 2 < y.size and y[end + 1] > halfheight[i]:
                 end += 1
-            ans[i] = (x[beg-1] + x[beg])/2, (x[end] + x[end+1])/2
+            ans.append(WaveRegion(self._obj.wave, beg, end))
         return ans
 
     @property
@@ -294,7 +318,7 @@ class Spikes(Feature):
     @property
     @utilities.once
     def spike_width(self):
-        return self.spike_bounds[:, 1] - self.spike_bounds[:, 0]
+        return np.array([bounds.width for bounds in self.spike_bounds])
 
     @property
     @utilities.once
@@ -332,7 +356,7 @@ class Spikes(Feature):
     def spike_plot(self, figure, **kwargs):
         x = self._obj.spikes.x.mean()
         spike_bounds = self.spike_bounds
-        spikes, thresholds = self.spike_i_and_threshold
+        thresholds = self.spike_threshold
         height = self.spike_height
 
         lmargin = self.spike_width.max()
@@ -346,8 +370,8 @@ class Spikes(Feature):
         for i in range(self.spike_count):
             y = thresholds[i] + height[i] / 2
             axes[i].annotate('FWHM',
-                             xy=(spike_bounds[i, 0], y),
-                             xytext=(spike_bounds[i, 1], y),
+                             xy=(spike_bounds[i].left, y),
+                             xytext=(spike_bounds[i].right, y),
                              arrowprops=dict(facecolor='black',
                                              shrink=0),
                              verticalalignment='bottom')
@@ -369,52 +393,56 @@ class AHP(Feature):
     def spike_ahp_window(self):
         spikes = self._obj.spikes
         bounds = self._obj.spike_bounds
+        thresholds = self._obj.spike_threshold
         injection_end = self._obj.injection_end
 
         x = self._obj.wave.x
         y = self._obj.wave.y
-        ans = np.empty((len(spikes), 4), dtype=float)
+        ans = []
         for i in range(len(spikes)):
-            lwidth = spikes[i].x - bounds[i, 0]
-            rwidth = bounds[i, 1] - spikes[i].x
+            rlimit = bounds[i+1].left if i < len(spikes)-1 else injection_end
 
-            beg = max(spikes[i - 1:i+1].x.mean() if i > 0 else -np.inf, spikes[i].x - lwidth*4)
-            end = min(spikes[i : i + 2].x.mean() if i < len(spikes)-1 else np.inf, injection_end)
-            left = y[(x >= beg) & (x < spikes[i].x-lwidth)].min()
-            right = y[(x <= end) & (x > spikes[i].x+rwidth)].min()
-            ans[i] = (beg, end, right, left)
+            beg = bounds[i].right_i
+            while y[beg] >= thresholds[i] and x[beg + 1] < rlimit:
+                beg += 1
 
-        return np.rec.fromarrays(ans.T, names='beg, end, lower, upper')
+            end = beg
+            while (y[end] < thresholds[i] or end - beg < 5) and x[end] < rlimit:
+                end += 1
+
+            ans.append(WaveRegion(self._obj.wave, beg, end))
+
+        return ans
 
     @property
     @utilities.once
     def spike_ahp(self):
-        window = self.spike_ahp_window
-        return window.upper - window.lower
+        return np.array([window.min() for window in self.spike_ahp_window])
 
     def _do_plots(self, axes):
         spikes = self._obj.spikes
-        window = self.spike_ahp_window
+        thresholds = self._obj.spike_threshold
+        windows = self.spike_ahp_window
         low, high = np.inf, -np.inf
 
-        for ax, beg, end, lower, upper, x in zip(axes,
-                                                 window.beg, window.end,
-                                                 window.lower, window.upper,
-                                                 spikes.x):
-            _plot_line(ax, [(beg, x)], upper, 'AHP upper edge', 'red')
-            _plot_line(ax, [(x, end)], lower, 'AHP lower edge', 'magenta')
+        for i in range(self._obj.spike_count):
+            window = windows[i]
+            axes[i].axhline(thresholds[i], color='green', linestyle='--', linewidth=0.3)
 
-            ax.annotate('AHP',
-                        xytext=((x + end)/2, lower),
-                        xy=((x + end)/2, upper),
-                        arrowprops=dict(facecolor='black',
-                                        shrink=0),
-                        horizontalalignment='center', verticalalignment='top')
-            diff = upper - lower
-            low = min(lower - diff*0.05, low)
-            high = max(upper + diff*0.05, high)
+            x = spikes.x[i]
+            _plot_line(axes[i], [(x, window.right)], window.min(), 'AHP lower edge', 'magenta')
 
-            ax.set_ylim(low, high)
+            axes[i].annotate('AHP',
+                             xytext=((x + window.right)/2, window.min()),
+                             xy=((x + window.right)/2, thresholds[i]),
+                             arrowprops=dict(facecolor='black',
+                                             shrink=0),
+                             horizontalalignment='center', verticalalignment='top')
+            diff = thresholds[i] - window.min()
+            low = min(window.min() - diff*0.05, low)
+            high = max(thresholds[i] + diff*0.05, high)
+
+            axes[i].set_ylim(low, high)
 
     def plot(self, figure):
         ax = super().plot(figure)
@@ -429,11 +457,16 @@ class AHP(Feature):
         figure.tight_layout()
 
     def spike_plot(self, figure, **kwargs):
-        x = self._obj.spikes.x.mean()
-        lmargin = (x - self.spike_ahp_window.beg.mean()) * 1.05
-        rmargin = np.diff(self._obj.spikes.x).mean()*0.8
-        axes = super().spike_plot(figure, lmargin=lmargin, rmargin=rmargin, **kwargs)
-        return self._do_plots(axes)
+        spike_bounds = self._obj.spike_bounds
+
+        axes = super().spike_plot(figure, **kwargs)
+        self._do_plots(axes)
+
+        for i in range(self._obj.spike_count):
+            l = spike_bounds[i].left
+            r = self.spike_ahp_window[i].right
+            diff = r - l
+            axes[i].set_xlim(l - diff*0.15, r + diff*0.15)
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     d = vartype.array_diff(wave)
