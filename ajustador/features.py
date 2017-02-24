@@ -344,11 +344,15 @@ class Spikes(Feature):
                                   **kwargs)
 
         for i in range(self.spike_count):
-            _plot_line(axes[i],
-                       [(spike_bounds[i, 0], spike_bounds[i, 1])],
-                       thresholds[i] + height[i] / 2,
-                       'spike threshold', 'green')
-            axes[i].axhline(thresholds[i], color='green', linestyle='--')
+            y = thresholds[i] + height[i] / 2
+            axes[i].annotate('FWHM',
+                             xy=(spike_bounds[i, 0], y),
+                             xytext=(spike_bounds[i, 1], y),
+                             arrowprops=dict(facecolor='black',
+                                             shrink=0),
+                             verticalalignment='bottom')
+
+            axes[i].axhline(thresholds[i], color='green', linestyle='--', linewidth=0.3)
 
 class AHP(Feature):
     """Find the depth of "after hyperpolarization"
