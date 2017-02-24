@@ -23,9 +23,10 @@ def once(function):
         try:
             return getattr(self, attr)
         except AttributeError:
-            val = function(self)
-            setattr(self, attr, val)
-            return val
+            pass
+        val = function(self)
+        setattr(self, attr, val)
+        return val
     return functools.update_wrapper(wrapper, function)
 
 
