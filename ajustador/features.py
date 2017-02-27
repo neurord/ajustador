@@ -427,14 +427,21 @@ class AHP(Feature):
 
         for i in range(self._obj.spike_count):
             window = windows[i]
-            axes[i].axhline(thresholds[i], color='green', linestyle='--', linewidth=0.3)
-
             x = spikes.x[i]
-            _plot_line(axes[i], [(x, window.right)], window.min(), 'AHP lower edge', 'magenta')
+            width = window.right - x
+
+            _plot_line(axes[i],
+                       [(window.left - width/2, window.left + width/2)],
+                       thresholds[i],
+                       'spike threshold', 'green')
+            _plot_line(axes[i],
+                       [(x, window.right)],
+                       window.min(),
+                       'AHP lower edge', 'magenta')
 
             axes[i].annotate('AHP',
-                             xytext=((x + window.right)/2, window.min()),
-                             xy=((x + window.right)/2, thresholds[i]),
+                             xytext=(x + width/2, window.min()),
+                             xy=(x + width/2, thresholds[i]),
                              arrowprops=dict(facecolor='black',
                                              shrink=0),
                              horizontalalignment='center', verticalalignment='top')
