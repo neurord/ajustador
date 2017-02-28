@@ -18,6 +18,8 @@ def response_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.injection <= 110e-12]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].response, meas[ind2].response)
@@ -36,6 +38,8 @@ def rectification_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.injection <= -10e-12]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].rectification, meas[ind2].rectification)
@@ -45,6 +49,8 @@ def charging_curve_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.spike_count >= 1]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sim[ind1].charging_curve_halfheight - meas[ind2].charging_curve_halfheight
@@ -54,6 +60,8 @@ def falling_curve_time_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.injection <= -10e-12]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     lefts = sim[ind1].falling_curve_tau
@@ -68,6 +76,8 @@ def mean_isi_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.spike_count >= 2]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sub_mes_dev(sim[ind1].mean_isi, meas[ind2].mean_isi)
@@ -77,6 +87,8 @@ def isi_spread_fitness(sim, measurement, full=False):
     x1 = sim.injection
     meas = measurement[measurement.spike_count >= 2]
     x2 = meas.injection
+    if len(x2) == 0:
+        return vartype.vartype.nan
     fitting = np.abs(x1[:,None] - x2) < 1e-12
     ind1, ind2 = np.where(fitting)
     diff = sim[ind1].isi_spread - meas[ind2].isi_spread

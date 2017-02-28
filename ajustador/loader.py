@@ -115,6 +115,8 @@ class Attributable(object):
 
         if attr in self._array_attributes:
             arr = [getattr(wave, attr) for wave in self.waves]
+            if not arr:
+                return np.empty(0)
             if isinstance(arr[0], vartype):
                 return vartype.array(arr)
             if isinstance(arr[0], np.ndarray):

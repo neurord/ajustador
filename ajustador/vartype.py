@@ -53,13 +53,23 @@ class vartype(object):
         return abs(self.x) > self.dev*3
 
     def __sub__(self, other):
-        return vartype(self.x - other.x, (self.dev**2 + other.dev**2)**0.5)
+        return self + -other
 
     def __add__(self, other):
-        return vartype(self.x + other.x, (self.dev**2 + other.dev**2)**0.5)
+        if isinstance(other, vartype):
+            return vartype(self.x + other.x, (self.dev**2 + other.dev**2)**0.5)
+        else:
+            return vartype(self.x + other, self.dev + other)
 
     def __rsub__(self, other):
         return vartype(other - self.x, self.dev)
+
+    def __mul__(self, other):
+        if isinstance(other, vartype):
+            return vartype(self.x * other.x,
+                           (self.x**2*other.dev**2 + other.x**2*self.dev**2)**0.5)
+        else:
+            return vartype(self.x * other, self.dev * other)
 
     def __lt__(self, other):
         return self.x < other.x
@@ -69,6 +79,9 @@ class vartype(object):
             return vartype(self.x/other, self.dev/other)
         else:
             return NotImplemented
+
+    def __pow__(self, other):
+        return vartype(self.x**other, self.dev**other)
 
     def __str__(self):
         preca = int(math.floor(math.log10(abs(self.x)))) if self.x < 0 or self.x > 0 else 0
@@ -126,6 +139,8 @@ class vartype(object):
         x = np.array([p.x for p in items])
         dev = np.array([p.dev for p in items])
         return np.rec.fromarrays((x, dev), names='x,dev')
+
+vartype.nan = vartype(np.nan, np.nan)
 
 def array_mean(data):
     return vartype(data.mean(), data.var(ddof=1)**0.5)
