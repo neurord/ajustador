@@ -502,8 +502,8 @@ function_fit = namedtuple('function_fit', 'function params good')
 def _fit_falling_curve(ccut, baseline, steady):
     if ccut.size < 5 or not (steady-baseline).negative:
         func = None
-        params = falling_param(vartype(np.nan, np.nan),
-                               vartype(np.nan, np.nan))
+        params = falling_param(vartype.vartype.nan,
+                               vartype.vartype.nan)
         good = False
     else:
         init = (ccut.y.min()-baseline.x, ccut.x.ptp())
@@ -593,7 +593,7 @@ class Rectification(Feature):
         steady = self._obj.steady
 
         if ccut.size < self.window_len + 1:
-            return vartype.vartype(np.nan)
+            return vartype.vartype.nan
         pos = ccut.y.argmin()
         end = max(pos + self.window_len//2, ccut.size-1)
         bottom = vartype.array_mean(ccut[end-self.window_len : end+self.window_len+1].y)
