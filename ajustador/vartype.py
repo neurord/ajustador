@@ -55,11 +55,17 @@ class vartype(object):
     def __sub__(self, other):
         return self + -other
 
+    def __neg__(self):
+        return vartype(-self.x, self.dev)
+
     def __add__(self, other):
         if isinstance(other, vartype):
             return vartype(self.x + other.x, (self.dev**2 + other.dev**2)**0.5)
         else:
             return vartype(self.x + other, self.dev + other)
+
+    def __radd__(self, other):
+        return vartype(other + self.x, self.dev)
 
     def __rsub__(self, other):
         return vartype(other - self.x, self.dev)
@@ -154,6 +160,8 @@ def array_sub(reca, recb):
 
     The uncertainty is calculated in the usual way.
     """
+    if len(reca) == len(recb) == 0:
+        return np.rec.fromarrays(([],[]), names='x,dev')
     xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
     return np.rec.fromarrays(xy, names='x,dev')
 
@@ -163,5 +171,7 @@ def array_rms(rec):
     .. math::
         \mathrm{rms} = \sqrt{\sum_i (x_i / \sigma_i)^2}
     """
-    return ((rec.x / rec.dev)**2).mean()**0.5
+    if isinstance(rec, vartype):
+        return rec
 
+    return ((rec.x / rec.dev)**2).mean()**0.5

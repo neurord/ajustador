@@ -23,7 +23,7 @@ def _plot_spike(ax, wave, spikes, i, bottom=None, spike_bounds=None, lmargin=0.0
     if bottom is not None:
         ax.vlines(spikes.x[i:i+1], bottom, spikes.y, 'r', zorder=3)
     if spike_bounds is not None:
-        ax.axvspan(spike_bounds[i].hh_left, spike_bounds[i].hh_right,
+        ax.axvspan(spike_bounds[i].left, spike_bounds[i].right,
                    alpha=0.3, color='cyan')
 
 def plural(n, word):
@@ -383,7 +383,7 @@ class AHP(Feature):
     """
     requires = ('wave',
                 'injection_start', 'injection_end', 'injection_interval',
-                'spikes', 'spike_count', 'spike_bounds')
+                'spikes', 'spike_count', 'spike_bounds', 'spike_threshold')
     provides = ('spike_ahp_window', 'spike_ahp')
     array_attributes = ('spike_ahp_window', 'spike_ahp')
     mean_attributes = ('spike_ahp',)
@@ -637,7 +637,9 @@ class Rectification(Feature):
 
 
 class ChargingCurve(Feature):
-    requires = ('wave', 'steady_after', 'steady', 'spikes', 'spike_count')
+    requires = ('wave', 'injection_start',
+                'baseline', 'baseline_before',
+                'spikes', 'spike_count', 'spike_threshold')
     provides = 'charging_curve_halfheight',
     array_attributes = 'charging_curve_halfheight',
 
@@ -645,42 +647,53 @@ class ChargingCurve(Feature):
     @utilities.once
     def charging_curve_halfheight(self):
         "The height in the middle between depolarization start and first spike"
-        if self._obj.spike_count < 1:
-            return np.nan
-        else:
-            wave = self._obj.wave
-            steady_after = self._obj.steady_after
-            spike0 = self._obj.spikes[0]
+        ccut = self.charging_curve
+        if ccut is None:
+            return vartype.vartype.nan
 
-            what = wave[(wave.x > steady_after) & (wave.x < spike0.x)]
-            return np.median(what.y)
+        baseline = self._obj.baseline
+        return np.median(ccut.y) - baseline
+
+    @property
+    @utilities.once
+    def charging_curve(self):
+        if self._obj.spike_count < 1:
+            return None
+        wave = self._obj.wave
+        injection_start = self._obj.injection_start
+        spike0 = self._obj.spikes[0]
+        baseline = self._obj.baseline
+        threshold = self._obj.spike_threshold[0]
+
+        what = wave[(wave.x > injection_start) & (wave.x < spike0.x)]
+        what = what[what.y < threshold]
+        return what
 
     def plot(self, figure):
         ax = super().plot(figure)
+        baseline = self._obj.baseline
 
-        after = self._obj.steady_after
-        steady = self._obj.steady
-
-        if np.isnan(self.charging_curve_halfheight):
+        ccut = self.charging_curve
+        if ccut is None:
             ax.text(0.05, 0.5, 'cannot determine charging curve',
                     horizontalalignment='left',
                     transform=ax.transAxes,
                     color='red')
-            before = self._obj.wave.x[-1]
         else:
-            before = self._obj.spikes[0].x
-            ax.set_xlim(after - 0.005, before + 0.005)
+            ax.plot(ccut.x, ccut.y, 'r', label='charging curve')
+            ax.set_xlim(ccut.x[0] - 0.005, self._obj.spikes[0].x)
+
             _plot_line(ax,
-                       [(after, before)],
-                       self.charging_curve_halfheight,
-                       'charging curve bottom', 'g')
+                       [(ccut.x[0], ccut.x[-1])],
+                       baseline + self.charging_curve_halfheight,
+                       'charging curve halfheight', 'g')
 
         _plot_line(ax,
-                   [(after, before)],
-                   steady,
-                   'steady', 'r')
+                   [(0, self._obj.baseline_before)],
+                   baseline,
+                   'baseline', 'k')
 
-        ax.legend(loc='upper right')
+        ax.legend(loc='upper left')
         figure.tight_layout()
 
 

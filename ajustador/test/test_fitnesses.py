@@ -3,11 +3,9 @@ import numpy as np
 from ajustador import fitnesses
 import measurements1
 
-w1 = measurements1.waves042811
-w2 = measurements1.waves042911
+wnames, waves = zip(*measurements1.waves.items())
 
-import pytest
-@pytest.mark.parametrize("fitness", [
+fitness_list = [
     fitnesses.response_fitness,
     fitnesses.baseline_fitness,
     fitnesses.rectification_fitness,
@@ -24,7 +22,23 @@ import pytest
     fitnesses.hyperpol_fitness,
     fitnesses.spike_fitness,
     fitnesses.simple_combined_fitness,
-])
-def test_basics(fitness):
-    n = fitness(w1, w2)
-    assert np.isnan(float(n)) or n > 0
+]
+
+import pytest
+@pytest.mark.parametrize("w2", waves, ids=wnames)
+@pytest.mark.parametrize("w1", waves, ids=wnames)
+@pytest.mark.parametrize("fitness", fitness_list, ids=[f.__name__ for f in fitness_list])
+def test_basics(w1, w2, fitness):
+    y = fitness(w1, w2)
+
+    if np.isnan(float(y)):
+        return
+
+    same = w1 is w2
+    disjoint = not (w1.injection[:,None] == w2.injection).any()
+    repeats = (np.diff(w1.injection) < 1e-14).any()
+
+    if same or disjoint or repeats:
+        assert y >= 0
+    else:
+        assert y > 0

@@ -7,68 +7,60 @@ import pandas as pd
 from . import vartype
 
 def sub_mes_dev(reca, recb, min_dev=.005):
+    if isinstance(reca, vartype.vartype):
+        assert reca == vartype.vartype.nan
+        return vartype.vartype.nan
+    if isinstance(recb, vartype.vartype):
+        assert recb == vartype.vartype.nan
+        return vartype.vartype.nan
+    if len(reca) == 0 or len(recb) == 0:
+        return vartype.vartype.nan
+
     xy = (reca.x - recb.x, (recb.dev**2 + min_dev**2)**0.5)
     if isinstance(reca, vartype.vartype):
         return vartype.vartype(*xy)
     else:
         return np.rec.fromarrays(xy, names='x,dev')
 
+def _select(a, b, which=None):
+    if which is not None:
+        bsel = b[which]
+    else:
+        bsel = b
+    fitting = np.abs(a.injection[:,None] - bsel.injection) < 1e-12
+    ind1, ind2 = np.where(fitting)
+    return a[ind1], bsel[ind2]
+
 def response_fitness(sim, measurement, full=False):
     "Similarity of response to hyperpolarizing injection"
-    x1 = sim.injection
-    meas = measurement[measurement.injection <= 110e-12]
-    x2 = meas.injection
-    if len(x2) == 0:
-        return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sub_mes_dev(sim[ind1].response, meas[ind2].response)
+    m1, m2 = _select(sim, measurement, measurement.injection <= 110e-12)
+    diff = sub_mes_dev(m1.response, m2.response)
     return vartype.array_rms(diff)
 
 def baseline_fitness(sim, measurement, full=False):
     "Similarity of baselines"
-    x1 = sim.injection
-    x2 = measurement.injection
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sub_mes_dev(sim[ind1].baseline, measurement[ind2].baseline)
+    m1, m2 = _select(sim, measurement)
+    diff = sub_mes_dev(m1.baseline, m2.baseline)
     return vartype.array_rms(diff)
 
 def rectification_fitness(sim, measurement, full=False):
-    x1 = sim.injection
-    meas = measurement[measurement.injection <= -10e-12]
-    x2 = meas.injection
-    if len(x2) == 0:
-        return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sub_mes_dev(sim[ind1].rectification, meas[ind2].rectification)
+    m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
+    diff = sub_mes_dev(m1.rectification, m2.rectification)
     return vartype.array_rms(diff)
 
 def charging_curve_fitness(sim, measurement, full=False):
-    x1 = sim.injection
-    meas = measurement[measurement.spike_count >= 1]
-    x2 = meas.injection
-    if len(x2) == 0:
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+    if len(m2) == 0:
         return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sim[ind1].charging_curve_halfheight - meas[ind2].charging_curve_halfheight
-    return (diff**2).sum()**0.5
+    diff = sub_mes_dev(m1.charging_curve_halfheight, m2.charging_curve_halfheight)
+    return vartype.array_rms(diff)
 
 def falling_curve_time_fitness(sim, measurement, full=False):
-    x1 = sim.injection
-    meas = measurement[measurement.injection <= -10e-12]
-    x2 = meas.injection
-    if len(x2) == 0:
+    m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
+    if len(m2) == 0:
         return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    lefts = sim[ind1].falling_curve_tau
-    rights = sim[ind2].falling_curve_tau
-    k = np.isnan(rights.x)
-    rights[k].x = 0
-    rights[k].dev = 1
+    lefts = m1.falling_curve_tau
+    rights = m2.falling_curve_tau
     diff = vartype.array_sub(lefts, rights)
     return vartype.array_rms(diff)
 
@@ -101,13 +93,15 @@ def measurement_to_spikes(meas):
     return pd.concat(frames)
 
 def spike_time_fitness(sim, measurement):
-    x1 = sim.injection
-    meas = measurement[measurement.spike_count >= 2]
-    x2 = meas.injection
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    spikes1 = measurement_to_spikes(sim[ind1])
-    spikes2 = measurement_to_spikes(meas[ind2])
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
+    if len(m1) == 0:
+        m1, m2 = _select(measurement, sim, sim.spike_count >= 2)
+        if len(m1) == 0:
+            # neither is spiking, cannot determine spike timing
+            return np.nan
+
+    spikes1 = measurement_to_spikes(m1)
+    spikes2 = measurement_to_spikes(m2)
     diff = spikes1 - spikes2
     diff.pop('injection')
     diff.fillna(sim[0].injection_interval, inplace=True)
@@ -136,15 +130,15 @@ def spike_onset_fitness(sim, measurement):
     return (np.array([a, b])**2).mean()**0.5
 
 def spike_width_fitness(sim, measurement):
-    a = sub_mes_dev(sim.mean_spike_width, measurement.mean_spike_width)
+    a = sim.mean_spike_width - measurement.mean_spike_width
     return (a.x / a.dev)**2
 
 def spike_height_fitness(sim, measurement):
-    a = sub_mes_dev(sim.mean_spike_height, measurement.mean_spike_height, 0.01)
+    a = sim.mean_spike_height - measurement.mean_spike_height
     return (a.x / a.dev)**2
 
 def spike_ahp_fitness(sim, measurement):
-    a = sub_mes_dev(sim.mean_spike_ahp, measurement.mean_spike_ahp)
+    a = sim.mean_spike_ahp - measurement.mean_spike_ahp
     return (a.x / a.dev)**2
 
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
