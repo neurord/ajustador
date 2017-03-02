@@ -200,3 +200,6 @@ class Measurement(Attributable):
             return self.name < other.name
         except AttributeError:
             raise TypeError
+
+    def __repr__(self):
+        return '<{} {}>'.format(self.__class__.__name__, self.name)
