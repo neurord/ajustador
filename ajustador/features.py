@@ -446,8 +446,8 @@ class AHP(Feature):
                                              shrink=0),
                              horizontalalignment='center', verticalalignment='top')
             diff = thresholds[i] - window.min()
-            low = min(window.min() - diff*0.05, low)
-            high = max(thresholds[i] + diff*0.05, high)
+            low = min(window.min() - diff*0.5, low)
+            high = max(thresholds[i] + diff*0.5, high)
 
             axes[i].set_ylim(low, high)
 
