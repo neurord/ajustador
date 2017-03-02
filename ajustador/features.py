@@ -650,9 +650,10 @@ class ChargingCurve(Feature):
         ccut = self.charging_curve
         if ccut is None:
             return vartype.vartype.nan
-
+        threshold = self._obj.spike_threshold[0]
         baseline = self._obj.baseline
-        return np.median(ccut.y) - baseline
+
+        return (threshold - baseline) / 2
 
     @property
     @utilities.once
