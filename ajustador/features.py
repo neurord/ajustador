@@ -455,6 +455,7 @@ class AHP(Feature):
 
     def _do_plots(self, axes):
         spikes = self._obj.spikes
+        spike_bounds = self._obj.spike_bounds
         thresholds = self._obj.spike_threshold
         windows = self.spike_ahp_window
         ahps = self.spike_ahp
@@ -467,7 +468,8 @@ class AHP(Feature):
 
             axes[i].plot(window.x, window.y, 'r', label='AHP')
             _plot_line(axes[i],
-                       [(window.left - width/2, window.left + width/2)],
+                       [(spikes[i].x - 3*spike_bounds[i].width,
+                         spikes[i].x + 3*spike_bounds[i].width)],
                        thresholds[i],
                        'spike threshold', 'green')
             _plot_line(axes[i],
