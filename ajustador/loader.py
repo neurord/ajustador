@@ -14,6 +14,7 @@ import operator
 import copy
 from collections import namedtuple
 import numpy as np
+from numpy.lib import recfunctions
 from igor import binarywave
 
 from . import utilities
@@ -119,12 +120,15 @@ class Attributable(object):
                 return np.empty(0)
             if isinstance(arr[0], vartype):
                 return vartype.array(arr)
+            if isinstance(arr[0], np.recarray):
+                return recfunctions.stack_arrays(arr, asrecarray=True, usemask=False)
             if isinstance(arr[0], np.ndarray):
                 return np.hstack(arr)
             return np.array(arr)
 
         if attr.startswith('mean_') and attr[5:] in self._mean_attributes:
-            return vartype.average(self.__getattr__(attr[5:]))
+            values = self.__getattr__(attr[5:])
+            return vartype.average(values)
 
         raise AttributeError(attr)
 
