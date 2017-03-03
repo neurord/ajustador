@@ -193,8 +193,20 @@ class WaveRegion:
     def width(self):
         return self.right - self.left
 
+    @property
+    def wave(self):
+        return self._wave[self.left_i:self.right_i+1]
+
+    @property
+    def x(self):
+        return self._wave.x[self.left_i:self.right_i+1]
+
+    @property
+    def y(self):
+        return self._wave.y[self.left_i:self.right_i+1]
+
     def min(self):
-        return self._wave.y[self.left_i : self.right_i+1].min()
+        return self.wave.min()
 
 class Spikes(Feature):
     """Find the position and height of spikes
@@ -392,7 +404,7 @@ class AHP(Feature):
     @utilities.once
     def spike_ahp_window(self):
         spikes = self._obj.spikes
-        bounds = self._obj.spike_bounds
+        spike_bounds = self._obj.spike_bounds
         thresholds = self._obj.spike_threshold
         injection_end = self._obj.injection_end
 
@@ -400,10 +412,12 @@ class AHP(Feature):
         y = self._obj.wave.y
         ans = []
         for i in range(len(spikes)):
-            rlimit = bounds[i+1].left if i < len(spikes)-1 else injection_end
+            rlimit = spike_bounds[i+1].left if i < len(spikes)-1 else injection_end
 
-            beg = bounds[i].right_i
-            while y[beg] >= thresholds[i] and x[beg + 1] < rlimit:
+            beg = spike_bounds[i].right_i
+            # if we are before the AHP, or mostly going down, advance
+            while (y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
+                   y[beg] > y[beg+5]):
                 beg += 1
 
             end = beg
@@ -417,12 +431,31 @@ class AHP(Feature):
     @property
     @utilities.once
     def spike_ahp(self):
-        return np.array([window.min() for window in self.spike_ahp_window])
+        """Returns the (averaged) minimum of each AHP window
+
+        `spike_ahp_window` is used to determine the extent of the AHP.
+        An average of the bottom area of the window of the width of the
+        spike is used.
+        """
+        windows = self.spike_ahp_window
+        spikes = self._obj.spikes
+        spike_bounds = self._obj.spike_bounds
+
+        ans = np.empty((len(windows), 2))
+        for i in range(len(windows)):
+            w = spike_bounds[i].width
+            left = windows[i].x[windows[i].y.argmin()] - w/2
+            right = windows[i].x[windows[i].y.argmin()] + w/2
+            cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
+            ans[i] = vartype.array_mean(cut.y)
+
+        return np.rec.fromarrays(ans.T, names='x,dev')
 
     def _do_plots(self, axes):
         spikes = self._obj.spikes
         thresholds = self._obj.spike_threshold
         windows = self.spike_ahp_window
+        ahps = self.spike_ahp
         low, high = np.inf, -np.inf
 
         for i in range(self._obj.spike_count):
@@ -430,23 +463,24 @@ class AHP(Feature):
             x = spikes.x[i]
             width = window.right - x
 
+            axes[i].plot(window.x, window.y, 'r', label='AHP')
             _plot_line(axes[i],
                        [(window.left - width/2, window.left + width/2)],
                        thresholds[i],
                        'spike threshold', 'green')
             _plot_line(axes[i],
                        [(x, window.right)],
-                       window.min(),
-                       'AHP lower edge', 'magenta')
+                       vartype.vartype(*ahps[i]),
+                       'AHP bottom', 'magenta')
 
             axes[i].annotate('AHP',
-                             xytext=(x + width/2, window.min()),
+                             xytext=(x + width/2, ahps[i].x),
                              xy=(x + width/2, thresholds[i]),
                              arrowprops=dict(facecolor='black',
                                              shrink=0),
                              horizontalalignment='center', verticalalignment='top')
-            diff = thresholds[i] - window.min()
-            low = min(window.min() - diff*0.5, low)
+            diff = abs(thresholds[i] - ahps[i].x)
+            low = min(ahps[i].x - diff*0.5, thresholds[i] - diff*0.5, low)
             high = max(thresholds[i] + diff*0.5, high)
 
             axes[i].set_ylim(low, high)
