@@ -413,14 +413,16 @@ class AHP(Feature):
         ans = []
         for i in range(len(spikes)):
             rlimit = spike_bounds[i+1].left if i < len(spikes)-1 else injection_end
+            w = spike_bounds[i].width
+            n_rolling_window = int(w // (x[1] - x[0])) + 1
 
             beg = spike_bounds[i].right_i
             # if we are before the AHP, or mostly going down, advance
             while (y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
-                   y[beg] > y[beg+5]):
+                   y[beg] > y[beg + n_rolling_window]):
                 beg += 1
 
-            end = beg
+            end = beg + n_rolling_window
             while (y[end] < thresholds[i] or end - beg < 5) and x[end] < rlimit:
                 end += 1
 
