@@ -76,7 +76,7 @@ class IVCurve(object):
             self._attributes[p] = obj
 
     def __getattr__(self, name):
-        if name in self._attributes:
+        if name != '_attributes' and name in self._attributes:
             return getattr(self._attributes[name], name)
         raise AttributeError(name)
 
@@ -176,7 +176,7 @@ class Measurement(Attributable):
 
         super().__init__(params, features)
 
-        self._features = (params, *features)
+        self.features = (params, *features)
 
         self._args = dict(IV=IV, IF=IF, time=time)
         self.bad_extra = bad_extra
@@ -188,7 +188,7 @@ class Measurement(Attributable):
     def waves(self):
         ls = os.listdir(self.dirname)
 
-        waves = [IVCurve.load(self.dirname, f, features=self._features, **self._args)
+        waves = [IVCurve.load(self.dirname, f, features=self.features, **self._args)
                  for f in ls]
         waves = np.array([wave for wave in waves
                           if wave.fileinfo.extra not in self.bad_extra])

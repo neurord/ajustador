@@ -8,7 +8,7 @@ ajustador
    loader
    features
    fitnesses
-   analysis
+   optimize
    utilities
    signal_smooth
    detect

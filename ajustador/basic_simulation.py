@@ -127,7 +127,6 @@ def setup(param_sim, model):
     MSNsyn, neurons = cell_proto.neuronclasses(model)
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
-    print(neuron_paths)
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
     vmtab,catab,plastab,currtab = tables.graphtables(model, neurons,
                                                      param_sim.plot_current,
