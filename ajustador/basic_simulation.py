@@ -32,6 +32,7 @@ from spspine import (cell_proto,
                      standard_options)
 from spspine.graph import neuron_graph
 
+# FIXME
 d1d2.neurontypes = lambda: ('D1',)
 
 def real(s):
@@ -49,6 +50,7 @@ def option_parser():
     )
     p.add_argument('--morph-file')
     p.add_argument('--baseline', type=real)
+    p.add_argument('--neuron-type')
 
     p.add_argument('--RA', type=real)
     p.add_argument('--RM', type=real)
@@ -76,8 +78,12 @@ def serialize_options(opts):
             key = key.replace('_', '-')
             yield '--{}={}'.format(key, val)
 
-def morph_morph_file(model, new_file=None, RA=None, RM=None, CM=None):
-    morph_file = cell_proto.find_morph_file(model)
+def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, CM=None):
+    if morph_file:
+        morph_file = util.find_model_file(model, morph_file)
+    else:
+        morph_file = cell_proto.find_morph_file(model, ntype)
+
     t = open(morph_file).read()
 
     if new_file is None:
@@ -95,9 +101,6 @@ def morph_morph_file(model, new_file=None, RA=None, RM=None, CM=None):
     return new_file
 
 def setup(param_sim, model):
-    if param_sim.morph_file:
-        model.morph_file = param_sim.morph_file
-
     if param_sim.Cond_D1_Kir is not None:
         for key in model.Condset.D1.Kir:
             model.Condset.D1.Kir[key] = param_sim.Cond_D1_Kir
@@ -115,17 +118,23 @@ def setup(param_sim, model):
             key = min(attr.keys())
             attr[key] = option
 
-    new_file = morph_morph_file(model, RA=param_sim.RA, RM=param_sim.RM, CM=param_sim.CM)
-    model.morph_file = new_file.name
+    new_file = morph_morph_file(model,
+                                param_sim.neuron_type,
+                                param_sim.morph_file,
+                                RA=param_sim.RA, RM=param_sim.RM, CM=param_sim.CM)
+    model.morph_file[param_sim.neuron_type] = new_file.name
 
-    MSNsyn,neuron,capools,synarray,spineHeads = cell_proto.neuronclasses(model)
-    pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron)
-    vmtab,catab,plastab,currtab = tables.graphtables(model, neuron,
+    MSNsyn, neurons = cell_proto.neuronclasses(model)
+    neuron_paths = {ntype:[neuron.path]
+                    for ntype, neuron in neurons.items()}
+    print(neuron_paths)
+    pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
+    vmtab,catab,plastab,currtab = tables.graphtables(model, neurons,
                                                      param_sim.plot_current,
-                                                     param_sim.plot_current_message,
-                                                     capools=capools)
+                                                     param_sim.plot_current_message)
     simpaths=['/'+neurotype for neurotype in model.neurontypes()]
-    clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve)
+    clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
+                         model.param_cond.NAME_SOMA)
     return pg
 
 def reset_baseline(neuron, baseline, Cond_D1_Kir):
@@ -139,13 +148,13 @@ def reset_baseline(neuron, baseline, Cond_D1_Kir):
                 print("%s Em %f -> %f" % (w.path, w.Em, Em))
             w.Em = Em
 
-def run_simulation(injection_current, simtime, param_sim=None):
+def run_simulation(injection_current, simtime, param_sim):
     global pulse_gen
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
     if param_sim.baseline is not None:
-        reset_baseline('D1', param_sim.baseline, param_sim.Cond_D1_Kir)
+        reset_baseline(param_sim.neuron_type, param_sim.baseline, param_sim.Cond_D1_Kir)
     moose.start(simtime)
 
 def main(args):
