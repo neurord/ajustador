@@ -13,6 +13,7 @@ import pickle
 import multiprocessing
 
 import numpy as np
+import cma
 
 from . import loader, features, fitnesses, utilities, basic_simulation
 
@@ -85,6 +86,7 @@ class Simulation(loader.Attributable):
         if baseline is None:
             raise ValueError
 
+        super().__init__(features)
         self.params = filtereddict(junction_potential=junction_potential,
                                    morph_file=morph_file,
                                    simtime=simtime,
@@ -137,11 +139,13 @@ class Simulation(loader.Attributable):
 
 class SimulationResult(loader.Attributable):
     def __init__(self, dirname, features):
-        self.name = dirname
-
         jar = os.path.join(dirname, 'params.pickle')
         with open(jar, 'rb') as f:
-            self.params = pickle.load(f)
+            params = pickle.load(f)
+
+        super().__init__(features)
+        self.params = params
+        self.features = (params, *features)
 
         print("Result from {}, {}".format(dirname, self._param_str))
         ivfiles = glob.glob(os.path.join(dirname, 'ivdata-*.npy'))
@@ -314,9 +318,12 @@ class Fit:
         self.params = params
         self._history = []
         self._async = False
+        self.optimizer = None
 
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
+
+        utilities.mkdir_p(dir)
 
     def load(self):
         try:
@@ -393,13 +400,19 @@ class Fit:
     def __len__(self):
         return len(self._sim_value)
 
+    def do_fit(self, count, params=None, sigma=1, popsize=8, seed=123):
+        if not hasattr(self, 'strategy'):
+            if params is None:
+                params = self.params.scaled
+            bounds = self.params.scaled_bounds
+            opts = dict(bounds=bounds, popsize=popsize, seed=123)
+            self.optimizer = cma.CMAEvolutionStrategy(params, sigma, opts)
 
-def do_fit(optimizer, fit, count):
-    for i in range(count):
-        if optimizer.stop():
-            break
-        points = optimizer.ask()
-        values = fit.fitness_multi(points)
-        optimizer.tell(points, values)
-        optimizer.logger.add()  # write data to disc to be plotted
-        optimizer.disp()
+        for i in range(count):
+            if self.optimizer.stop():
+                break
+            points = self.optimizer.ask()
+            values = self.fitness_multi(points)
+            self.optimizer.tell(points, values)
+            self.optimizer.logger.add()  # write data to disc to be plotted
+            self.optimizer.disp()

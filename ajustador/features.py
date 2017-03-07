@@ -168,9 +168,12 @@ def _find_spikes(wave, min_height=0.0, max_charge_time=0.004, charge_threshold=0
         y = wave.y[start:peaks[i] + 1]
         yderiv = np.diff(y)
         #spike threshold is point where derivative is 2% of steepest
-        ythresh = charge_threshold * yderiv.max()
-        thresh = y[1:][yderiv > ythresh].min()
-        thresholds[i] = thresh
+        try:
+            ythresh = charge_threshold * yderiv.max()
+            thresh = y[1:][yderiv > ythresh].min()
+            thresholds[i] = thresh
+        except Exception:
+            thresholds[i] = np.nan
     return peak_and_threshold(peaks, thresholds)
 
 class WaveRegion:

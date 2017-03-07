@@ -142,8 +142,8 @@ class vartype(object):
         >>> X.dev
         array([ 1. ,  1.1,  1.2,  1.3,  1.4])
         """
-        x = np.array([p.x for p in items])
-        dev = np.array([p.dev for p in items])
+        x = np.array([getattr(p, 'x', p) for p in items])
+        dev = np.array([getattr(p, 'dev', np.nan) for p in items])
         return np.rec.fromarrays((x, dev), names='x,dev')
 
 vartype.nan = vartype(np.nan, np.nan)

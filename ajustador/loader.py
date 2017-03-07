@@ -98,15 +98,15 @@ class IVCurve(object):
         return self.wave.x[-1]
 
 class Attributable(object):
-    def __init__(self, params, features=None):
+    def __init__(self, features=None):
         # TODO: check duplicates, check dependencies between mean_attrs and array_attrs
         self._array_attributes = {p
                                   for feature in features
-                                  for p in feature.array_attributes} | \
+                                  for p in getattr(feature, 'array_attributes', ())} | \
                                  {'injection', 'filename'} # FIXME
         self._mean_attributes = {p
                                  for feature in features
-                                 for p in feature.mean_attributes}
+                                 for p in getattr(feature, 'mean_attributes', ())}
 
     def __getattr__(self, attr):
         if attr.startswith('__'):
@@ -174,7 +174,7 @@ class Measurement(Attributable):
             from . import features
             features = features.standard_features
 
-        super().__init__(params, features)
+        super().__init__(features)
 
         self.features = (params, *features)
 
