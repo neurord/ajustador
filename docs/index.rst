@@ -9,6 +9,7 @@ ajustador
    features
    fitnesses
    optimize
+   drawing
    utilities
    signal_smooth
    detect
