@@ -115,9 +115,9 @@ class Simulation(loader.Attributable):
         return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
 
     def __repr__(self):
-        return '{}({}, time={}) {}'.format(
+        return '{}({}, {})'.format(
             self.__class__.__name__,
-            self.tmpdir, self.params['simtime'], self._param_str)
+            self.tmpdir, self._param_str)
 
     def _set_result(self, result):
         self.waves = np.array(result, dtype=object)
@@ -139,6 +139,8 @@ class Simulation(loader.Attributable):
 
 class SimulationResult(loader.Attributable):
     def __init__(self, dirname, features):
+        self.name = dirname
+
         jar = os.path.join(dirname, 'params.pickle')
         with open(jar, 'rb') as f:
             params = pickle.load(f)
@@ -157,6 +159,7 @@ class SimulationResult(loader.Attributable):
                                  junction_potential=junction_potential,
                                  features=features)
                  for ivfile in ivfiles]
+
         waves.sort(key=operator.attrgetter('injection'))
         self.waves = np.array(waves, dtype=object)
 
@@ -165,9 +168,8 @@ class SimulationResult(loader.Attributable):
         return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
 
     def __repr__(self):
-        return '{}({}, time={}) {}'.format(
-            self.__class__.__name__,
-            self.name, self.waves[0].time, self._param_str)
+        return '{}({!r}, {})'.format(
+            self.__class__.__name__, self.name, self._param_str)
 
     @staticmethod
     def find_global(param, p_file):

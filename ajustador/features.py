@@ -583,12 +583,12 @@ class FallingCurve(Feature):
     @property
     def falling_curve_amp(self):
         fit = self.falling_curve_fit
-        return fit.params.amp if fit.good else np.nan
+        return fit.params.amp if fit.good else vartype.vartype.nan
 
     @property
     def falling_curve_tau(self):
         fit = self.falling_curve_fit
-        return fit.params.tau if fit.good else np.nan
+        return fit.params.tau if fit.good else vartype.vartype.nan
 
     @property
     def falling_curve_function(self):
