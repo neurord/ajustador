@@ -35,7 +35,6 @@ def _get_graph(name, figsize=None):
 
 def plot_together(*groups, **opts):
     offset = opts.get('offset', False)
-    use_j_p = opts.get('use_junction_potential', False)
     f = _get_graph(groups[0].name + ' together')
     ax = f.gca()
     for i, waves in enumerate(groups):
@@ -48,22 +47,12 @@ def plot_together(*groups, **opts):
             off = waves.injection.min() - 100e-12
             ptp = 100e-12
 
-        if use_j_p:
-            try:
-                jp = waves.params['junction_potential']
-            except TypeError:
-                jp = 0
-        else:
-            jp = 0
-
         for j, curve in enumerate(waves.waves):
             c[(i+2) % len(c)] = np.clip((curve.injection - off)/ptp, 0, 1)
             kwargs = {}
             if j == len(waves.waves)-1:
-                suffix = ' ({:+.4f})'.format(-jp) if jp else ''
-                kwargs['label'] = waves.name + suffix
+                kwargs['label'] = waves.name
             y = curve.wave.y - (curve.baseline.x if offset else 0)
-            y -= jp
             ax.plot(curve.wave.x, y, c=tuple(c), **kwargs)
 
     ax.legend(loc='lower right', fontsize=8)
