@@ -6,7 +6,7 @@ import pandas as pd
 
 from . import vartype
 
-def sub_mes_dev(reca, recb, min_dev=.005):
+def sub_mes_dev(reca, recb):
     if isinstance(reca, vartype.vartype):
         assert reca == vartype.vartype.nan
         return vartype.vartype.nan
@@ -16,7 +16,7 @@ def sub_mes_dev(reca, recb, min_dev=.005):
     if len(reca) == 0 or len(recb) == 0:
         return vartype.vartype.nan
 
-    xy = (reca.x - recb.x, (recb.dev**2 + min_dev**2)**0.5)
+    xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
     if isinstance(reca, vartype.vartype):
         return vartype.vartype(*xy)
     else:
