@@ -425,12 +425,15 @@ class AHP(Feature):
 
             beg = spike_bounds[i].right_i
             # if we are before the AHP, or mostly going down, advance
-            while (y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
+            while (beg < y.size and
+                   y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
                    y[beg] > y[beg + n_rolling_window]):
                 beg += 1
 
             end = beg + n_rolling_window
-            while (y[end] < thresholds[i] or end - beg < 5) and x[end] < rlimit:
+            while (end < x.size and
+                   (y[end] < thresholds[i] or end - beg < 5) and
+                   x[end] < rlimit):
                 end += 1
 
             ans.append(WaveRegion(self._obj.wave, beg, end))
