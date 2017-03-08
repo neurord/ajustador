@@ -169,11 +169,11 @@ def plot_shape2(what, *group):
 def plot_param_space(group, measurement=None, *what, **options):
     age = options.get('age', False)
     fitness_func = options.get('fitness', fitnesses.combined_fitness)
+    values = group.param_values(*what)
     if age:
-        values, fitness = analysis.convert_to_values(group, None, None, *what)
         fitness = np.arange(1, len(values)+1)
     else:
-        values, fitness = analysis.convert_to_values(group, measurement, fitness_func, *what)
+        fitness = [fitness_func(item, measurement) for item in group]
 
     f = _get_graph('param space')
     f.canvas.set_window_title('3-param view for {}'.format(fitness_func.__name__))
@@ -238,7 +238,9 @@ def plot_history(groups, measurement, **options):
 
 def plot_param_view(group, measurement, *what, **options):
     fitness_func = options.get('fitness', fitnesses.combined_fitness)
-    values, fitness = analysis.convert_to_values(group, measurement, fitness_func, *what)
+
+    values = group.param_values(*what)
+    fitness = [fitness_func(item, measurement) for item in group]
 
     f = _get_graph('param space')
     f.canvas.set_window_title('2-param view for {}'.format(fitness_func.__name__))
@@ -259,12 +261,17 @@ def plot_param_view(group, measurement, *what, **options):
 
 def plot_param_section(group, measurement, *what, **options):
     if not what:
-        what = [p for p in analysis.PARAMS if p in group[0].params]
+        what = group.param_names()
     columns = 1 if len(what) < 6 else 2
 
     regression = options.get('regression', None)
-    fitness_func = options.get('fitness', fitnesses.combined_fitness)
-    values, fitness = analysis.convert_to_values(group, measurement, fitness_func, *what)
+    fitness_func = options.get('fitness', None)
+    if fitness_func is None:
+        fitness_func = group.fitness_func
+
+    values = group.param_values(*what)
+    fitness = [fitness_func(item, measurement) for item in group]
+
     rows = int(math.ceil(values.shape[1] / columns))
 
     f = _get_graph('param ranges')
@@ -272,7 +279,6 @@ def plot_param_section(group, measurement, *what, **options):
                       wspace=0.17, hspace=0.24)
 
     for n, param in enumerate(what):
-        print(values.shape, (rows, columns, (n%rows)*columns + n//rows + 1))
         ax = f.add_subplot(rows, columns, (n%rows)*columns + n//rows + 1)
         res = ax.scatter(values.T[n], fitness,
                          c=range(len(values)))
@@ -403,11 +409,14 @@ def cbdr(values, func, xnames, yname, order=None, debug=False):
 
 def plot_flat(group, measurement, *what, **options):
     if not what:
-        what = group[0].params.keys()
+        what = group.param_names()
 
     fitness_func = options.pop('fitness', fitnesses.combined_fitness)
     log = options.pop('log', False)
-    values, fitness = analysis.convert_to_values(group, measurement, fitness_func, *what)
+
+    values = group.param_values(*what)
+    fitness = [fitness_func(item, measurement, **opts) for item in group]
+
     nontrivial = np.ptp(values, axis=0) > 1e-10
     values = values[:, nontrivial]
     what = np.array(what)[nontrivial]
@@ -434,7 +443,10 @@ def plot_map(group, measurement, *what, **options):
     fitness_func = options.pop('fitness', fitnesses.combined_fitness)
     log = options.pop('log', False)
     dots = options.pop('dots', False)
-    values, fitness = analysis.convert_to_values(group, measurement, fitness_func, *what)
+
+    values = group.param_values(*what)
+    fitness = [fitness_func(item, measurement, **options) for item in group]
+
     rms = (np.array(fitness)**2).mean()**0.5
     if log:
         fitness = np.log(fitness)

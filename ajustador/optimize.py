@@ -353,6 +353,9 @@ class Fit:
             if key not in self._sim_value:
                 self._sim_value[key] = sim
 
+    def param_names(self):
+        return [p.name for p in self.params.ajuparams]
+
     @utilities.cached
     def sim(self, scaled_params):
         unscaled = self.params.unscaled_dict(scaled_params)
@@ -415,6 +418,13 @@ class Fit:
         return list(self._sim_value.values()).__getitem__(i)
     def __len__(self):
         return len(self._sim_value)
+
+    def param_values(self, *what):
+        values = np.empty((self.__len__(), len(what)))
+        for i, item in enumerate(self):
+            for j, param in enumerate(what):
+                values[i, j] = item.params[param]
+        return values
 
     def do_fit(self, count, params=None, sigma=1, popsize=8, seed=123):
         if self.optimizer is None:
