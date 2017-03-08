@@ -223,6 +223,8 @@ class SimulationResults(object):
 
 
 class Param:
+    min = max = None
+
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -248,7 +250,10 @@ class AjuParam(Param):
         self.max = max
 
         # if starting value is less than 0.1 or more than 10, scale to that region
-        rr = math.log10(value) if value != 0 else -1
+        val = value if value != 0 else (
+            max if max is not None and max != 0 else
+            (min if min is not None else 0))
+        rr = math.log10(val) if val != 0 else -1
         if abs(rr) <= 1:
             self._scaling = 1
         else:
@@ -296,6 +301,15 @@ class ParamSet:
                                for p in self.fixedparams))
         return collections.OrderedDict(gen)
 
+    def update(self, **kwargs):
+        args = ((AjuParam(p.name, kwargs[p.name], p.min, p.max)
+                 if isinstance(p, AjuParam)
+                 else Param(p.name, kwargs[p.name]))
+                if p.name in kwargs
+                else p
+                for p in self.params)
+        return ParamSet(*args)
+
     @property
     @utilities.once
     def scaled_bounds(self):
@@ -306,7 +320,7 @@ class ParamSet:
                  for p in self.params
                  if isinstance(p, AjuParam)])
 
-    def __str__(self):
+    def __repr__(self):
         vv = ' '.join('{}={}'.format(p.name, p.value) for p in self.params)
         return 'ParamSet ' + vv
 
