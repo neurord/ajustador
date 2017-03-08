@@ -417,7 +417,7 @@ class Fit:
         return len(self._sim_value)
 
     def do_fit(self, count, params=None, sigma=1, popsize=8, seed=123):
-        if not hasattr(self, 'strategy'):
+        if self.optimizer is None:
             if params is None:
                 params = self.params.scaled
             bounds = self.params.scaled_bounds
