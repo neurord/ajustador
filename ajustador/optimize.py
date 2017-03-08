@@ -253,7 +253,7 @@ class AjuParam(Param):
         val = value if value != 0 else (
             max if max is not None and max != 0 else
             (min if min is not None else 0))
-        rr = math.log10(val) if val != 0 else -1
+        rr = math.log10(abs(val)) if val != 0 else -1
         if abs(rr) <= 1:
             self._scaling = 1
         else:
