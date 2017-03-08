@@ -417,7 +417,11 @@ class AHP(Feature):
         for i in range(len(spikes)):
             rlimit = spike_bounds[i+1].left if i < len(spikes)-1 else injection_end
             w = spike_bounds[i].width
-            n_rolling_window = int(w // (x[1] - x[0])) + 1
+            if not np.isnan(w):
+                n_rolling_window = int(w // (x[1] - x[0])) + 1
+            else:
+                # FIXME: consider rejecting those outright
+                n_rolling_window = 5
 
             beg = spike_bounds[i].right_i
             # if we are before the AHP, or mostly going down, advance
