@@ -203,11 +203,14 @@ def parametrized_fitness(response=1, baseline=0.3, rectification=1,
 
 def hyperpol_fitness(sim, measurement, full=False):
     a = response_fitness(sim, measurement)
-    b = baseline_fitness(sim, measurement) / 5
-    c = rectification_fitness(sim, measurement) * 4
-    d = falling_curve_time_fitness(sim, measurement) / 20
+    b = baseline_fitness(sim, measurement)
+    c = rectification_fitness(sim, measurement)
+    d = falling_curve_time_fitness(sim, measurement)
     e = spike_count_fitness(sim, measurement)
-    arr = np.array([a, b, c, d, e])
+    if ERROR == ErrorCalc.normal:
+        arr = np.array([a, b/5, c*4, d/20, e])
+    else:
+        arr = np.array([a, b, c, d, e])
     if full:
         return arr
     else:
@@ -240,13 +243,16 @@ def spike_fitness(sim, measurement, full=False):
 def new_combined_fitness(sim, measurement, full=False):
     a = response_fitness(sim, measurement)
     b = baseline_fitness(sim, measurement)
-    c = 2 * rectification_fitness(sim, measurement)
+    c = rectification_fitness(sim, measurement)
     d = falling_curve_time_fitness(sim, measurement)
     e = spike_time_fitness(sim, measurement)
     f = spike_width_fitness(sim, measurement)
     g = spike_height_fitness(sim, measurement)
     h = spike_ahp_fitness(sim, measurement)
-    arr = np.array([a, b, c, d, e, f, g, h])
+    if ERROR == ErrorCalc.normal:
+        arr = np.array([a, b, c * 2, d, e, f, g, h])
+    else:
+        arr = np.array([a, b, c, d, e, f, g, h])
     if full:
         return arr
     else:
