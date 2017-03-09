@@ -93,12 +93,13 @@ def plot_waves(waves):
 
 def plot_rectification(waves):
     f = _get_graph(waves.name + ' activation', figsize=(16,10))
-    n = sum(waves.response.x < -10e-12)
     ii = 0
+    n = len(waves.waves)
+    columns = 1 if n == 1 else 2 if n in (2, 4) else 3 if n <= 9 else 4 if n <= 16 else 5
     for i, curve in enumerate(waves.waves):
         if curve.response.x >= -12e-12:
             continue
-        ax = f.add_subplot(int(math.ceil(n/5)), 5, ii+1)
+        ax = f.add_subplot(int(math.ceil(n/columns)), columns, i+1)
         ax.plot(curve.wave.x, curve.wave.y)
         ax.set_title('{0.filename} / {0.injection}V'.format(curve), fontsize=8)
 
@@ -107,15 +108,12 @@ def plot_rectification(waves):
         steady = curve.steady
         rect = curve.rectification
         ax.plot(ccut.x, ccut.y, 'r')
-        ax.set_xlim(curve.params.baseline_before, ccut.x.max() + .01)
+        ax.set_xlim(curve.baseline_before, ccut.x.max() + .01)
 
-        try:
-            func, popt = curve.falling_curve_fit
-        except Exception:
-            print("Failed to get fit")
-        else:
-            ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--')
-        ax.hlines([steady.x, steady.x-rect.x], 0.20, 0.40)
+        fit = curve.falling_curve_fit
+        if fit.good:
+            ax.plot(ccut.x, baseline.x + fit.function(ccut.x, *fit.params), 'g--')
+            ax.hlines([steady.x, steady.x-rect.x], 0.20, 0.40)
 
         ii += 1
 
