@@ -48,8 +48,10 @@ def relative_diff_single(a, b, extra=0):
     x = getattr(a, 'x', a)
     y = getattr(b, 'x', b)
 
-    return (abs(x - y) / (abs(x) + abs(y) / RELATIVE_MAX_RATIO)
-            + RELATIVE_MAX_RATIO * extra)
+    base = abs(x) + abs(y) / RELATIVE_MAX_RATIO
+    nonzero = np.atleast_1d(base > 0).any()
+    return ((abs(x - y) / base if nonzero else base)
+             + RELATIVE_MAX_RATIO * extra)
 
 def relative_diff(a, b):
     """A difference between a and b using b as the yardstick
