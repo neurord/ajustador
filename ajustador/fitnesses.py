@@ -1,10 +1,20 @@
 from __future__ import print_function, division
 
 import collections
+import enum
 import numpy as np
 import pandas as pd
 
 from . import vartype
+
+class ErrorCalc(enum.Enum):
+    normal = 1,
+    relative = 2,
+
+ERROR = ErrorCalc.normal
+
+"If 'b' (measurement) is 0, limit to this value"
+RELATIVE_MAX_RATIO = 10
 
 def sub_mes_dev(reca, recb):
     if isinstance(reca, vartype.vartype):
@@ -16,11 +26,14 @@ def sub_mes_dev(reca, recb):
     if len(reca) == 0 or len(recb) == 0:
         return vartype.vartype.nan
 
-    xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
-    if isinstance(reca, vartype.vartype):
-        return vartype.vartype(*xy)
+    if hasattr(reca, 'x'):
+        xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
+        if isinstance(reca, vartype.vartype):
+            return vartype.vartype(*xy)
+        else:
+            return np.rec.fromarrays(xy, names='x,dev')
     else:
-        return np.rec.fromarrays(xy, names='x,dev')
+        return reca - recb
 
 def _select(a, b, which=None):
     if which is not None:
@@ -31,62 +44,86 @@ def _select(a, b, which=None):
     ind1, ind2 = np.where(fitting)
     return a[ind1], bsel[ind2]
 
+def relative_diff_single(a, b, extra=0):
+    x = getattr(a, 'x', a)
+    y = getattr(b, 'x', b)
+
+    return (abs(x - y) / (abs(x) + abs(y) / RELATIVE_MAX_RATIO)
+            + RELATIVE_MAX_RATIO * extra)
+
+def relative_diff(a, b):
+    """A difference between a and b using b as the yardstick
+
+    .. math::
+       W = |a - b| / (|b| + |a| * RELATIVE_MAX_RATIO)
+       w = rms(W)
+    """
+    n1, n2 = len(a), len(b)
+    if n1 == n2 == 0:
+        return np.array([])
+    if n1 < n2:
+        a = a[:n2]
+    elif n1 < n2:
+        b = b[:n1]
+    return relative_diff_single(a, b, extra=abs(n1 - n2))
+
+def _evaluate(a, b):
+    if ERROR == ErrorCalc.normal:
+        diff = sub_mes_dev(a, b)
+        return vartype.array_rms(diff)
+    elif ERROR == ErrorCalc.relative:
+        diff = relative_diff(a, b)
+        return vartype.array_rms(diff)
+    else:
+        raise AssertionError
+
+def _evaluate_single(a, b):
+    if ERROR == ErrorCalc.normal:
+        return float(abs(a - b))
+    elif ERROR == ErrorCalc.relative:
+        return relative_diff_single(a, b)
+    else:
+        raise AssertionError
+
 def response_fitness(sim, measurement, full=False):
     "Similarity of response to hyperpolarizing injection"
     m1, m2 = _select(sim, measurement, measurement.injection <= 110e-12)
-    diff = sub_mes_dev(m1.response, m2.response)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.response, m2.response)
 
 def baseline_fitness(sim, measurement, full=False):
     "Similarity of baselines"
     m1, m2 = _select(sim, measurement)
-    diff = sub_mes_dev(m1.baseline, m2.baseline)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.baseline, m2.baseline)
 
 def rectification_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
-    diff = sub_mes_dev(m1.rectification, m2.rectification)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.rectification, m2.rectification)
 
 def charging_curve_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
     if len(m2) == 0:
         return vartype.vartype.nan
-    diff = sub_mes_dev(m1.charging_curve_halfheight, m2.charging_curve_halfheight)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight)
 
 def falling_curve_time_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
     if len(m2) == 0:
         return vartype.vartype.nan
-    lefts = m1.falling_curve_tau
-    rights = m2.falling_curve_tau
-    diff = vartype.array_sub(lefts, rights)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.falling_curve_tau, m2.falling_curve_tau)
 
 def mean_isi_fitness(sim, measurement, full=False):
-    x1 = sim.injection
-    meas = measurement[measurement.spike_count >= 2]
-    x2 = meas.injection
-    if len(x2) == 0:
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
+    if len(m2) == 0:
         return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sub_mes_dev(sim[ind1].mean_isi, meas[ind2].mean_isi)
-    return vartype.array_rms(diff)
+    return _evaluate(m1.mean_isi, m2.mean_isi)
 
 def isi_spread_fitness(sim, measurement, full=False):
-    x1 = sim.injection
-    meas = measurement[measurement.spike_count >= 2]
-    x2 = meas.injection
-    if len(x2) == 0:
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
+    if len(m2) == 0:
         return vartype.vartype.nan
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sim[ind1].isi_spread - meas[ind2].isi_spread
-    return (diff**2).mean()**0.5
+    return _evaluate(m1.isi_spread, m2.isi_spread)
 
-def measurement_to_spikes(meas):
+def _measurement_to_spikes(meas):
     frames = [pd.DataFrame(wave.spikes) for wave in meas]
     for frame, wave in zip(frames, meas):
         frame['injection'] = wave.injection
@@ -100,41 +137,42 @@ def spike_time_fitness(sim, measurement):
             # neither is spiking, cannot determine spike timing
             return np.nan
 
-    spikes1 = measurement_to_spikes(m1)
-    spikes2 = measurement_to_spikes(m2)
+    spikes1 = _measurement_to_spikes(m1)
+    spikes2 = _measurement_to_spikes(m2)
     diff = spikes1 - spikes2
     diff.pop('injection')
     diff.fillna(sim[0].injection_interval, inplace=True)
+    # FIXME
     return (diff.x**2).mean()**0.5
 
 def spike_count_fitness(sim, measurement):
-    x1 = sim.injection
-    x2 = measurement.injection
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sim[ind1].spike_count - measurement[ind2].spike_count
-    return (diff**2).sum()**0.5
+    m1, m2 = _select(sim, measurement)
+    return _evaluate(m1.spike_count, m2.spike_count)
 
 def spike_latency_fitness(sim, measurement):
-    x1 = sim.injection
-    meas = measurement[measurement.spike_count >= 1]
-    x2 = meas.injection
-    fitting = np.abs(x1[:,None] - x2) < 1e-12
-    ind1, ind2 = np.where(fitting)
-    diff = sim[ind1].spike_latency - meas[ind2].spike_latency
-    return (diff**2).mean()**0.5
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+    return _evaluate(m1.spike_latency, m2.spike_latency)
 
 def spike_width_fitness(sim, measurement):
-    a = sim.mean_spike_width - measurement.mean_spike_width
-    return (a.x / a.dev)**2
+    return _evaluate_single(sim.mean_spike_width, measurement.mean_spike_width)
 
 def spike_height_fitness(sim, measurement):
-    a = sim.mean_spike_height - measurement.mean_spike_height
-    return (a.x / a.dev)**2
+    return _evaluate_single(sim.mean_spike_height, measurement.mean_spike_height)
 
 def spike_ahp_fitness(sim, measurement):
-    a = sim.mean_spike_ahp - measurement.mean_spike_ahp
-    return (a.x / a.dev)**2
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+
+    # Just ignore any extra spikes. Let's assume that most spikes
+    # and AHPs are similar, and that we're using a different fitness
+    # function to compare spike counts.
+    left = m1.spike_ahp
+    right = m2.spike_ahp
+    if len(left) < len(right):
+        right = right[:len(left)]
+    elif len(left) > len(right):
+        left = left[:len(right)]
+
+    return _evaluate(left, right)
 
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,

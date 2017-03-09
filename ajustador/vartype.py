@@ -104,6 +104,12 @@ class vartype(object):
     def __float__(self):
         return float(self.x)
 
+    def __abs__(self):
+        if self.x >= 0:
+            return self
+        else:
+            return -self
+
     @classmethod
     def average(cls, vect):
         """Calculate a weighted average of an array
@@ -174,4 +180,7 @@ def array_rms(rec):
     if isinstance(rec, vartype):
         return rec
 
-    return ((rec.x / rec.dev)**2).mean()**0.5
+    if hasattr(rec, 'x'):
+        return ((rec.x / rec.dev)**2).mean()**0.5
+    else:
+        return (rec ** 2).mean()**0.5
