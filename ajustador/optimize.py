@@ -298,7 +298,7 @@ class ParamSet:
     def unscaled_dict(self, scaled_values):
         assert len(scaled_values) == len(self.ajuparams)
         gen = itertools.chain(((p.name, p.unscale(v))
-                               for (p, v) in zip(self.params, scaled_values)),
+                               for (p, v) in zip(self.ajuparams, scaled_values)),
                               ((p.name, p.value)
                                for p in self.fixedparams))
         return collections.OrderedDict(gen)
