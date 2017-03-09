@@ -15,7 +15,6 @@ fitness_list = [
     fitnesses.spike_time_fitness,
     fitnesses.spike_count_fitness,
     fitnesses.spike_latency_fitness,
-    fitnesses.spike_onset_fitness,
     fitnesses.spike_width_fitness,
     fitnesses.spike_height_fitness,
     fitnesses.spike_ahp_fitness,

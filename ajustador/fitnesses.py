@@ -124,11 +124,6 @@ def spike_latency_fitness(sim, measurement):
     diff = sim[ind1].spike_latency - meas[ind2].spike_latency
     return (diff**2).mean()**0.5
 
-def spike_onset_fitness(sim, measurement):
-    a = spike_latency_fitness(sim, measurement)
-    b = charging_curve_fitness(sim, measurement)
-    return (np.array([a, b])**2).mean()**0.5
-
 def spike_width_fitness(sim, measurement):
     a = sim.mean_spike_width - measurement.mean_spike_width
     return (a.x / a.dev)**2
