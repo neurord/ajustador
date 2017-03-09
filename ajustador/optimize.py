@@ -15,7 +15,7 @@ import multiprocessing
 import numpy as np
 import cma
 
-from . import loader, features, fitnesses, utilities, basic_simulation
+from . import loader, features, fitnesses, utilities
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
@@ -43,6 +43,8 @@ def iv_filename_to_current(ivfile):
     return injection_current
 
 def execute(p):
+    from . import basic_simulation
+
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
     params = basic_simulation.serialize_options(params)

@@ -5,5 +5,4 @@ from . import (compat,
                loader,
                optimize,
                utilities,
-               vartype,
-               basic_simulation)
+               vartype)

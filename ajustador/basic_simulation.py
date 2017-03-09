@@ -16,6 +16,10 @@ in parallel, where each one should be run out-of-process::
       --simtime=0.9 \\
       -i=-5.0000000000000034e-11 \\
       --save=ivdata--5.0000000000000034e-11.npy
+
+This module is not automatically imported as a child of ajustador.
+An explicit import is needed:
+>>> import ajustador.basic_simulation
 """
 
 import sys
