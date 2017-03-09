@@ -196,9 +196,12 @@ def plot_history(groups, measurement, **options):
     colors = list('rgbkmc')
     markers = 'x+12348'
 
+    fitness_func = options.get('fitness', None)
+
     for i, group in enumerate(groups):
-        fitness_func = options.get('fitness', fitnesses.combined_fitness)
-        fitness = [fitness_func(item, measurement) for item in group]
+        func = fitness_func or group.fitness_func
+
+        fitness = [func(item, measurement) for item in group]
         fitness = pd.DataFrame(fitness)
         if show_quit:
             quit = fitnesses.fit_finished(fitness)
@@ -217,7 +220,7 @@ def plot_history(groups, measurement, **options):
         ax.set_ylim(top=ymax)
     ax.legend(frameon=True, loc='upper right', fontsize=8, numpoints=1)
     ax.set_xlabel('generation')
-    ax.set_ylabel(fitness_func.__name__)
+    ax.set_ylabel(func.__name__)
     f.tight_layout()
     f.canvas.draw()
     f.show()
