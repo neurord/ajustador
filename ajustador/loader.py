@@ -133,7 +133,7 @@ class Attributable(object):
         raise AttributeError(attr)
 
     def __getitem__(self, index):
-        if isinstance(index, (slice, np.ndarray)):
+        if isinstance(index, (slice, np.ndarray, list)):
             c = copy.copy(self)
             c.waves = self.waves[index]
             return c
