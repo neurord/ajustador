@@ -16,6 +16,8 @@ ERROR = ErrorCalc.normal
 "If 'b' (measurement) is 0, limit to this value"
 RELATIVE_MAX_RATIO = 10
 
+NAN_REPLACEMENT = 20
+
 def sub_mes_dev(reca, recb):
     if isinstance(reca, vartype.vartype):
         assert reca == vartype.vartype.nan
@@ -72,20 +74,28 @@ def relative_diff(a, b):
 def _evaluate(a, b):
     if ERROR == ErrorCalc.normal:
         diff = sub_mes_dev(a, b)
-        return vartype.array_rms(diff)
+        ans = vartype.array_rms(diff)
     elif ERROR == ErrorCalc.relative:
         diff = relative_diff(a, b)
-        return vartype.array_rms(diff)
+        ans = vartype.array_rms(diff)
     else:
         raise AssertionError
+    if np.isnan(ans):
+        return NAN_REPLACEMENT
+    else:
+        return ans
 
 def _evaluate_single(a, b):
     if ERROR == ErrorCalc.normal:
-        return float(abs(a - b))
+        ans = float(abs(a - b))
     elif ERROR == ErrorCalc.relative:
-        return relative_diff_single(a, b)
+        ans = relative_diff_single(a, b)
     else:
         raise AssertionError
+    if np.isnan(ans):
+        return NAN_REPLACEMENT
+    else:
+        return ans
 
 def response_fitness(sim, measurement, full=False):
     "Similarity of response to hyperpolarizing injection"

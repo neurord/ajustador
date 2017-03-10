@@ -178,7 +178,7 @@ def array_rms(rec):
         \mathrm{rms} = \sqrt{\sum_i (x_i / \sigma_i)^2}
     """
     if isinstance(rec, vartype):
-        return rec
+        return float(rec)
 
     if hasattr(rec, 'x'):
         return ((rec.x / rec.dev)**2).mean()**0.5
