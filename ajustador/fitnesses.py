@@ -139,9 +139,11 @@ def _measurement_to_spikes(meas):
     frames = [pd.DataFrame(wave.spikes) for wave in meas]
     for frame, wave in zip(frames, meas):
         frame['injection'] = wave.injection
+        frame.reset_index(inplace=1)
+        frame.set_index(['index', 'injection'], inplace=1)
     return pd.concat(frames)
 
-def spike_time_fitness(sim, measurement):
+def spike_time_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
     if len(m1) == 0:
         m1, m2 = _select(measurement, sim, sim.spike_count >= 2)
@@ -151,27 +153,28 @@ def spike_time_fitness(sim, measurement):
 
     spikes1 = _measurement_to_spikes(m1)
     spikes2 = _measurement_to_spikes(m2)
-    diff = spikes1 - spikes2
-    diff.pop('injection')
-    diff.fillna(sim[0].injection_interval, inplace=True)
-    # FIXME
-    return (diff.x**2).mean()**0.5
+    diff = spikes2 - spikes1
+    spikes1 = spikes1 + diff # this is original spikes1 with nans inserted for missing spikes
+    spikes2 = spikes2 - diff # and the same for spikes2
+    spikes1.fillna(sim[0].injection_interval, inplace=True)
+    spikes2.fillna(sim[0].injection_interval, inplace=True)
+    return _evaluate(spikes1['x'], spikes2['x'])
 
-def spike_count_fitness(sim, measurement):
+def spike_count_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement)
     return _evaluate(m1.spike_count, m2.spike_count)
 
-def spike_latency_fitness(sim, measurement):
+def spike_latency_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
     return _evaluate(m1.spike_latency, m2.spike_latency)
 
-def spike_width_fitness(sim, measurement):
+def spike_width_fitness(sim, measurement, full=False):
     return _evaluate_single(sim.mean_spike_width, measurement.mean_spike_width)
 
-def spike_height_fitness(sim, measurement):
+def spike_height_fitness(sim, measurement, full=False):
     return _evaluate_single(sim.mean_spike_height, measurement.mean_spike_height)
 
-def spike_ahp_fitness(sim, measurement):
+def spike_ahp_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
 
     # Just ignore any extra spikes. Let's assume that most spikes
