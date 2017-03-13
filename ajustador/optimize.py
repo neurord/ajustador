@@ -151,7 +151,6 @@ class SimulationResult(loader.Attributable):
         self.params = params
         self.features = (params, *features)
 
-        print("Result from {}, {}".format(dirname, self._param_str))
         ivfiles = glob.glob(os.path.join(dirname, 'ivdata-*.npy'))
 
         junction_potential = self.params.get('junction_potential', 0)
@@ -354,6 +353,7 @@ class Fit:
             key = tuple(self.params.scale_dict(sim.params))
             if key not in self._sim_value:
                 self._sim_value[key] = sim
+                print(sim)
 
     def param_names(self):
         return [p.name for p in self.params.ajuparams]
