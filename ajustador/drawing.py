@@ -249,18 +249,16 @@ def plot_param_view(group, measurement, *what, **options):
     f.show()
     return f
 
-def plot_param_section(group, measurement, *what, **options):
+def plot_param_section(group, measurement, *what, regression=False, fitness=None):
     if not what:
         what = group.param_names()
     columns = 1 if len(what) < 6 else 2
 
-    regression = options.get('regression', None)
-    fitness_func = options.get('fitness', None)
-    if fitness_func is None:
-        fitness_func = group.fitness_func
+    if fitness is None:
+        fitness = group.fitness_func
 
     values = group.param_values(*what)
-    fitness = [fitness_func(item, measurement) for item in group]
+    fitnesses = [fitness(item, measurement) for item in group]
 
     rows = int(math.ceil(values.shape[1] / columns))
 
@@ -270,16 +268,16 @@ def plot_param_section(group, measurement, *what, **options):
 
     for n, param in enumerate(what):
         ax = f.add_subplot(rows, columns, (n%rows)*columns + n//rows + 1)
-        res = ax.scatter(values.T[n], fitness,
+        res = ax.scatter(values.T[n], fitnesses,
                          c=range(len(values)))
 
         if regression:
-            a, b = stats.linregress(values.T[n], fitness)[:2]
+            a, b = stats.linregress(values.T[n], fitnesses)[:2]
             x1, x2 = values.T[n].min(), values.T[n].max()
             ax.plot([x1, x2], [a*x1+b, a*x2+b], 'r--')
 
         if n == (rows - 1) // 2 * columns:
-            ax.set_ylabel(getattr(fitness_func, '__name__', str(fitness_func)))
+            ax.set_ylabel(getattr(fitness, '__name__', str(fitness)))
         ax2 = ax.twinx()
         ax2.set_ylabel(what[n])
         ax2.set_yticks([])
@@ -288,6 +286,7 @@ def plot_param_section(group, measurement, *what, **options):
     f.canvas.draw()
     f.show()
     return f
+
 
 def _product(seq):
     return reduce(operator.mul, seq, 1)
