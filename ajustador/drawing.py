@@ -249,20 +249,27 @@ def plot_param_view(group, measurement, *what, **options):
     f.show()
     return f
 
-def plot_param_section(group, measurement, *what, regression=False, fitness=None, log=False):
+def plot_param_section(group, measurement, *what, regression=False,
+                       fitness=None, fitness_name=None,
+                       log=False):
     if not what:
         what = group.param_names()
     columns = 1 if len(what) < 6 else 2
 
     if fitness is None:
         fitness = group.fitness_func
+    if fitness_name is None:
+        fitness_name = getattr(fitness, '__name__', str(fitness))
 
     values = group.param_values(*what)
-    fitnesses = [fitness(item, measurement) for item in group]
+    fitnesses = [fitness(item, measurement) if measurement is not None else fitness(item)
+                 for item in group]
 
     rows = int(math.ceil(values.shape[1] / columns))
 
-    f = _get_graph('param ranges')
+    f = _get_graph(' '.join(('param section',
+                             getattr(group, 'name', '(no name)'),
+                             fitness_name)))
     f.subplots_adjust(left=0.08, bottom=0.06, right=0.96, top=0.97,
                       wspace=0.17, hspace=0.24)
 
@@ -277,10 +284,10 @@ def plot_param_section(group, measurement, *what, regression=False, fitness=None
             ax.plot([x1, x2], [a*x1+b, a*x2+b], 'r--')
 
         if log:
-            ax.set_yscale('symlog')
+            ax.set_yscale('symlog' if isinstance(log, int) else log)
 
         if n == (rows - 1) // 2 * columns:
-            ax.set_ylabel(getattr(fitness, '__name__', str(fitness)))
+            ax.set_ylabel(fitness_name)
         ax2 = ax.twinx()
         ax2.set_ylabel(what[n])
         ax2.set_yticks([])

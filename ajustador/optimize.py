@@ -328,8 +328,8 @@ class ParamSet:
 class Fit:
     fitness_max = 200
 
-    def __init__(self, dir, measurement, fitness_func, params, feature_list=None):
-        self.dir = dir
+    def __init__(self, dirname, measurement, fitness_func, params, feature_list=None):
+        self.dirname = dirname
         self.measurement = measurement
         self.fitness_func = fitness_func
         self.params = params
@@ -348,7 +348,7 @@ class Fit:
         except AttributeError:
             self._sim_value = collections.OrderedDict()
 
-        old = SimulationResults(self.dir, features=self.measurement.features)
+        old = SimulationResults(self.dirname, features=self.measurement.features)
         for sim in old.results:
             key = tuple(self.params.scale_dict(sim.params))
             if key not in self._sim_value:
@@ -363,7 +363,7 @@ class Fit:
         unscaled = self.params.unscaled_dict(scaled_params)
         baseline = self.measurement.mean_baseline.x
         simtime = self.measurement.waves[0].time
-        return Simulation(dir=self.dir,
+        return Simulation(dir=self.dirname,
                           currents=self.measurement.injection,
                           baseline=baseline,
                           simtime=simtime,
@@ -379,6 +379,10 @@ class Fit:
                     fitness[i] = max_fitness
         self._history.append(fitness)
         return fitness
+
+    @property
+    def name(self):
+        return os.path.basename(self.dirname)
 
     @utilities.cached
     def fitness(self, scaled_params):
