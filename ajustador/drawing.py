@@ -249,7 +249,7 @@ def plot_param_view(group, measurement, *what, **options):
     f.show()
     return f
 
-def plot_param_section(group, measurement, *what, regression=False, fitness=None):
+def plot_param_section(group, measurement, *what, regression=False, fitness=None, log=False):
     if not what:
         what = group.param_names()
     columns = 1 if len(what) < 6 else 2
@@ -275,6 +275,9 @@ def plot_param_section(group, measurement, *what, regression=False, fitness=None
             a, b = stats.linregress(values.T[n], fitnesses)[:2]
             x1, x2 = values.T[n].min(), values.T[n].max()
             ax.plot([x1, x2], [a*x1+b, a*x2+b], 'r--')
+
+        if log:
+            ax.set_yscale('symlog')
 
         if n == (rows - 1) // 2 * columns:
             ax.set_ylabel(getattr(fitness, '__name__', str(fitness)))
