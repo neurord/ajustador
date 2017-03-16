@@ -293,10 +293,11 @@ def new_combined_fitness(sim, measurement, full=False):
     f = spike_width_fitness(sim, measurement)
     g = spike_height_fitness(sim, measurement)
     h = spike_ahp_fitness(sim, measurement)
+    i = ahp_curve_fitness(sim, measurement)
     if ERROR == ErrorCalc.normal:
-        arr = np.array([a, b, c * 2, d, e, f, g, h])
+        arr = np.array([a, b, c * 2, d, e, f, g, h, i])
     else:
-        arr = np.array([a, b, c, d, e, f, g, h])
+        arr = np.array([a, b, c, d, e, f, g, h, i])
     if full:
         return arr
     else:
