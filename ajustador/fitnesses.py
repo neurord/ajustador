@@ -189,6 +189,37 @@ def spike_ahp_fitness(sim, measurement, full=False):
 
     return _evaluate(left, right)
 
+def ahp_curve_fitness(sim, measurement, full=False):
+    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+
+    SQ = N = MES = 0
+
+    for wave1, wave2 in zip(m1, m2):
+        w1 = wave1.spike_ahp_window
+        w2 = wave2.spike_ahp_window
+
+        n = max(len(w1), len(w2))
+        for i in range(n):
+            cut1 = w1[i].y - wave1.spike_ahp[i].x if i < len(w1) else np.zeros_like(w2[i].y)
+            cut2 = w2[i].y - wave2.spike_ahp[i].x if i < len(w2) else np.zeros_like(w1[i].y)
+
+            width = min(cut1.size, cut2.size)
+            diff = cut1[:width] - cut2[:width]
+            SQ += (diff**2).sum()
+            N += width
+            MES += (cut2[:width]**2).sum() if cut2.any() else (cut1[:width]**2).sum()
+
+    if ERROR == ErrorCalc.normal:
+        return (SQ/N)**0.5
+    elif ERROR == ErrorCalc.relative:
+        return (SQ/MES)**0.5
+    else:
+        raise AssertionError
+    if np.isnan(ans):
+        return NAN_REPLACEMENT
+    else:
+        return ans
+
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,
                          mean_isi=1, spike_latency=1,
