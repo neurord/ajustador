@@ -205,7 +205,7 @@ def ahp_curve_fitness(sim, measurement, full=False):
 
             width = min(cut1.size, cut2.size)
             diff = cut1[:width] - cut2[:width]
-            SQ += (diff**2).sum()
+            SQ += (diff**2).sum() + (cut1.size-width + cut2.size-width)*diff.max()**2
             N += width
             MES += (cut2[:width]**2).sum() if cut2.any() else (cut1[:width]**2).sum()
 
