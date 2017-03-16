@@ -340,7 +340,7 @@ class Fit:
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
 
-        utilities.mkdir_p(dir)
+        utilities.mkdir_p(dirname)
 
     def load(self):
         try:
