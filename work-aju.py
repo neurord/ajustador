@@ -91,3 +91,21 @@ fit6 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-2',
                         aju.fitnesses.new_combined_fitness, params6)
 fit6.load()
 fit6.do_fit(150, popsize=20)
+
+aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
+# fit6.params.update(**fit6[5650].params)
+params7 = params6.update(junction_potential=-0.01473080415412029,
+                         RA=10.65928280866225,
+                         RM=9.084575725069685,
+                         CM=0.06497639701396317,
+                         Cond_D1_Kir=16.683626881626683,
+                         Kir_offset=-0.00499822637790663,
+                         Cond_D1_NaF_0=158950.93821085666,
+                         Cond_D1_KaS_0=178.8056033265561,
+                         Cond_D1_KaF_0=611.1236043484937,
+                         Cond_D1_Krp_0=204.35266201409314)
+fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-3',
+                        ms1.waves5[[0, 7, 17, 21, 23]],
+                        aju.fitnesses.new_combined_fitness, params7)
+fit7.load()
+fit7.do_fit(150, popsize=8)
