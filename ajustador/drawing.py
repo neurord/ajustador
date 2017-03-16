@@ -183,11 +183,9 @@ def plot_param_space(group, measurement=None, *what, **options):
     f.show()
     return f
 
-def plot_history(groups, measurement, **options):
-    show_quit = options.get('quit', False)
-    labels = options.get('labels', None)
-    ymax = options.get('ymax', None)
-    f = _get_graph('fit history')
+def plot_history(groups, measurement=None, *,
+                 show_quit=False, labels=None, ymax=None, fitness=None):
+    f = _get_graph('fit history ' + measurement.name)
     ax = f.gca()
 
     if hasattr(groups[0], 'name'):
@@ -196,25 +194,23 @@ def plot_history(groups, measurement, **options):
     colors = list('rgbkmc')
     markers = 'x+12348'
 
-    fitness_func = options.get('fitness', None)
-
     for i, group in enumerate(groups):
-        func = fitness_func or group.fitness_func
+        func = fitness or group.fitness_func
 
-        fitness = [func(item, measurement) for item in group]
-        fitness = pd.DataFrame(fitness)
+        fitnesses = [func(item, measurement) for item in group]
+        fitnesses = pd.DataFrame(fitnesses)
         if show_quit:
-            quit = fitnesses.fit_finished(fitness)
+            quit = fitnesses.fit_finished(fitnesses)
 
         color = colors[i % len(colors)]
         marker = markers[i % len(markers)]
 
         label = labels[i] if labels is not None else str(i)
         if show_quit:
-            ax.plot(fitness[-quit], color + marker, label=label)
-            ax.plot(fitness[quit], marker=marker, color='0.5')
+            ax.plot(fitnesses[-quit], color + marker, label=label)
+            ax.plot(fitnesses[quit], marker=marker, color='0.5')
         else:
-            ax.plot(fitness, color + marker, label=label)
+            ax.plot(fitnesses, color + marker, label=label)
 
     if ymax is not None:
         ax.set_ylim(top=ymax)
