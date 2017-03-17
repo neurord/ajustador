@@ -141,7 +141,7 @@ class Simulation(loader.Attributable):
 
 class SimulationResult(loader.Attributable):
     def __init__(self, dirname, features):
-        self.name = dirname
+        self.name = os.path.basename(dirname)
 
         if not isinstance(features, (list, tuple)):
             features = [features, *_features.standard_features]

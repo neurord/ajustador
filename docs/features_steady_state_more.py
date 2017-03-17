@@ -1,5 +1,6 @@
 import os
 import measurements1
+import strange1
 import pprint
 
 def header(name, underline):
@@ -28,7 +29,8 @@ filters = {'features_spikes':{'042811-6ivifcurves_Waves': (21, 22, 23), # no spi
                               '051811-13ivifcurves_Waves': (10, ),         # undulating no injection
                               '090612-1ivcurves_Waves': (12, 14),          # high spikes, changing size
                               '091312-4ivcurves_Waves': (),
-                              },
+                              'high_baseline_post': (3, 4),
+                             },
            'features_steady_state': {'042811-6ivifcurves_Waves': (0, 2, 8, 9, 10, 11, 13, 14),
                                      '042911-10ivifcurves_Waves': (2, ),
                                      '050311-4ivifcurves_Waves': (0, 7, 8, 9, 10, 11, 12),
@@ -39,7 +41,9 @@ filters = {'features_spikes':{'042811-6ivifcurves_Waves': (21, 22, 23), # no spi
                                      '051411-5ivifcurves_Waves': (),
                                      '051811-13ivifcurves_Waves': (),
                                      '090612-1ivcurves_Waves': (0, 9),
-                                     '091312-4ivcurves_Waves': ()},
+                                     '091312-4ivcurves_Waves': (),
+                                     'high_baseline_post': (3, 4),
+                                    },
            'features_rectification': {'042811-6ivifcurves_Waves': (0, 5, 8),
                                       '042911-10ivifcurves_Waves': (0, ),
                                       '050311-4ivifcurves_Waves': (),
@@ -50,7 +54,9 @@ filters = {'features_spikes':{'042811-6ivifcurves_Waves': (21, 22, 23), # no spi
                                       '051411-5ivifcurves_Waves': (),
                                       '051811-13ivifcurves_Waves': (),
                                       '090612-1ivcurves_Waves': (7, 8),
-                                      '091312-4ivcurves_Waves': ()},
+                                      '091312-4ivcurves_Waves': (),
+                                      'high_baseline_post': (3, 4),
+                                     },
            'features_charging_curve': {'042811-6ivifcurves_Waves': (0, 10, 21, 22, 23),
                                        '042911-10ivifcurves_Waves': (),
                                        '050311-4ivifcurves_Waves': (),
@@ -61,7 +67,9 @@ filters = {'features_spikes':{'042811-6ivifcurves_Waves': (21, 22, 23), # no spi
                                        '051411-5ivifcurves_Waves': (18, ),
                                        '051811-13ivifcurves_Waves': (),
                                        '090612-1ivcurves_Waves': (),
-                                       '091312-4ivcurves_Waves': ()},
+                                       '091312-4ivcurves_Waves': (),
+                                       'high_baseline_post': (3, 4),
+                                      },
            'features_falling_curve': {'042811-6ivifcurves_Waves': (0, 1, 3, 6, 8, 9, 10, 11, 12),
                                       '042911-10ivifcurves_Waves': (),
                                       '050311-4ivifcurves_Waves': (),
@@ -72,7 +80,9 @@ filters = {'features_spikes':{'042811-6ivifcurves_Waves': (21, 22, 23), # no spi
                                       '051411-5ivifcurves_Waves': (),
                                       '051811-13ivifcurves_Waves': (),
                                       '090612-1ivcurves_Waves': (0, 2, 4),
-                                      '091312-4ivcurves_Waves': (0, 2, 4)},
+                                      '091312-4ivcurves_Waves': (0, 2, 4),
+                                      'high_baseline_post': (3, 4),
+                                     },
 }
 
 filter = filters.get(basename, None)
@@ -81,23 +91,27 @@ print('Looking at {}'.format(basename),
       if filter is not None else '')
 
 if filter is None:
-    empty = dict((mes.name, ()) for mes in sorted(measurements1.waves.values()))
+    empty = dict((mes.name, ())
+                 for mod in (measurements1, strange1)
+                 for mes in sorted(mod.waves.values()))
     pprint.pprint({basename: empty})
 
 with open(stem + '_more.rst', 'w') as f:
     print(title, file=f)
-    for ident, mes in sorted(measurements1.waves.items()):
-        fallback = range(len(mes))
-        indices = filter.get(mes.name, fallback) if filter else fallback
-        print('    {} → {}'.format(mes.name, indices if indices != fallback else ' (all)'))
+    for mod in (measurements1, strange1):
+        for ident, mes in sorted(mod.waves.items()):
+            fallback = range(len(mes))
+            indices = filter.get(mes.name, fallback) if filter else fallback
+            print('    {} → {}'.format(mes.name, indices if indices != fallback else ' (all)'))
 
-        if indices:
-            print(header(mes.name, '`'), file=f)
-        for n in indices:
-            print('''\
+            if indices:
+                print(header(mes.name, '`'), file=f)
+            for n in indices:
+                print('''\
 .. plot::
 
+   import {} as mod
    wavename, n = {!r}, {}
    exec(open('{}').read())
-'''.format(ident, n, basename + '.py'), file=f)
-    print('{} is written ({})'.format(f.name, section))
+'''.format(mod.__name__, ident, n, basename + '.py'), file=f)
+            print('{} is written ({})'.format(f.name, section))
