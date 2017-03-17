@@ -189,36 +189,49 @@ def spike_ahp_fitness(sim, measurement, full=False):
 
     return _evaluate(left, right)
 
-def ahp_curve_fitness(sim, measurement, full=False):
-    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+def interpolate(wave1, wave2):
+    "Interpolate wave1 to wave2.x"
+    y = np.interp(wave2.x, wave1.x, wave1.y)
+    return np.rec.fromarrays((wave2.x, y), names='x,y')
 
-    SQ = N = MES = 0
+def ahp_curve_centered(wave, i):
+    windows = wave.spike_ahp_window
+    if i >= len(windows):
+        return None
+    cut = windows[i]
+    ahp_y = wave.spike_ahp[i]
+    ahp_x = wave.spike_ahp_position[i]
+    return cut.relative_to(ahp_x.x, ahp_y.x)
+
+def ahp_curve_compare(cut1, cut2):
+    """Returns a number from [0, 1] which compares how close they are.
+
+    0 means the same, 1 means very different.
+    """
+    assert not cut1 is cut2 is None
+
+    if cut1 is None or cut2 is None:
+        return 1
+
+    cut1 = interpolate(cut1, cut2)
+    diff = np.tanh((cut1.y - cut2.y) / cut2.y)
+    return ((diff**2).sum()/diff.size)**0.5
+
+def ahp_curve_fitness(sim, measurement, full=False):
+    m1, m2 = _select(sim, measurement)
 
     for wave1, wave2 in zip(m1, m2):
-        w1 = wave1.spike_ahp_window
-        w2 = wave2.spike_ahp_window
+        n = max(wave1.spike_count, wave2.spike_count)
+        if n == 0:
+            continue
 
-        n = max(len(w1), len(w2))
-        for i in range(n):
-            cut1 = w1[i].y - wave1.spike_ahp[i].x if i < len(w1) else np.zeros_like(w2[i].y)
-            cut2 = w2[i].y - wave2.spike_ahp[i].x if i < len(w2) else np.zeros_like(w1[i].y)
-
-            width = min(cut1.size, cut2.size)
-            diff = cut1[:width] - cut2[:width]
-            SQ += (diff**2).sum() + (cut1.size-width + cut2.size-width)*diff.max()**2
-            N += width
-            MES += (cut2[:width]**2).sum() if cut2.any() else (cut1[:width]**2).sum()
-
-    if ERROR == ErrorCalc.normal:
-        return (SQ/N)**0.5
-    elif ERROR == ErrorCalc.relative:
-        return (SQ/MES)**0.5
-    else:
-        raise AssertionError
-    if np.isnan(ans):
-        return NAN_REPLACEMENT
-    else:
-        return ans
+        diffs = [ahp_curve_compare(ahp_curve_centered(wave1, i),
+                                   ahp_curve_centered(wave2, i))
+                 for i in range(n)]
+        assert 0 <= min(diffs) <= 1
+        assert 0 <= max(diffs) <= 1
+    # take the twentieth percentile to avoid coincidental fits
+    return sorted(diffs)[len(diffs)//5]
 
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,

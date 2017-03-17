@@ -211,6 +211,10 @@ class WaveRegion:
     def min(self):
         return self.wave.min()
 
+    def relative_to(self, x, y):
+        new = np.rec.fromarrays((self.x - x, self.y - y), names='x,y')
+        return WaveRegion(new, 0, new.size-1)
+
 class Spikes(Feature):
     """Find the position and height of spikes
     """
@@ -399,8 +403,8 @@ class AHP(Feature):
     requires = ('wave',
                 'injection_start', 'injection_end', 'injection_interval',
                 'spikes', 'spike_count', 'spike_bounds', 'spike_threshold')
-    provides = ('spike_ahp_window', 'spike_ahp')
-    array_attributes = ('spike_ahp_window', 'spike_ahp')
+    provides = ('spike_ahp_window', 'spike_ahp', 'spike_ahp_position')
+    array_attributes = ('spike_ahp_window', 'spike_ahp', 'spike_ahp_position')
     mean_attributes = ('spike_ahp',)
 
     @property
@@ -443,7 +447,7 @@ class AHP(Feature):
     @property
     @utilities.once
     def spike_ahp(self):
-        """Returns the (averaged) minimum of each AHP window
+        """Returns the (averaged) minimum in y of each AHP window
 
         `spike_ahp_window` is used to determine the extent of the AHP.
         An average of the bottom area of the window of the width of the
@@ -460,6 +464,36 @@ class AHP(Feature):
             right = windows[i].x[windows[i].y.argmin()] + w/2
             cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
             ans[i] = vartype.array_mean(cut.y)
+
+        return np.rec.fromarrays(ans.T, names='x,dev')
+
+    @property
+    @utilities.once
+    def spike_ahp_position(self):
+        """Returns the (averaged) x or the minimum in y of each AHP window
+
+        `spike_ahp_window` is used to determine the extent of the AHP.
+        An average of the bottom area of the window of the width of the
+        spike is used.
+
+        TODO: add to plot
+        """
+        windows = self.spike_ahp_window
+        spikes = self._obj.spikes
+        spike_bounds = self._obj.spike_bounds
+
+        ans = np.empty((len(windows), 2))
+        for i in range(len(windows)):
+            w = spike_bounds[i].width
+            left = windows[i].x[windows[i].y.argmin()] - w/2
+            right = windows[i].x[windows[i].y.argmin()] + w/2
+            cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
+            bottom = vartype.array_mean(cut.y)
+            weights = 1/(cut.y - bottom.x)**2
+            avg = (cut.x * weights).sum() / weights.sum()
+            dev = ((cut.x-avg)**2 * weights).sum()**0.5 / weights.sum()**0.5
+            # TODO: check the formula for dev
+            ans[i] = (avg, dev)
 
         return np.rec.fromarrays(ans.T, names='x,dev')
 
