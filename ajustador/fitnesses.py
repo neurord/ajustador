@@ -107,6 +107,16 @@ def baseline_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement)
     return _evaluate(m1.baseline, m2.baseline)
 
+def baseline_pre_fitness(sim, measurement, full=False):
+    "Similarity of baselines"
+    m1, m2 = _select(sim, measurement)
+    return _evaluate(m1.baseline_pre, m2.baseline_pre)
+
+def baseline_post_fitness(sim, measurement, full=False):
+    "Similarity of baselines"
+    m1, m2 = _select(sim, measurement)
+    return _evaluate(m1.baseline_post, m2.baseline_post)
+
 def rectification_fitness(sim, measurement, full=False):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
     return _evaluate(m1.rectification, m2.rectification)
@@ -260,14 +270,15 @@ def parametrized_fitness(response=1, baseline=0.3, rectification=1,
 
 def hyperpol_fitness(sim, measurement, full=False):
     a = response_fitness(sim, measurement)
-    b = baseline_fitness(sim, measurement)
+    b1 = baseline_pre_fitness(sim, measurement)
+    b2 = baseline_post_fitness(sim, measurement)
     c = rectification_fitness(sim, measurement)
     d = falling_curve_time_fitness(sim, measurement)
     e = spike_count_fitness(sim, measurement)
     if ERROR == ErrorCalc.normal:
-        arr = np.array([a, b/5, c*4, d/20, e])
+        arr = np.array([a, b1/5, b2/5, c*4, d/20, e])
     else:
-        arr = np.array([a, b, c, d, e])
+        arr = np.array([a, b1, b2, c, d, e])
     if full:
         return arr
     else:
@@ -299,7 +310,8 @@ def spike_fitness(sim, measurement, full=False):
 
 def new_combined_fitness(sim, measurement, full=False):
     a = response_fitness(sim, measurement)
-    b = baseline_fitness(sim, measurement)
+    b1 = baseline_pre_fitness(sim, measurement)
+    b2 = baseline_post_fitness(sim, measurement)
     c = rectification_fitness(sim, measurement)
     d = falling_curve_time_fitness(sim, measurement)
     e = spike_time_fitness(sim, measurement)
@@ -308,9 +320,9 @@ def new_combined_fitness(sim, measurement, full=False):
     h = spike_ahp_fitness(sim, measurement)
     i = ahp_curve_fitness(sim, measurement)
     if ERROR == ErrorCalc.normal:
-        arr = np.array([a, b, c * 2, d, e, f, g, h, i])
+        arr = np.array([a, b1, b2, c * 2, d, e, f, g, h, i])
     else:
-        arr = np.array([a, b, c, d, e, f, g, h, i])
+        arr = np.array([a, b1, b2, c, d, e, f, g, h, i])
     if full:
         return arr
     else:

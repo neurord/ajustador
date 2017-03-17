@@ -117,7 +117,6 @@ drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_ahp_fit
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.ahp_curve_fitness, clear=False)
 
 
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 params8 = aju.optimize.ParamSet(
     ('junction_potential', 0,       -0.030, +0.030),
     ('RA',                 12.004,    0, 100),
@@ -133,8 +132,30 @@ params8 = aju.optimize.ParamSet(
     ('Cond_Krp_0',      177,        0, 600),
     ('Cond_SKCa_0',     0.5,        0, 6),
     ('Cond_BKCa_0',     10,         0, 100))
+aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 fit8 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-8',
                         ms1.waves5[[0, 7, 17, 21, 23]],
                         aju.fitnesses.new_combined_fitness, params8)
 fit8.load()
 fit8.do_fit(150, popsize=20)
+
+# baseline → baseline_pre, baseline_post
+# fit8.params.update(**fit8[2536].params)
+params9 = params8.update(junction_potential=-0.01358622557992854,
+                         RA=7.5097716484728485,
+                         RM=9.865608455066301,
+                         CM=0.05695624758868263,
+                         Cond_Kir=15.175645393785455,
+                         Kir_offset=-0.004965981023001747,
+                         Cond_NaF_0=165710.14383336686,
+                         Cond_KaS_0=529.1622011113959,
+                         Cond_KaF_0=670.775894939824,
+                         Cond_Krp_0=4.446655927879732,
+                         Cond_SKCa_0=0.12046639942362143,
+                         Cond_BKCa_0=11.51439493711431)
+aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
+fit9 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-9',
+                        ms1.waves5[[0, 7, 17, 21, 23]],
+                        aju.fitnesses.new_combined_fitness, params9)
+fit9.load()
+fit9.do_fit(400, popsize=20)
