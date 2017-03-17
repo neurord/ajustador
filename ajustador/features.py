@@ -168,6 +168,8 @@ class SteadyState(Feature):
         wave = self._obj.wave
         before = self._obj.baseline_before
         after = self._obj.baseline_after
+        steady_after = self._obj.steady_after
+        steady_before = self._obj.steady_before
         time = wave.x[-1]
 
         ax = super().plot(figure)
@@ -187,7 +189,7 @@ class SteadyState(Feature):
                        'baseline_post', 'k')
 
         _plot_line(ax,
-                   [(after, before)],
+                   [(steady_after, steady_before)],
                    self.steady,
                    'steady', 'r')
         ax.annotate('response',
