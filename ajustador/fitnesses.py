@@ -16,7 +16,7 @@ ERROR = ErrorCalc.normal
 "If 'b' (measurement) is 0, limit to this value"
 RELATIVE_MAX_RATIO = 10
 
-NAN_REPLACEMENT = 20
+NAN_REPLACEMENT = 1.5
 
 def sub_mes_dev(reca, recb):
     if isinstance(reca, vartype.vartype):
