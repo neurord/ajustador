@@ -225,6 +225,7 @@ class SimulationResults(object):
 
 class Param:
     min = max = None
+    fixed = True
 
     def __init__(self, name, value):
         self.name = name
@@ -245,6 +246,8 @@ class Param:
             return AjuParam(*args)
 
 class AjuParam(Param):
+    fixed = False
+
     def __init__(self, name, value, min=None, max=None):
         super().__init__(name, value)
         self.min = min
@@ -273,10 +276,8 @@ class AjuParam(Param):
 class ParamSet:
     def __init__(self, *params):
         self.params = tuple(Param.make(p) for p in params)
-        self.ajuparams = tuple(p for p in self.params
-                               if isinstance(p, AjuParam))
-        self.fixedparams = tuple(p for p in self.params
-                                 if not isinstance(p, AjuParam))
+        self.fixedparams = tuple(p for p in self.params if p.fixed)
+        self.ajuparams = tuple(p for p in self.params if not p.fixed)
 
     @property
     def scaled(self):
@@ -304,7 +305,7 @@ class ParamSet:
 
     def update(self, **kwargs):
         args = ((AjuParam(p.name, kwargs[p.name], p.min, p.max)
-                 if isinstance(p, AjuParam)
+                 if not p.fixed
                  else Param(p.name, kwargs[p.name]))
                 if p.name in kwargs
                 else p
@@ -315,11 +316,9 @@ class ParamSet:
     @utilities.once
     def scaled_bounds(self):
         return ([p.scale(p.min) if p.min is not None else None
-                 for p in self.params
-                 if isinstance(p, AjuParam)],
+                 for p in self.ajuparams],
                 [p.scale(p.max) if p.max is not None else None
-                 for p in self.params
-                 if isinstance(p, AjuParam)])
+                 for p in self.ajuparams])
 
     def __repr__(self):
         vv = ' '.join('{}={}'.format(p.name, p.value) for p in self.params)
