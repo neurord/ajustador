@@ -199,7 +199,7 @@ class SteadyState(Feature):
                                     shrink=0),
                     horizontalalignment='center', verticalalignment='bottom')
 
-        ax.legend(loc='center right')
+        ax.legend(loc='upper right')
         figure.tight_layout()
 
 

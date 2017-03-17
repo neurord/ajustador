@@ -17,6 +17,8 @@ ajustador.features
 
     .. plot:: features_steady_state.py
 
+    .. plot:: features_steady_state2.py
+
     :doc:`features_steady_state_more`
 
 .. autoclass:: ajustador.features.Spikes
@@ -25,6 +27,8 @@ ajustador.features
     :member-order: bysource
 
     .. plot:: features_spikes.py
+
+    .. plot:: features_spikes2.py
 
     :doc:`features_spikes_more`
 

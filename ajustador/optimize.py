@@ -15,7 +15,7 @@ import multiprocessing
 import numpy as np
 import cma
 
-from . import loader, features, fitnesses, utilities
+from . import loader, features as _features, fitnesses, utilities
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
@@ -143,13 +143,16 @@ class SimulationResult(loader.Attributable):
     def __init__(self, dirname, features):
         self.name = dirname
 
+        if not isinstance(features, (list, tuple)):
+            features = [features, *_features.standard_features]
+
         jar = os.path.join(dirname, 'params.pickle')
         with open(jar, 'rb') as f:
             params = pickle.load(f)
 
         super().__init__(features)
+        self.features = features
         self.params = params
-        self.features = (params, *features)
 
         ivfiles = glob.glob(os.path.join(dirname, 'ivdata-*.npy'))
 

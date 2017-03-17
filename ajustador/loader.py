@@ -171,8 +171,8 @@ class Measurement(Attributable):
                  bad_extra=()):
 
         if features is None:
-            from . import features
-            features = features.standard_features
+            from . import features as _features
+            features = _features.standard_features
 
         super().__init__(features)
 
