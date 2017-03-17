@@ -17,19 +17,24 @@ try:
     _GRAPHS
 except NameError:
     _GRAPHS = {}
-def _get_graph(name, figsize=None):
+def _get_graph(name, figsize=None, clear=True):
     try:
         f = _GRAPHS[name]
     except KeyError:
         pass
     else:
         if not f.closed:
-            f.clear()
-            f.canvas.draw() # this is here to make it easier to see what changed
+            if clear:
+                f.clear()
+                f.canvas.draw() # this is here to make it easier to see what changed
+                f.plot_counter = 0
+            else:
+                f.plot_counter += 1
             return f
     f = _GRAPHS[name] = pyplot.figure(figsize=figsize)
     f.canvas.set_window_title(name)
     f.closed = False
+    f.plot_counter = 0
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
@@ -184,15 +189,22 @@ def plot_param_space(group, measurement=None, *what, **options):
     return f
 
 def plot_history(groups, measurement=None, *,
-                 show_quit=False, labels=None, ymax=None, fitness=None):
-    f = _get_graph('fit history ' + measurement.name)
-    ax = f.gca()
+                 show_quit=False, labels=None, ymax=None, fitness=None,
+                 clear=True):
 
     if hasattr(groups[0], 'name'):
         groups = groups,
 
+    func = fitness or groups[0].fitness_func
+
+    f = _get_graph('fit history {}'.format(measurement.name),
+                   clear=clear)
+    ax = f.gca()
+
     colors = list('rgbkmc')
     markers = 'x+12348'
+    colors = colors[f.plot_counter:] + colors[:f.plot_counter]
+    markers = markers[f.plot_counter:] + markers[:f.plot_counter]
 
     for i, group in enumerate(groups):
         func = fitness or group.fitness_func
@@ -205,7 +217,8 @@ def plot_history(groups, measurement=None, *,
         color = colors[i % len(colors)]
         marker = markers[i % len(markers)]
 
-        label = labels[i] if labels is not None else str(i)
+        label = (labels[i] if labels is not None else
+                 '{} {}'.format(group.name, func.__name__))
         if show_quit:
             ax.plot(fitnesses[-quit], color + marker, label=label)
             ax.plot(fitnesses[quit], marker=marker, color='0.5')

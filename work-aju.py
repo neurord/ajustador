@@ -109,3 +109,9 @@ fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-3',
                         aju.fitnesses.new_combined_fitness, params7)
 fit7.load()
 fit7.do_fit(150, popsize=8)
+
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.new_combined_fitness)
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_time_fitness, clear=False)
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_width_fitness, clear=False)
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_ahp_fitness, clear=False)
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.ahp_curve_fitness, clear=False)
