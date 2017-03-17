@@ -84,10 +84,13 @@ class SteadyState(Feature):
     requires = ('wave',
                 'baseline_before', 'baseline_after',
                 'steady_after', 'steady_before', 'steady_cutoff')
-    provides = ('baseline', 'steady', 'response')
+    provides = ('baseline', 'steady', 'response',
+                'baseline_pre', 'baseline_post')
 
-    mean_attributes = ('baseline', 'steady', 'response')
-    array_attributes = ('baseline', 'steady', 'response')
+    mean_attributes = ('baseline', 'steady', 'response',
+                       'baseline_pre', 'baseline_post')
+    array_attributes = ('baseline', 'steady', 'response',
+                        'baseline_pre', 'baseline_post')
 
     @property
     @utilities.once
@@ -102,6 +105,38 @@ class SteadyState(Feature):
         after = self._obj.baseline_after
 
         what = wave.y[(wave.x < before) | (wave.x > after)]
+        cutoffa, cutoffb = np.percentile(what, (5, 95))
+        cut = what[(what > cutoffa) & (what < cutoffb)]
+        return vartype.array_mean(cut)
+
+    @property
+    @utilities.once
+    def baseline_pre(self):
+        """The mean voltage of the area before the injection interval
+
+        Returns mean value of wave after excluding "outliers", values
+        > 95th or < 5th percentile.
+        """
+        wave = self._obj.wave
+        before = self._obj.baseline_before
+
+        what = wave.y[(wave.x < before)]
+        cutoffa, cutoffb = np.percentile(what, (5, 95))
+        cut = what[(what > cutoffa) & (what < cutoffb)]
+        return vartype.array_mean(cut)
+
+    @property
+    @utilities.once
+    def baseline_post(self):
+        """The mean voltage of the area after the injection interval
+
+        Returns mean value of wave after excluding "outliers", values
+        > 95th or < 5th percentile.
+        """
+        wave = self._obj.wave
+        after = self._obj.baseline_after
+
+        what = wave.y[(wave.x > after)]
         cutoffa, cutoffb = np.percentile(what, (5, 95))
         cut = what[(what > cutoffa) & (what < cutoffb)]
         return vartype.array_mean(cut)
@@ -129,17 +164,28 @@ class SteadyState(Feature):
     def response(self):
         return self.steady - self.baseline
 
-    def plot(self, figure):
+    def plot(self, figure, pre_post=False):
         wave = self._obj.wave
         before = self._obj.baseline_before
         after = self._obj.baseline_after
         time = wave.x[-1]
 
         ax = super().plot(figure)
-        _plot_line(ax,
-                   [(0, before), (after, time)],
-                   self.baseline,
-                   'baseline', 'k')
+        if not pre_post:
+            _plot_line(ax,
+                       [(0, before), (after, time)],
+                       self.baseline,
+                       'baseline', 'k')
+        else:
+            _plot_line(ax,
+                       [(0, before)],
+                       self.baseline_pre,
+                       'baseline_pre', 'k')
+            _plot_line(ax,
+                       [(after, time)],
+                       self.baseline_post,
+                       'baseline_post', 'k')
+
         _plot_line(ax,
                    [(after, before)],
                    self.steady,
