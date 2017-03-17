@@ -10,7 +10,7 @@ in parallel, where each one should be run out-of-process::
       --RA=9.273975490852102 \\
       --RM=0.11241922550664576 \\
       --CM=0.0298401595465488 \\
-      --Cond-D1-Kir=6.441375022294002 \\
+      --Cond-Kir=6.441375022294002 \\
       --Kir-offset=6.529897906031442e-07 \\
       --morph-file=MScell-tertDendlongRE.p \\
       --simtime=0.9 \\
@@ -60,14 +60,21 @@ def option_parser():
     p.add_argument('--RM', type=real)
     p.add_argument('--CM', type=real)
 
-    p.add_argument('--Cond-D1-Kir', type=real)
+    p.add_argument('--Cond-Kir', type=real)
     p.add_argument('--Kir-offset', type=real)
 
-    p.add_argument('--Cond-D1-NaF-0', type=real)
-    p.add_argument('--Cond-D1-KaS-0', type=real)
-    p.add_argument('--Cond-D1-KaF-0', type=real)
-    p.add_argument('--Cond-D1-Krp-0', type=real)
-    p.add_argument('--Cond-D1-BKCa-0', type=real)
+    p.add_argument('--Cond-NaF-0', type=real)
+    p.add_argument('--Cond-KaS-0', type=real)
+    p.add_argument('--Cond-KaF-0', type=real)
+    p.add_argument('--Cond-Krp-0', type=real)
+    p.add_argument('--Cond-BKCa-0', type=real)
+    p.add_argument('--Cond-SKCa-0', type=real)
+
+    p.add_argument('--Cond-CaL12-0', type=real)
+    p.add_argument('--Cond-CaL13-0', type=real)
+    p.add_argument('--Cond-CaN-0', type=real)
+    p.add_argument('--Cond-CaR-0', type=real)
+    p.add_argument('--Cond-CaT-0', type=real)
 
     p.add_argument('--save')
     return p
@@ -105,19 +112,26 @@ def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, 
     return new_file
 
 def setup(param_sim, model):
-    if param_sim.Cond_D1_Kir is not None:
-        for key in model.Condset.D1.Kir:
-            model.Condset.D1.Kir[key] = param_sim.Cond_D1_Kir
+    condset = getattr(model.Condset, param_sim.neuron_type)
+    if param_sim.Cond_Kir is not None:
+        for key in condset.Kir:
+            condset.Kir[key] = param_sim.Cond_Kir
 
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.Avhalf += param_sim.Kir_offset
         model.Channels.Kir.X.Bvhalf += param_sim.Kir_offset
 
-    for option, attr in [(param_sim.Cond_D1_NaF_0, model.Condset.D1.NaF),
-                         (param_sim.Cond_D1_KaS_0, model.Condset.D1.KaS),
-                         (param_sim.Cond_D1_KaF_0, model.Condset.D1.KaF),
-                         (param_sim.Cond_D1_Krp_0, model.Condset.D1.Krp),
-                         (param_sim.Cond_D1_BKCa_0, model.Condset.D1.BKCa)]:
+    for option, attr in [(param_sim.Cond_NaF_0, condset.NaF),
+                         (param_sim.Cond_KaS_0, condset.KaS),
+                         (param_sim.Cond_KaF_0, condset.KaF),
+                         (param_sim.Cond_Krp_0, condset.Krp),
+                         (param_sim.Cond_BKCa_0, condset.BKCa),
+                         (param_sim.Cond_SKCa_0, condset.SKCa),
+                         (param_sim.Cond_CaL12_0, condset.CaL12),
+                         (param_sim.Cond_CaL13_0, condset.CaL13),
+                         (param_sim.Cond_CaN_0, condset.CaN),
+                         (param_sim.Cond_CaR_0, condset.CaR),
+                         (param_sim.Cond_CaT_0, condset.CaT)]:
         if option is not None:
             key = min(attr.keys())
             attr[key] = option
@@ -140,11 +154,11 @@ def setup(param_sim, model):
                          model.param_cond.NAME_SOMA)
     return pg
 
-def reset_baseline(neuron, baseline, Cond_D1_Kir):
+def reset_baseline(neuron, baseline, Cond_Kir):
     for n, w in enumerate(moose.wildcardFind('/{}/#[TYPE=Compartment]'.format(neuron))):
         w.initVm = w.Vm = baseline
 
-        if Cond_D1_Kir != 0:
+        if Cond_Kir != 0:
             kir = moose.element(w.path + '/Kir')
             Em = baseline + kir.Gk * w.Rm * (baseline - kir.Ek)
             if n == 0:
@@ -157,7 +171,7 @@ def run_simulation(injection_current, simtime, param_sim):
     pulse_gen.firstLevel = injection_current
     moose.reinit()
     if param_sim.baseline is not None:
-        reset_baseline(param_sim.neuron_type, param_sim.baseline, param_sim.Cond_D1_Kir)
+        reset_baseline(param_sim.neuron_type, param_sim.baseline, param_sim.Cond_Kir)
     moose.start(simtime)
 
 def main(args):
@@ -166,14 +180,15 @@ def main(args):
     pulse_gen = setup(param_sim, d1d2)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim)
 
+    elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
     if param_sim.plot_current:
         neuron_graph.graphs(d1d2,
-                            [[moose.element('/data/VmD1_0')]],
+                            [[moose.element(elemname)]],
                             False,
                             param_sim.simtime)
         util.block_if_noninteractive()
     if param_sim.save:
-        np.save(param_sim.save, moose.element('/data/VmD1_0').vector)
+        np.save(param_sim.save, moose.element(elemname).vector)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
