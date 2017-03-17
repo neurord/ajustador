@@ -104,7 +104,7 @@ params7 = params6.update(junction_potential=-0.01473080415412029,
                          Cond_KaS_0=178.8056033265561,
                          Cond_KaF_0=611.1236043484937,
                          Cond_Krp_0=204.35266201409314)
-fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-3',
+fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-4',
                         ms1.waves5[[0, 7, 17, 21, 23]],
                         aju.fitnesses.new_combined_fitness, params7)
 fit7.load()
@@ -115,3 +115,26 @@ drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_time_fi
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_width_fitness, clear=False)
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_ahp_fitness, clear=False)
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.ahp_curve_fitness, clear=False)
+
+
+aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
+params8 = aju.optimize.ParamSet(
+    ('junction_potential', 0,       -0.030, +0.030),
+    ('RA',                 12.004,    0, 100),
+    ('RM',                 9.427,     0,  10),
+    ('CM',                 0.03604,   0, 0.10),
+    ('Cond_Kir',           14.502,    0, 100),
+    ('Kir_offset',         -.004,    -0.005, +0.005),
+    ('morph_file', 'MScell-tertDendlongRE.p'),
+    ('neuron_type', 'D1'),
+    ('Cond_NaF_0',      150e3,      0, 600e3),
+    ('Cond_KaS_0',      372,        0, 600),
+    ('Cond_KaF_0',      641,        0, 1000),
+    ('Cond_Krp_0',      177,        0, 600),
+    ('Cond_SKCa_0',     0.5,        0, 6),
+    ('Cond_BKCa_0',     10,         0, 100))
+fit8 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-8',
+                        ms1.waves5[[0, 7, 17, 21, 23]],
+                        aju.fitnesses.new_combined_fitness, params8)
+fit8.load()
+fit8.do_fit(150, popsize=20)
