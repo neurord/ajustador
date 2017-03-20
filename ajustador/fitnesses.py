@@ -360,6 +360,13 @@ class new_combined_fitness:
         else:
             return (arr**2).mean()**0.5
 
+    def report(self, sim, measurement):
+        parts = list(self._parts(sim, measurement))
+        desc = '\n'.join('{}={}'.format(name, w)
+                         for w, name in parts)
+        total = desc + '\n' + 'total: {}'.format(self.__call__(sim, measurement))
+        return total
+
 def simple_combined_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     arr = np.fromiter((f(sim, measurement, error=error)**2 for f in
                         [response_fitness,
