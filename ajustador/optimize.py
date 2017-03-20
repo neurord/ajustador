@@ -112,6 +112,9 @@ class Simulation(loader.Attributable):
             print("Simulating{} at {} points".format(" asynchronously" if async else "", len(currents)))
             self.execute_for(currents, junction_potential, single, async=async)
 
+        tag = os.path.join(self.tmpdir.name, '.complete')
+        open(tag, 'w').close()
+
     @property
     def _param_str(self):
         return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
@@ -192,38 +195,25 @@ class SimulationResult(loader.Attributable):
 class SimulationResults(object):
     def __init__(self, dirname, features):
         self.dirname = dirname
-        sims = [SimulationResult(dir, features) for dir in self._dirs()]
-        if sims:
-            size = max(sim.waves.size for sim in sims)
-        self.results = [sim for sim in sims if sim.waves.size == size and size > 0]
+        self.features = features
 
     def _dirs(self):
-        return sorted(glob.glob(os.path.join(self.dirname, '*/')),
-                      key=lambda dir: os.stat(dir).st_mtime)
+        paths = glob.glob(os.path.join(self.dirname, '*/.complete'))
+        dirs = (os.path.dirname(path) for path in paths)
+        # sort by the simulation initialization order
+        compare = lambda dir: os.stat(os.path.join(dir, 'params.pickle')).st_mtime
+        return sorted(dirs, key=compare)
 
-    def update(self):
+    def load(self):
         dirs = self._dirs()
-        old = [sim for sim in self.results if sim.name in dirs]
-        for sim in self.results:           # hack for reloading
-            sim.__class__ = SimulationResult
-
-        olddirs = {sim.name for sim in old}
-        sims = [SimulationResult(dir, time=self.time) for dir in dirs
-                if dir not in olddirs]
-        sims = [sim for sim in sims if sim.waves.size >= self.results[0].waves.size]
-        self.results.extend(sims)
-        return self
+        n = len(dirs)
+        for i, dir in enumerate(dirs):
+            yield i, n, SimulationResult(dir, self.features)
 
     def ordered(self, measurement, *, fitness=fitnesses.combined_fitness):
         values, fitnesses = convert_to_values(self.results, measurement, fitness)
         keys = np.argsort(fitnesses)
         return np.array(self.results)[keys]
-
-    def __getitem__(self, i):
-        return self.results.__getitem__(i)
-    def __len__(self):
-        return len(self.results)
-
 
 
 class Param:
@@ -350,12 +340,13 @@ class Fit:
         except AttributeError:
             self._sim_value = collections.OrderedDict()
 
-        old = SimulationResults(self.dirname, features=self.measurement.features)
-        for sim in old.results:
+        new = SimulationResults(self.dirname, features=self.measurement.features)
+        for i, n, sim in new.load():
+            print('{}/{} {}'.format(i, n, sim.name), end='\r')
             key = tuple(self.params.scale_dict(sim.params))
             if key not in self._sim_value:
                 self._sim_value[key] = sim
-                print(sim)
+                print() # keep this line
 
     def param_names(self):
         return [p.name for p in self.params.ajuparams]
