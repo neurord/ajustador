@@ -308,26 +308,53 @@ def spike_fitness(sim, measurement, full=False):
     else:
         return (arr**2).mean()**0.5
 
-def new_combined_fitness(sim, measurement, full=False):
-    a = response_fitness(sim, measurement)
-    b1 = baseline_pre_fitness(sim, measurement)
-    b2 = baseline_post_fitness(sim, measurement)
-    c = rectification_fitness(sim, measurement)
-    d = falling_curve_time_fitness(sim, measurement)
-    e = spike_time_fitness(sim, measurement)
-    f = spike_width_fitness(sim, measurement)
-    g = spike_height_fitness(sim, measurement)
-    h = spike_ahp_fitness(sim, measurement)
-    i = ahp_curve_fitness(sim, measurement)
-    if ERROR == ErrorCalc.normal:
-        arr = np.array([a, b1, b2, c * 2, d, e, f, g, h, i])
-    else:
-        arr = np.array([a, b1, b2, c, d, e, f, g, h, i])
-    if full:
-        return arr
-    else:
-        return (arr**2).mean()**0.5
+class new_combined_fitness:
+    def __init__(self, error=ErrorCalc.relative,
+                 response=1,
+                 baseline_pre=1,
+                 baseline_post=1,
+                 rectification=1,
+                 falling_curve_time=1,
+                 spike_time=1,
+                 spike_width=1,
+                 spike_height=1,
+                 spike_ahp=1,
+                 ahp_curve=1):
 
+        self.error = error
+
+        # weights
+        self.response = response
+        self.baseline_pre = baseline_pre
+        self.baseline_post = baseline_post
+        self.rectification = rectification
+        self.falling_curve_time = falling_curve_time
+        self.spike_time = spike_time
+        self.spike_width = spike_width
+        self.spike_height = spike_height
+        self.spike_ahp = spike_ahp
+        self.ahp_curve = ahp_curve
+
+    def _parts(self, sim, measurement):
+        for w, func in ((self.response, response_fitness),
+                        (self.baseline_pre, baseline_pre_fitness),
+                        (self.baseline_post, baseline_post_fitness),
+                        (self.rectification, rectification_fitness),
+                        (self.falling_curve_time, falling_curve_time_fitness),
+                        (self.spike_time, spike_time_fitness),
+                        (self.spike_width, spike_width_fitness),
+                        (self.spike_height, spike_height_fitness),
+                        (self.spike_ahp, spike_ahp_fitness),
+                        (self.ahp_curve, ahp_curve_fitness)):
+            yield func(sim, measurement), func.__name__
+
+    def __call__(self, sim, measurement, full=False):
+        parts = [w for w, name in self._parts(sim, measurement)]
+        arr = np.array(parts)
+        if full:
+            return arr
+        else:
+            return (arr**2).mean()**0.5
 
 def simple_combined_fitness(sim, measurement, full=False):
     arr = np.fromiter((f(sim, measurement)**2 for f in
