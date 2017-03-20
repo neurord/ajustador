@@ -6,6 +6,7 @@ import operator
 import os
 import sys
 import shlex
+import shutil
 import subprocess
 import glob
 import re
@@ -341,12 +342,18 @@ class Fit:
             self._sim_value = collections.OrderedDict()
 
         new = SimulationResults(self.dirname, features=self.measurement.features)
+        need_erase = False
         for i, n, sim in new.load():
             print('{}/{} {}'.format(i, n, sim.name), end='\r')
+            need_erase = True
             key = tuple(self.params.scale_dict(sim.params))
             if key not in self._sim_value:
                 self._sim_value[key] = sim
-                print() # keep this line
+                print(sim)
+                need_erase = False
+
+        if need_erase:
+            print(' ' * shutil.get_terminal_size().columns, end='\r')
 
     def param_names(self):
         return [p.name for p in self.params.ajuparams]
