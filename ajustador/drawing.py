@@ -220,10 +220,10 @@ def plot_history(groups, measurement=None, *,
         label = (labels[i] if labels is not None else
                  '{} {}'.format(group.name, func.__name__))
         if show_quit:
-            ax.plot(fitnesses[-quit], color + marker, label=label)
-            ax.plot(fitnesses[quit], marker=marker, color='0.5')
+            ax.plot(fitnesses[-quit], color + marker, label=label, picker=5)
+            ax.plot(fitnesses[quit], marker=marker, color='0.5', picker=5)
         else:
-            ax.plot(fitnesses, color + marker, label=label)
+            ax.plot(fitnesses, color + marker, label=label, picker=5)
 
     if ymax is not None:
         ax.set_ylim(top=ymax)
@@ -232,6 +232,20 @@ def plot_history(groups, measurement=None, *,
     ax.set_ylabel(func.__name__)
     f.tight_layout()
     f.canvas.draw()
+
+    def onpick(event):
+        thisline = event.artist
+        xdata = thisline.get_xdata()
+        ind = event.ind
+        x = xdata[ind][0]
+        if measurement:
+            # FIXME: map from artist to group
+            plot_together(measurement, groups[0][x])
+        else:
+            plot_together(groups[0][x])
+
+    f.canvas.mpl_connect('pick_event', onpick)
+
     f.show()
     return f
 
