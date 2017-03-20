@@ -11,8 +11,6 @@ class ErrorCalc(enum.Enum):
     normal = 1,
     relative = 2,
 
-ERROR = ErrorCalc.normal
-
 "If 'b' (measurement) is 0, limit to this value"
 RELATIVE_MAX_RATIO = 10
 
@@ -71,11 +69,11 @@ def relative_diff(a, b):
         b = b[:n1]
     return relative_diff_single(a, b, extra=abs(n1 - n2))
 
-def _evaluate(a, b):
-    if ERROR == ErrorCalc.normal:
+def _evaluate(a, b, error=ErrorCalc.relative):
+    if error == ErrorCalc.normal:
         diff = sub_mes_dev(a, b)
         ans = vartype.array_rms(diff)
-    elif ERROR == ErrorCalc.relative:
+    elif error == ErrorCalc.relative:
         diff = relative_diff(a, b)
         ans = vartype.array_rms(diff)
     else:
@@ -85,10 +83,10 @@ def _evaluate(a, b):
     else:
         return ans
 
-def _evaluate_single(a, b):
-    if ERROR == ErrorCalc.normal:
+def _evaluate_single(a, b, error=ErrorCalc.relative):
+    if error == ErrorCalc.normal:
         ans = float(abs(a - b))
-    elif ERROR == ErrorCalc.relative:
+    elif error == ErrorCalc.relative:
         ans = relative_diff_single(a, b)
     else:
         raise AssertionError
@@ -97,53 +95,54 @@ def _evaluate_single(a, b):
     else:
         return ans
 
-def response_fitness(sim, measurement, full=False):
+def response_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of response to hyperpolarizing injection"
     m1, m2 = _select(sim, measurement, measurement.injection <= 110e-12)
-    return _evaluate(m1.response, m2.response)
+    return _evaluate(m1.response, m2.response, error=error)
 
-def baseline_fitness(sim, measurement, full=False):
+def baseline_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of baselines"
     m1, m2 = _select(sim, measurement)
-    return _evaluate(m1.baseline, m2.baseline)
+    return _evaluate(m1.baseline, m2.baseline, error=error)
 
-def baseline_pre_fitness(sim, measurement, full=False):
+def baseline_pre_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of baselines"
     m1, m2 = _select(sim, measurement)
-    return _evaluate(m1.baseline_pre, m2.baseline_pre)
+    return _evaluate(m1.baseline_pre, m2.baseline_pre, error=error)
 
-def baseline_post_fitness(sim, measurement, full=False):
+def baseline_post_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of baselines"
     m1, m2 = _select(sim, measurement)
-    return _evaluate(m1.baseline_post, m2.baseline_post)
+    return _evaluate(m1.baseline_post, m2.baseline_post, error=error)
 
-def rectification_fitness(sim, measurement, full=False):
+def rectification_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
-    return _evaluate(m1.rectification, m2.rectification)
+    return _evaluate(m1.rectification, m2.rectification, error=error)
 
-def charging_curve_fitness(sim, measurement, full=False):
+def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
     if len(m2) == 0:
         return vartype.vartype.nan
-    return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight)
+    return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight,
+                     error=error)
 
-def falling_curve_time_fitness(sim, measurement, full=False):
+def falling_curve_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
     if len(m2) == 0:
         return vartype.vartype.nan
-    return _evaluate(m1.falling_curve_tau, m2.falling_curve_tau)
+    return _evaluate(m1.falling_curve_tau, m2.falling_curve_tau, error=error)
 
-def mean_isi_fitness(sim, measurement, full=False):
+def mean_isi_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
     if len(m2) == 0:
         return vartype.vartype.nan
-    return _evaluate(m1.mean_isi, m2.mean_isi)
+    return _evaluate(m1.mean_isi, m2.mean_isi, error=error)
 
-def isi_spread_fitness(sim, measurement, full=False):
+def isi_spread_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
     if len(m2) == 0:
         return vartype.vartype.nan
-    return _evaluate(m1.isi_spread, m2.isi_spread)
+    return _evaluate(m1.isi_spread, m2.isi_spread, error=error)
 
 def _measurement_to_spikes(meas):
     frames = [pd.DataFrame(wave.spikes) for wave in meas]
@@ -153,7 +152,7 @@ def _measurement_to_spikes(meas):
         frame.set_index(['index', 'injection'], inplace=1)
     return pd.concat(frames)
 
-def spike_time_fitness(sim, measurement, full=False):
+def spike_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 2)
     if len(m1) == 0:
         m1, m2 = _select(measurement, sim, sim.spike_count >= 2)
@@ -168,23 +167,25 @@ def spike_time_fitness(sim, measurement, full=False):
     spikes2 = spikes2 - diff # and the same for spikes2
     spikes1.fillna(sim[0].injection_interval, inplace=True)
     spikes2.fillna(sim[0].injection_interval, inplace=True)
-    return _evaluate(spikes1['x'], spikes2['x'])
+    return _evaluate(spikes1['x'], spikes2['x'], error=error)
 
-def spike_count_fitness(sim, measurement, full=False):
+def spike_count_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement)
-    return _evaluate(m1.spike_count, m2.spike_count)
+    return _evaluate(m1.spike_count, m2.spike_count, error=error)
 
-def spike_latency_fitness(sim, measurement, full=False):
+def spike_latency_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
-    return _evaluate(m1.spike_latency, m2.spike_latency)
+    return _evaluate(m1.spike_latency, m2.spike_latency, error=error)
 
-def spike_width_fitness(sim, measurement, full=False):
-    return _evaluate_single(sim.mean_spike_width, measurement.mean_spike_width)
+def spike_width_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    return _evaluate_single(sim.mean_spike_width, measurement.mean_spike_width,
+                            error=error)
 
-def spike_height_fitness(sim, measurement, full=False):
-    return _evaluate_single(sim.mean_spike_height, measurement.mean_spike_height)
+def spike_height_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    return _evaluate_single(sim.mean_spike_height, measurement.mean_spike_height,
+                            error=error)
 
-def spike_ahp_fitness(sim, measurement, full=False):
+def spike_ahp_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
 
     # Just ignore any extra spikes. Let's assume that most spikes
@@ -197,7 +198,7 @@ def spike_ahp_fitness(sim, measurement, full=False):
     elif len(left) > len(right):
         left = left[:len(right)]
 
-    return _evaluate(left, right)
+    return _evaluate(left, right, error=ErrorCalc.relative)
 
 def interpolate(wave1, wave2):
     "Interpolate wave1 to wave2.x"
@@ -227,7 +228,7 @@ def ahp_curve_compare(cut1, cut2):
     diff = np.tanh((cut1.y - cut2.y) / cut2.y)
     return ((diff**2).sum()/diff.size)**0.5
 
-def ahp_curve_fitness(sim, measurement, full=False):
+def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement)
 
     for wave1, wave2 in zip(m1, m2):
@@ -246,17 +247,18 @@ def ahp_curve_fitness(sim, measurement, full=False):
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,
                          mean_isi=1, spike_latency=1,
-                         spike_height=1, spike_width=1, spike_ahp=1):
+                         spike_height=1, spike_width=1, spike_ahp=1,
+                         error=ErrorCalc.relative):
     def fitness(sim, measurement):
-        f1 = response_fitness(sim, measurement) if response else 0
-        f2 = baseline_fitness(sim, measurement) if baseline else 0
-        f3 = rectification_fitness(sim, measurement) if rectification else 0
-        f4 = falling_curve_time_fitness(sim, measurement) if falling_curve_param else 0
-        f5 = mean_isi_fitness(sim, measurement) if mean_isi else 0
-        f6 = spike_latency_fitness(sim, measurement) if spike_latency else 0
-        f7 = spike_height_fitness(sim, measurement) if spike_height else 0
-        f8 = spike_width_fitness(sim, measurement) if spike_width else 0
-        f9 = spike_ahp_fitness(sim, measurement) if spike_ahp else 0
+        f1 = response_fitness(sim, measurement, error=error) if response else 0
+        f2 = baseline_fitness(sim, measurement, error=error) if baseline else 0
+        f3 = rectification_fitness(sim, measurement, error=error) if rectification else 0
+        f4 = falling_curve_time_fitness(sim, measurement, error=error) if falling_curve_param else 0
+        f5 = mean_isi_fitness(sim, measurement, error=error) if mean_isi else 0
+        f6 = spike_latency_fitness(sim, measurement, error=error) if spike_latency else 0
+        f7 = spike_height_fitness(sim, measurement, error=error) if spike_height else 0
+        f8 = spike_width_fitness(sim, measurement, error=error) if spike_width else 0
+        f9 = spike_ahp_fitness(sim, measurement, error=error) if spike_ahp else 0
         return (response * f1 / 16 +
                 baseline * f2 / 35 +
                 rectification * f3 / 3 +
@@ -268,14 +270,14 @@ def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                 spike_ahp * f9 / 8)
     return fitness
 
-def hyperpol_fitness(sim, measurement, full=False):
-    a = response_fitness(sim, measurement)
-    b1 = baseline_pre_fitness(sim, measurement)
-    b2 = baseline_post_fitness(sim, measurement)
-    c = rectification_fitness(sim, measurement)
-    d = falling_curve_time_fitness(sim, measurement)
-    e = spike_count_fitness(sim, measurement)
-    if ERROR == ErrorCalc.normal:
+def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    a = response_fitness(sim, measurement, error=error)
+    b1 = baseline_pre_fitness(sim, measurement, error=error)
+    b2 = baseline_post_fitness(sim, measurement, error=error)
+    c = rectification_fitness(sim, measurement, error=error)
+    d = falling_curve_time_fitness(sim, measurement, error=error)
+    e = spike_count_fitness(sim, measurement, error=error)
+    if error == ErrorCalc.normal:
         arr = np.array([a, b1/5, b2/5, c*4, d/20, e])
     else:
         arr = np.array([a, b1, b2, c, d, e])
@@ -284,24 +286,24 @@ def hyperpol_fitness(sim, measurement, full=False):
     else:
         return (arr**2).mean()**0.5
 
-def spike_fitness_0(sim, measurement, full=False):
-    a = mean_isi_fitness(sim, measurement)
-    b = spike_latency_fitness(sim, measurement)
-    c = spike_width_fitness(sim, measurement)
-    d = spike_height_fitness(sim, measurement)
-    e = spike_ahp_fitness(sim, measurement)
-    f = spike_time_fitness(sim, measurement)
+def spike_fitness_0(sim, measurement, full=False, error=ErrorCalc.relative):
+    a = mean_isi_fitness(sim, measurement, error=error)
+    b = spike_latency_fitness(sim, measurement, error=error)
+    c = spike_width_fitness(sim, measurement, error=error)
+    d = spike_height_fitness(sim, measurement, error=error)
+    e = spike_ahp_fitness(sim, measurement, error=error)
+    f = spike_time_fitness(sim, measurement, error=error)
     arr = np.array([a, b, c, d, e, f])
     if full:
         return arr
     else:
         return (arr**2).mean()**0.5
 
-def spike_fitness(sim, measurement, full=False):
-    a = spike_time_fitness(sim, measurement)
-    b = spike_width_fitness(sim, measurement)
-    c = spike_height_fitness(sim, measurement)
-    d = spike_ahp_fitness(sim, measurement)
+def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    a = spike_time_fitness(sim, measurement, error=error)
+    b = spike_width_fitness(sim, measurement, error=error)
+    c = spike_height_fitness(sim, measurement, error=error)
+    d = spike_ahp_fitness(sim, measurement, error=error)
     arr = np.array([a, b, c, d])
     if full:
         return arr
@@ -309,7 +311,7 @@ def spike_fitness(sim, measurement, full=False):
         return (arr**2).mean()**0.5
 
 class new_combined_fitness:
-    def __init__(self, error=ErrorCalc.relative,
+    def __init__(self, *,
                  response=1,
                  baseline_pre=1,
                  baseline_post=1,
@@ -319,7 +321,8 @@ class new_combined_fitness:
                  spike_width=1,
                  spike_height=1,
                  spike_ahp=1,
-                 ahp_curve=1):
+                 ahp_curve=1,
+                 error=ErrorCalc.relative):
 
         self.error = error
 
@@ -346,7 +349,8 @@ class new_combined_fitness:
                         (self.spike_height, spike_height_fitness),
                         (self.spike_ahp, spike_ahp_fitness),
                         (self.ahp_curve, ahp_curve_fitness)):
-            yield func(sim, measurement), func.__name__
+            yield (func(sim, measurement, error=self.error) if w else 0,
+                   func.__name__)
 
     def __call__(self, sim, measurement, full=False):
         parts = [w for w, name in self._parts(sim, measurement)]
@@ -356,8 +360,8 @@ class new_combined_fitness:
         else:
             return (arr**2).mean()**0.5
 
-def simple_combined_fitness(sim, measurement, full=False):
-    arr = np.fromiter((f(sim, measurement)**2 for f in
+def simple_combined_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    arr = np.fromiter((f(sim, measurement, error=error)**2 for f in
                         [response_fitness,
                          baseline_fitness,
                          rectification_fitness,

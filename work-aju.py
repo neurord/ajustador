@@ -153,9 +153,9 @@ params9 = params8.update(junction_potential=-0.01358622557992854,
                          Cond_Krp_0=4.446655927879732,
                          Cond_SKCa_0=0.12046639942362143,
                          Cond_BKCa_0=11.51439493711431)
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
+fitness = aju.fitnesses.new_combined_fitness()
 fit9 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-9',
                         ms1.waves5[[0, 7, 17, 21, 23]],
-                        aju.fitnesses.new_combined_fitness, params9)
+                        fitness, params9)
 fit9.load()
 fit9.do_fit(400, popsize=20)
