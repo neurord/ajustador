@@ -311,7 +311,7 @@ class Spikes(Feature):
                         'spike_height', 'spike_width',
                         'mean_isi', 'isi_spread',
                         'spike_latency')
-    mean_attributes = ('spike_height', 'spike_width')
+    mean_attributes = ('spike_height', 'spike_width', 'spike_threshold')
 
     @property
     @utilities.once
