@@ -542,7 +542,8 @@ class AHP(Feature):
             left = windows[i].x[windows[i].y.argmin()] - w/2
             right = windows[i].x[windows[i].y.argmin()] + w/2
             cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
-            ans[i] = vartype.array_mean(cut.y)
+            mean = vartype.array_mean(cut.y)
+            ans[i] = mean.x, mean.dev
 
         return np.rec.fromarrays(ans.T, names='x,dev')
 
