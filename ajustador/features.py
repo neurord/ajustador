@@ -1,5 +1,6 @@
 import math
 from collections import namedtuple
+import pprint
 import numpy as np
 from scipy import optimize
 
@@ -71,6 +72,26 @@ class Feature:
 
         figure.autofmt_xdate()
         return axes
+
+    def report_attr(self, name):
+        val = getattr(self, name)
+        prefix = '{} = '.format(name)
+        if hasattr(val, 'report'):
+            ans = val.report(prefix=prefix)
+        elif isinstance(val, np.ndarray) and hasattr(val, 'dev'):
+            ans = vartype.vartype.format_array(val, prefix=prefix)
+        elif hasattr(val, '__len__'):
+            joiner = '\n' + len(prefix)*' '
+            ans = prefix + joiner.join(str(x) for x in val)
+        else:
+            ans = prefix + str(val)
+        if name in self.mean_attributes and hasattr(val, '__len__'):
+            mean = vartype.vartype.average(val)
+            ans += '\n{:{}} = {}'.format('', len(name), mean)
+        return ans
+
+    def report(self):
+        return '\n'.join(self.report_attr(name) for name in self.provides)
 
 class SteadyState(Feature):
     """Find the baseline and injection steady states
@@ -262,6 +283,16 @@ class WaveRegion:
     def relative_to(self, x, y):
         new = np.rec.fromarrays((self.x - x, self.y - y), names='x,y')
         return WaveRegion(new, 0, new.size-1)
+
+    def __str__(self):
+        y = self.y
+        return 'WaveRegion[{} points, x={:.04f}-{:.04f}, y={:.03f}-{:.03f}]'.format(
+            self.right_i - self.left_i + 1,
+            self.left, self.right,
+            self.y.min(), self.y.max())
+
+    def report(self, prefix='WaveRegion = '):
+        return '{}{}'.format(prefix, self)
 
 class Spikes(Feature):
     """Find the position and height of spikes

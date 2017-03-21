@@ -89,16 +89,17 @@ class vartype(object):
     def __pow__(self, other):
         return vartype(self.x**other, self.dev**other)
 
-    def __str__(self):
+    def _prec(self):
         preca = int(math.floor(math.log10(abs(self.x)))) if self.x < 0 or self.x > 0 else 0
         precb = int(math.floor(math.log10(self.dev))) if self.dev > 0 else 0
         prec = -min(preca, precb, 0)
-        return '{0.x:.{1}f}±{0.dev:.{1}f}'.format(self, prec)
+        return prec
+
+    def __str__(self):
+        return '{0.x:.{1}f}±{0.dev:.{1}f}'.format(self, self._prec())
 
     def __repr__(self):
-        preca = int(math.floor(math.log10(abs(self.x)))) if self.x < 0 or self.x > 0 else 0
-        precb = int(math.floor(math.log10(self.dev))) if self.dev > 0 else 0
-        prec = -min(preca, precb, 0) + 1
+        prec = self._prec() + 1
         return '{0.__class__.__name__}({0.x:.{1}f}, {0.dev:.{1}f})'.format(self, prec)
 
     def __float__(self):
@@ -151,6 +152,13 @@ class vartype(object):
         x = np.array([getattr(p, 'x', p) for p in items])
         dev = np.array([getattr(p, 'dev', np.nan) for p in items])
         return np.rec.fromarrays((x, dev), names='x,dev')
+
+    @classmethod
+    def format_array(cls, array, prefix=''):
+        prec = max(cls(*x)._prec() for x in array)
+        gen = ('{0:.{2}f}±{1:.{2}f}'.format(*x, prec) for x in array)
+        joiner = '\n' + ' ' * len(prefix)
+        return prefix + joiner.join(gen)
 
 vartype.nan = vartype(np.nan, np.nan)
 
