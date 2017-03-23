@@ -17,24 +17,24 @@ ajustador.features
 
     .. plot:: features_steady_state.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1
+        import ajustador
 
-        rec = ms1.waves042811[8]
-        feat = aju.features.SteadyState(rec)
+        rec = measurements1.waves042811[8]
+        feat = ajustador.features.SteadyState(rec)
         print(feat.report())
 
     .. plot:: features_steady_state2.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import strange1
-        import ajustador as aju
+        import strange1               # suppress
+        import ajustador              # suppress
 
         rec = strange1.high_baseline_post[-1]
-        feat = aju.features.SteadyState(rec)
+        feat = ajustador.features.SteadyState(rec)
         print(feat.report())
 
     :doc:`features_steady_state_more`
@@ -46,24 +46,24 @@ ajustador.features
 
     .. plot:: features_spikes.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1          # suppress
+        import ajustador              # suppress
 
-        rec = ms1.waves042811[-1]
-        feat = aju.features.Spikes(rec)
+        rec = measurements1.waves042811[-1]
+        feat = ajustador.features.Spikes(rec)
         print(feat.report())
 
     .. plot:: features_spikes2.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import strange1
-        import ajustador as aju
+        import strange1               # suppress
+        import ajustador              # suppress
 
         rec = strange1.high_baseline_post[-1]
-        feat = aju.features.Spikes(rec)
+        feat = ajustador.features.Spikes(rec)
         print(feat.report())
 
     :doc:`features_spikes_more`
@@ -75,13 +75,13 @@ ajustador.features
 
     .. plot:: features_ahp.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1          # suppress
+        import ajustador              # suppress
 
-        rec = ms1.waves042811[-1]
-        feat = aju.features.AHP(rec)
+        rec = measurements1.waves042811[-1]
+        feat = ajustador.features.AHP(rec)
         print(feat.report())
 
 .. autoclass:: ajustador.features.FallingCurve
@@ -91,13 +91,13 @@ ajustador.features
 
     .. plot:: features_falling_curve.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1          # suppress
+        import ajustador              # suppress
 
-        rec = ms1.waves042811[0]
-        feat = aju.features.FallingCurve(rec)
+        rec = measurements1.waves042811[0]
+        feat = ajustador.features.FallingCurve(rec)
         print(feat.report())
 
     :doc:`features_falling_curve_more`
@@ -109,13 +109,13 @@ ajustador.features
 
     .. plot:: features_rectification.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1          # suppress
+        import ajustador              # suppress
 
-        rec = ms1.waves042811[1]
-        feat = aju.features.Rectification(rec)
+        rec = measurements1.waves042811[1]
+        feat = ajustador.features.Rectification(rec)
         print(feat.report())
 
     :doc:`features_rectification_more`
@@ -127,13 +127,13 @@ ajustador.features
 
     .. plot:: features_charging_curve.py
 
-    .. ipython:: python
+    .. codesample::
 
-        import measurements1 as ms1
-        import ajustador as aju
+        import measurements1          # suppress
+        import ajustador              # suppress
 
-        rec = ms1.waves042811[-1]
-        feat = aju.features.ChargingCurve(rec)
+        rec = measurements1.waves042811[-1]
+        feat = ajustador.features.ChargingCurve(rec)
         print(feat.report())
 
     :doc:`features_charging_curve_more`
