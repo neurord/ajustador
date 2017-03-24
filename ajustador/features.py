@@ -426,12 +426,15 @@ class Spikes(Feature):
         return vartype.array_mean(self.spikes.y)
 
     def plot(self, figure):
+        from . import drawing_util
+
         wave = self._obj.wave
         ax = super().plot(figure)
         bottom = -0.06 # self._obj.steady.x
                        # Doing the "proper" thing makes the plot hard to read
 
-        ax.vlines(self.spikes.x, bottom, self.spikes.y, 'r')
+        vline1 = ax.vlines(self.spikes.x, bottom, self.spikes.y, 'r',
+                            label='timing of spike maximum')
         ax.text(0.05, 0.5, plural(self.spike_count, 'spike'),
                 horizontalalignment='left',
                 transform=ax.transAxes)
@@ -440,7 +443,8 @@ class Spikes(Feature):
                    [(self._obj.steady_after, self._obj.steady_before)],
                    self.mean_spike_height,
                    'spike_height', 'y', zorder=0)
-        ax.legend(loc='upper left')
+        ax.legend(loc='upper left',
+                  handler_map={vline1: drawing_util.HandlerVLineCollection()})
         figure.tight_layout()
 
         if self.spike_count > 0:
