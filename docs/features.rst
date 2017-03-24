@@ -30,8 +30,8 @@ ajustador.features
 
     .. codesample::
 
-        import strange1               # suppress
-        import ajustador              # suppress
+        import strange1               # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = strange1.high_baseline_post[-1]
         feat = ajustador.features.SteadyState(rec)
@@ -48,8 +48,8 @@ ajustador.features
 
     .. codesample::
 
-        import measurements1          # suppress
-        import ajustador              # suppress
+        import measurements1          # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = measurements1.waves042811[-1]
         feat = ajustador.features.Spikes(rec)
@@ -59,8 +59,8 @@ ajustador.features
 
     .. codesample::
 
-        import strange1               # suppress
-        import ajustador              # suppress
+        import strange1               # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = strange1.high_baseline_post[-1]
         feat = ajustador.features.Spikes(rec)
@@ -77,8 +77,8 @@ ajustador.features
 
     .. codesample::
 
-        import measurements1          # suppress
-        import ajustador              # suppress
+        import measurements1          # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = measurements1.waves042811[-1]
         feat = ajustador.features.AHP(rec)
@@ -93,8 +93,8 @@ ajustador.features
 
     .. codesample::
 
-        import measurements1          # suppress
-        import ajustador              # suppress
+        import measurements1          # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = measurements1.waves042811[0]
         feat = ajustador.features.FallingCurve(rec)
@@ -111,8 +111,8 @@ ajustador.features
 
     .. codesample::
 
-        import measurements1          # suppress
-        import ajustador              # suppress
+        import measurements1          # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = measurements1.waves042811[1]
         feat = ajustador.features.Rectification(rec)
@@ -129,8 +129,8 @@ ajustador.features
 
     .. codesample::
 
-        import measurements1          # suppress
-        import ajustador              # suppress
+        import measurements1          # SUPPRESS
+        import ajustador              # SUPPRESS
 
         rec = measurements1.waves042811[-1]
         feat = ajustador.features.ChargingCurve(rec)
