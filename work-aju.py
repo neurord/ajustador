@@ -172,10 +172,18 @@ params10 = params8.update(junction_potential=-0.011962426960236439,
                           Cond_SKCa_0=0.8627234570253062,
                           Cond_BKCa_0=8.435723459115415)
 fitness = aju.fitnesses.new_combined_fitness()
+
 fit10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-10',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          fitness, params10)
 fit10.load()
-drawing.plot_history(fit10, fit10.measurement, fitness=aju.fitnesses.ahp_curve_fitness)
-
+drawing.plot_history(fit10, fit10.measurement)
 fit10.do_fit(400, popsize=20)
+
+# the same as before, but with spike_latency_fitness thrown into the mix
+fitness = aju.fitnesses.new_combined_fitness()
+fit11 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11',
+                         ms1.waves5[[0, 7, 17, 18, 21]],
+                         fitness, params10)
+fit11.load()
+fit11.do_fit(800, popsize=20)

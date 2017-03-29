@@ -424,6 +424,7 @@ class new_combined_fitness:
                  spike_time=1,
                  spike_width=1,
                  spike_height=1,
+                 spike_latency=1,
                  spike_ahp=1,
                  ahp_curve=1,
                  spike_range_y_histogram=1,
@@ -440,6 +441,7 @@ class new_combined_fitness:
         self.spike_time = spike_time
         self.spike_width = spike_width
         self.spike_height = spike_height
+        self.spike_latency = spike_latency
         self.spike_ahp = spike_ahp
         self.ahp_curve = ahp_curve
         self.spike_range_y_histogram = spike_range_y_histogram
@@ -453,6 +455,7 @@ class new_combined_fitness:
                         (self.spike_time, spike_time_fitness),
                         (self.spike_width, spike_width_fitness),
                         (self.spike_height, spike_height_fitness),
+                        (self.spike_latency, spike_latency_fitness),
                         (self.spike_ahp, spike_ahp_fitness),
                         (self.ahp_curve, ahp_curve_fitness),
                         (self.spike_range_y_histogram, spike_range_y_histogram_fitness)):
