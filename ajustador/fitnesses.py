@@ -7,9 +7,9 @@ import pandas as pd
 
 from . import vartype
 
-class ErrorCalc(enum.Enum):
-    normal = 1,
-    relative = 2,
+class ErrorCalc(enum.IntEnum):
+    normal = 1
+    relative = 2
 
 "If 'b' (measurement) is 0, limit to this value"
 RELATIVE_MAX_RATIO = 10
@@ -77,7 +77,7 @@ def _evaluate(a, b, error=ErrorCalc.relative):
         diff = relative_diff(a, b)
         ans = vartype.array_rms(diff)
     else:
-        raise AssertionError
+        assert False, error
     if np.isnan(ans):
         return NAN_REPLACEMENT
     else:
