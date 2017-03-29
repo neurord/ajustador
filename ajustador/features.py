@@ -384,7 +384,7 @@ class Spikes(Feature):
         if len(self.spikes) > 0:
             return self.spikes[0].x - self._obj.injection_start
         else:
-            return np.nan
+            return self._obj.injection_end - self._obj.injection_start
 
     @property
     @utilities.once
