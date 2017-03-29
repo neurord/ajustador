@@ -113,9 +113,6 @@ class Simulation(loader.Attributable):
             print("Simulating{} at {} points".format(" asynchronously" if async else "", len(currents)))
             self.execute_for(currents, junction_potential, single, async=async)
 
-        tag = os.path.join(self.tmpdir.name, '.complete')
-        open(tag, 'w').close()
-
     @property
     def _param_str(self):
         return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
@@ -127,6 +124,9 @@ class Simulation(loader.Attributable):
 
     def _set_result(self, result):
         self.waves = np.array(result, dtype=object)
+
+        tag = os.path.join(self.tmpdir.name, '.complete')
+        open(tag, 'w').close()
 
     def execute_for(self, injection_currents, junction_potential, single, async):
         params = ((self.tmpdir.name, inj, junction_potential, self.params, self.features)
