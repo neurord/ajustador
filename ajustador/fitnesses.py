@@ -244,6 +244,41 @@ def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     # take the twentieth percentile to avoid coincidental fits
     return sorted(diffs)[len(diffs)//5]
 
+
+def wave_histogram_diff(wave1, wave2, left=-np.inf, right=+np.inf, full=False):
+    """Compute the difference between cumulative histograms of two waves
+    """
+    # Since the x step might be different, we need to scale to the same range
+
+    y1 = wave1.y[(wave1.x >= left) & (wave1.x <= right)]
+    y2 = wave2.y[(wave2.x >= left) & (wave2.x <= right)]
+
+    low = min(y1.min(), y2.min())
+    high = max(y1.max(), y2.max())
+    bins = np.linspace(low, high, 50)
+
+    hist1 = np.histogram(wave1.y, bins=bins, density=True)[0]
+    hist2 = np.histogram(wave2.y, bins=bins, density=True)[0]
+    hist1 /= hist1.sum()
+    hist2 /= hist2.sum()
+    cum1 = np.cumsum(hist1)
+    cum2 = np.cumsum(hist2)
+    diff = cum1 - cum2
+    if full:
+        return cum1, cum2, diff
+    else:
+        # we return something that is approximately the area betwen the CDFs
+        return np.abs(diff).sum() * (high - low)
+
+def height_histogram_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    m1, m2 = _select(sim, measurement)
+
+    l, r = measurement.injection_start, measurement.injection_end
+
+    diffs = np.array([wave_histogram_diff(wave1.wave, wave2.wave, l, r)
+                      for wave1, wave2 in zip(m1, m2)])
+    return (diffs**2).mean()**0.5
+
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,
                          mean_isi=1, spike_latency=1,
