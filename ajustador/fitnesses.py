@@ -293,7 +293,7 @@ class WaveHistogram:
             return np.abs(diff).sum()
 
     def plot(self, figure):
-        from matplotlib.patches import Polygon
+        from matplotlib import pyplot, patches
 
         ax1 = figure.add_subplot(121)
         ax2 = figure.add_subplot(122)
@@ -312,9 +312,12 @@ class WaveHistogram:
         xy = np.array((np.hstack((bins, bins[::-1])),
                        np.hstack((hist1, hist1[-1:], hist2[-1:], hist2[::-1])))).T
 
-        p = Polygon(xy[:, ::-1], hatch='x', facecolor='none', edgecolor='red')
+        p = patches.Polygon(xy[:, ::-1], hatch='x', fill=False)
         ax2.add_patch(p)
 
+        ax2.set_title('cumulative histograms\ndiff={}'.format(np.abs(diff).sum()))
+        ax2.yaxis.set_major_formatter(pyplot.NullFormatter())
+        figure.tight_layout()
         return ax1, ax2
 
 def height_histogram_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
