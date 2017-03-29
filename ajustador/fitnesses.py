@@ -247,7 +247,7 @@ def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     else:
         # cut off everything below the twentieth centile to decrease
         # sensitivity to occasional errors.
-        diffs = np.sort(diffs)[len(diffs)//5:]
+        diffs = np.sort(diffs)[:len(diffs)*4//5]
         return ((diffs**2).sum()/diffs.size)**0.5
 
 class WaveHistogram:
