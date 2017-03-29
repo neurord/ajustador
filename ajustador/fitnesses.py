@@ -245,39 +245,89 @@ def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     return sorted(diffs)[len(diffs)//5]
 
 
-def wave_histogram_diff(wave1, wave2, left=-np.inf, right=+np.inf, full=False):
+class WaveHistogram:
     """Compute the difference between cumulative histograms of two waves
+
+    Since the x step might be different, we need to scale to the same
+    range. This is done by doing a frequency histogram, which
+    abstracts away the number of points in either plot.
     """
-    # Since the x step might be different, we need to scale to the same range
+    def __init__(self, wave1, wave2, left=-np.inf, right=+np.inf):
+        self.wave1 = wave1
+        self.wave2 = wave2
+        self.left = left
+        self.right = right
 
-    y1 = wave1.y[(wave1.x >= left) & (wave1.x <= right)]
-    y2 = wave2.y[(wave2.x >= left) & (wave2.x <= right)]
+    def x1(self):
+        return self.wave1.x[(self.wave1.x >= self.left) & (self.wave1.x <= self.right)]
+    def x2(self):
+        return self.wave2.x[(self.wave2.x >= self.left) & (self.wave2.x <= self.right)]
+    def y1(self):
+        return self.wave1.y[(self.wave1.x >= self.left) & (self.wave1.x <= self.right)]
+    def y2(self):
+        return self.wave2.y[(self.wave2.x >= self.left) & (self.wave2.x <= self.right)]
 
-    low = min(y1.min(), y2.min())
-    high = max(y1.max(), y2.max())
-    bins = np.linspace(low, high, 50)
+    def hist(self, bins, y, cumulative=True):
+        hist = np.histogram(y, bins=bins, density=True)[0]
+        hist /= hist.sum()
+        if cumulative:
+            return np.cumsum(hist)
+        else:
+            return hist
 
-    hist1 = np.histogram(wave1.y, bins=bins, density=True)[0]
-    hist2 = np.histogram(wave2.y, bins=bins, density=True)[0]
-    hist1 /= hist1.sum()
-    hist2 /= hist2.sum()
-    cum1 = np.cumsum(hist1)
-    cum2 = np.cumsum(hist2)
-    diff = cum1 - cum2
-    if full:
-        return cum1, cum2, diff
-    else:
-        # we return something that is approximately the area betwen the CDFs
-        return np.abs(diff).sum() * (high - low)
+    def bins(self, n=50):
+        y1, y2 = self.y1(), self.y2()
+        low = min(y1.min(), y2.min())
+        high = max(y1.max(), y2.max())
+        return np.linspace(low, high, n)
+
+    def diff(self, full=False):
+        bins = self.bins()
+        hist1 = self.hist(bins, self.y1())
+        hist2 = self.hist(bins, self.y2())
+        diff = (hist2 - hist1) * bins.ptp()
+        if full:
+            return diff
+        else:
+            # we return something that is approximately the area betwen the CDFs
+            return np.abs(diff).sum()
+
+    def plot(self, figure):
+        from matplotlib.patches import Polygon
+
+        ax1 = figure.add_subplot(121)
+        ax2 = figure.add_subplot(122)
+        ax1.plot(self.x1(), self.y1(), label='recording 1', color='blue')
+        ax1.plot(self.x2(), self.y2(), label='recording 2', color='red')
+
+        bins = self.bins()
+        hist1 = self.hist(bins, self.y1())
+        hist2 = self.hist(bins, self.y2())
+        diff = self.diff(full=True)
+
+        height = bins.ptp() / bins.size
+        ax2.barh(bins[:-1], hist1, height=height, color='blue')
+        ax2.barh(bins[:-1], hist2, height=height, alpha=0.3, color='red')
+
+        xy = np.array((np.hstack((bins, bins[::-1])),
+                       np.hstack((hist1, hist1[-1:], hist2[-1:], hist2[::-1])))).T
+
+        p = Polygon(xy[:, ::-1], hatch='x', facecolor='none', edgecolor='red')
+        ax2.add_patch(p)
+
+        return ax1, ax2
 
 def height_histogram_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement)
 
     l, r = measurement.injection_start, measurement.injection_end
 
-    diffs = np.array([wave_histogram_diff(wave1.wave, wave2.wave, l, r)
+    diffs = np.array([WaveHistogram(wave1.wave, wave2.wave, l, r).diff()
                       for wave1, wave2 in zip(m1, m2)])
-    return (diffs**2).mean()**0.5
+    if full:
+        return diffs
+    else:
+        return (diffs**2).mean()**0.5
 
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,
