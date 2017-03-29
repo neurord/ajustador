@@ -293,7 +293,7 @@ class WaveHistogram:
             return np.abs(diff).sum()
 
     def plot(self, figure):
-        from matplotlib import pyplot, patches
+        from matplotlib import pyplot
 
         ax1 = figure.add_subplot(121)
         ax2 = figure.add_subplot(122)
@@ -306,27 +306,38 @@ class WaveHistogram:
         diff = self.diff(full=True)
 
         height = bins.ptp() / bins.size
-        ax2.barh(bins[:-1], hist1, height=height, color='blue')
-        ax2.barh(bins[:-1], hist2, height=height, alpha=0.3, color='red')
+        ax2.barh(bins[:-1], hist1, height=height, alpha=0.2, color='blue')
+        ax2.barh(bins[:-1], hist2, height=height, alpha=0.2, color='red')
 
-        xy = np.array((np.hstack((bins, bins[::-1])),
-                       np.hstack((hist1, hist1[-1:], hist2[-1:], hist2[::-1])))).T
-
-        p = patches.Polygon(xy[:, ::-1], hatch='x', fill=False)
-        ax2.add_patch(p)
+        bars = ax2.barh(bins[:-1], left=hist1, width=hist2-hist1,
+                        height=height, color='none', edgecolor='black')
+        for bar in bars:
+            bar.set_hatch('x')
 
         ax2.set_title('cumulative histograms\ndiff={}'.format(np.abs(diff).sum()))
         ax2.yaxis.set_major_formatter(pyplot.NullFormatter())
         figure.tight_layout()
         return ax1, ax2
 
-def height_histogram_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+def spike_range_y_histogram_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    """Match histograms of y-values in spiking regions
+
+    This returns an rms of `WaveHistogram.diff` over the injection
+    region. Waves are filtered to have at at least one spike between
+    the pair. This is done to make this fitness function sensitive to
+    depolarization block. Otherwise, the result would be dominated by
+    baseline mismatches and response mismatches.
+
+    `baseline_post_fitness` and `response_fitness` are better fitted
+    to detect mismatches in other regions.
+    """
     m1, m2 = _select(sim, measurement)
 
-    l, r = measurement.injection_start, measurement.injection_end
+    diffs = np.array([WaveHistogram(wave1.wave, wave2.wave,
+                                    wave1.injection_start, wave1.injection_end).diff()
+                      for wave1, wave2 in zip(m1, m2)
+                      if max(wave1.spike_count, wave2.spike_count) > 0])
 
-    diffs = np.array([WaveHistogram(wave1.wave, wave2.wave, l, r).diff()
-                      for wave1, wave2 in zip(m1, m2)])
     if full:
         return diffs
     else:
@@ -410,6 +421,7 @@ class new_combined_fitness:
                  spike_height=1,
                  spike_ahp=1,
                  ahp_curve=1,
+                 spike_range_y_histogram=1,
                  error=ErrorCalc.relative):
 
         self.error = error
@@ -425,6 +437,7 @@ class new_combined_fitness:
         self.spike_height = spike_height
         self.spike_ahp = spike_ahp
         self.ahp_curve = ahp_curve
+        self.spike_range_y_histogram = spike_range_y_histogram
 
     def _parts(self, sim, measurement):
         for w, func in ((self.response, response_fitness),
@@ -436,7 +449,8 @@ class new_combined_fitness:
                         (self.spike_width, spike_width_fitness),
                         (self.spike_height, spike_height_fitness),
                         (self.spike_ahp, spike_ahp_fitness),
-                        (self.ahp_curve, ahp_curve_fitness)):
+                        (self.ahp_curve, ahp_curve_fitness),
+                        (self.spike_range_y_histogram, spike_range_y_histogram_fitness)):
             yield (func(sim, measurement, error=self.error) if w else 0,
                    func.__name__)
 
