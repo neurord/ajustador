@@ -467,6 +467,10 @@ class new_combined_fitness:
         else:
             return (arr**2).mean()**0.5
 
+    @property
+    def __name__(self):
+        return self.__class__.__name__
+
     def report(self, sim, measurement):
         parts = list(self._parts(sim, measurement))
         desc = '\n'.join('{}={}'.format(name, w)
