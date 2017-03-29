@@ -159,3 +159,25 @@ fit9 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-9',
                         fitness, params9)
 fit9.load()
 fit9.do_fit(400, popsize=20)
+
+
+# updated fitness functions, use wave with late spikes to fit latency
+# fit9.params.update(**fit9["194"].params)
+params10 = params8.update(junction_potential=-0.011962426960236439,
+                          RA=7.461321794316308,
+                          RM=7.430291533499045,
+                          CM=0.06459645379574586,
+                          Cond_Kir=16.785027556088167,
+                          Kir_offset=-0.004966350334998441,
+                          Cond_NaF_0=193235.13881770396,
+                          Cond_KaS_0=596.4041260775343,
+                          Cond_KaF_0=748.532913089759,
+                          Cond_Krp_0=3.9188988122933415,
+                          Cond_SKCa_0=0.8627234570253062,
+                          Cond_BKCa_0=8.435723459115415)
+fitness = aju.fitnesses.new_combined_fitness()
+fit10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-10',
+                         ms1.waves5[[0, 7, 17, 18, 21]],
+                         fitness, params10)
+fit10.load()
+fit10.do_fit(400, popsize=20)
