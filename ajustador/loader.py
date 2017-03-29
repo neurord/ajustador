@@ -131,7 +131,7 @@ class Attributable(object):
             return vartype.average(values)
 
         raise AttributeError('{} object does not have {} attribute'.format(
-            self.__class__.__name__, attr)
+            self.__class__.__name__, attr))
 
     def __getitem__(self, index):
         if isinstance(index, (slice, np.ndarray, list)):
