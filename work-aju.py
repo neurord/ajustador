@@ -61,7 +61,6 @@ fit4.do_fit(100)
 
 
 params5 = params3
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 fit5 = aju.optimize.Fit('../fit-2017-aju-cma-wave5h-2',
                         ms1.waves5[0:10:2], aju.fitnesses.hyperpol_fitness, params5)
 fit5.load()
@@ -72,7 +71,6 @@ for i in range(len(fit5)):
           '→', fit5.fitness_func(fit5[i], fit5.measurement, full=0))
 
 
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 params6 = aju.optimize.ParamSet(
     ('junction_potential', 0,       -0.030, +0.030),
     ('RA',                 12.004,    0, 100),
@@ -92,7 +90,6 @@ fit6 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-2',
 fit6.load()
 fit6.do_fit(150, popsize=20)
 
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 # fit6.params.update(**fit6[5650].params)
 params7 = params6.update(junction_potential=-0.01473080415412029,
                          RA=10.65928280866225,
@@ -132,7 +129,6 @@ params8 = aju.optimize.ParamSet(
     ('Cond_Krp_0',      177,        0, 600),
     ('Cond_SKCa_0',     0.5,        0, 6),
     ('Cond_BKCa_0',     10,         0, 100))
-aju.fitnesses.ERROR = aju.fitnesses.ErrorCalc.relative
 fit8 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-8',
                         ms1.waves5[[0, 7, 17, 21, 23]],
                         aju.fitnesses.new_combined_fitness, params8)
@@ -180,4 +176,6 @@ fit10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-10',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          fitness, params10)
 fit10.load()
+drawing.plot_history(fit10, fit10.measurement, fitness=aju.fitnesses.ahp_curve_fitness)
+
 fit10.do_fit(400, popsize=20)
