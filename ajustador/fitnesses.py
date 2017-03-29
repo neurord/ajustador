@@ -229,18 +229,19 @@ def ahp_curve_compare(cut1, cut2):
     return ((diff**2).sum()/diff.size)**0.5
 
 def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
-    m1, m2 = _select(sim, measurement)
+    m1, m2 = _select(sim, measurement,
+                     sim.spike_count + measurement.spike_count > 0)
 
-    for wave1, wave2 in zip(m1, m2):
-        n = max(wave1.spike_count, wave2.spike_count)
-        if n == 0:
-            continue
+    diffs = [ahp_curve_compare(ahp_curve_centered(wave1, i),
+                               ahp_curve_centered(wave2, i))
+             for wave1, wave2 in zip(m1, m2)
+             for i in range(max(wave1.spike_count, wave2.spike_count))]
+    if not diffs:
+        return 0
 
-        diffs = [ahp_curve_compare(ahp_curve_centered(wave1, i),
-                                   ahp_curve_centered(wave2, i))
-                 for i in range(n)]
-        assert 0 <= min(diffs) <= 1
-        assert 0 <= max(diffs) <= 1
+    assert 0 <= min(diffs) <= 1, diffs
+    assert 0 <= max(diffs) <= 1, diffs
+
     # take the twentieth percentile to avoid coincidental fits
     return sorted(diffs)[len(diffs)//5]
 
