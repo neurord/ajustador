@@ -476,9 +476,9 @@ class new_combined_fitness:
 
     def report(self, sim, measurement):
         parts = list(self._parts(sim, measurement))
-        desc = '\n'.join('{}={}'.format(name, w)
+        desc = '\n'.join('{}={:.2g}'.format(name, w)
                          for w, name in parts)
-        total = desc + '\n' + 'total: {}'.format(self.__call__(sim, measurement))
+        total = desc + '\n' + 'total: {:.02g}'.format(self.__call__(sim, measurement))
         return total
 
 def simple_combined_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
