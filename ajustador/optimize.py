@@ -202,15 +202,19 @@ class SimulationResults(object):
         self.dirname = dirname
         self.features = features
 
-    def _dirs(self):
+    def _dirs(self, last=None):
         paths = glob.glob(os.path.join(self.dirname, '*/.complete'))
         dirs = (os.path.dirname(path) for path in paths)
         # sort by the simulation initialization order
         compare = lambda dir: os.stat(os.path.join(dir, 'params.pickle')).st_mtime
-        return sorted(dirs, key=compare)
+        ans = sorted(dirs, key=compare)
+        if last is None:
+            return ans
+        else:
+            return ans[-last:]
 
-    def load(self):
-        dirs = self._dirs()
+    def load(self, last=None):
+        dirs = self._dirs(last=last)
         n = len(dirs)
         for i, dir in enumerate(dirs):
             yield i, n, SimulationResult(dir, self.features)
@@ -339,7 +343,7 @@ class Fit:
 
         utilities.mkdir_p(dirname)
 
-    def load(self):
+    def load(self, last=None):
         try:
             self._sim_value
         except AttributeError:
@@ -347,7 +351,7 @@ class Fit:
 
         new = SimulationResults(self.dirname, features=self.measurement.features)
         need_erase = False
-        for i, n, sim in new.load():
+        for i, n, sim in new.load(last=last):
             print('{}/{} {}'.format(i, n, sim.name), end='\r')
             need_erase = True
             key = tuple(self.params.scale_dict(sim.params))
