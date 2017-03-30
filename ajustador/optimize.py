@@ -113,14 +113,13 @@ class Simulation(loader.Attributable):
             print("Simulating{} at {} points".format(" asynchronously" if async else "", len(currents)))
             self.execute_for(currents, junction_potential, single, async=async)
 
-    @property
-    def _param_str(self):
-        return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
+    def _param_str(self, sep=' '):
+        return sep.join('{}={}'.format(k, v) for k, v in self.params.items())
 
     def __repr__(self):
         return '{}({}, {})'.format(
             self.__class__.__name__,
-            self.tmpdir, self._param_str)
+            self.tmpdir, self._param_str())
 
     def _set_result(self, result):
         self.waves = np.array(result, dtype=object)
@@ -171,13 +170,18 @@ class SimulationResult(loader.Attributable):
         waves.sort(key=operator.attrgetter('injection'))
         self.waves = np.array(waves, dtype=object)
 
-    @property
-    def _param_str(self):
-        return ' '.join('{}={}'.format(k, v) for k, v in self.params.items())
+    def _param_str(self, sep=' '):
+        return sep.join(('{}={:.3g}' if isinstance(v, float) else '{}={}').format(k, v)
+                        for k, v in self.params.items())
 
     def __repr__(self):
-        return '{}({!r}, {})'.format(
-            self.__class__.__name__, self.name, self._param_str)
+        return '{}({!r}, {})'.format(self.__class__.__name__, self.name,
+                                     self._param_str())
+
+    def report(self):
+        return '{}({!r})\n{}'.format(self.__class__.__name__, self.name,
+                                     self._param_str('\n'))
+
 
     @staticmethod
     def find_global(param, p_file):
