@@ -247,6 +247,9 @@ class Param:
         else:
             return AjuParam(*args)
 
+    def valid(self, val):
+        return True
+
 class AjuParam(Param):
     fixed = False
 
@@ -274,6 +277,10 @@ class AjuParam(Param):
 
     def unscale(self, val):
         return val * self._scaling
+
+    def valid(self, val):
+        return ((self.min is None or self.min <= val) and
+                (self.max is None or val <= self.max))
 
 class ParamSet:
     def __init__(self, *params):
@@ -323,7 +330,9 @@ class ParamSet:
                  for p in self.ajuparams])
 
     def __repr__(self):
-        vv = ' '.join('{}={}'.format(p.name, p.value) for p in self.params)
+        vv = ' '.join('{}={}{}'.format(p.name, p.value,
+                                       '' if p.valid(p.value) else '*')
+                      for p in self.params)
         return 'ParamSet ' + vv
 
 class Fit:
