@@ -247,7 +247,9 @@ def plot_history(groups, measurement=None, *,
         else:
             plot_together(groups[0][x])
 
-    f.canvas.mpl_connect('pick_event', onpick)
+    if hasattr(f, '_pick_event_id'):
+        f.canvas.mpl_disconnect(f._pick_event_id)
+    f._pick_event_id = f.canvas.mpl_connect('pick_event', onpick)
 
     f.show()
     return f
