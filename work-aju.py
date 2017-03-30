@@ -185,5 +185,44 @@ fitness = aju.fitnesses.new_combined_fitness()
 fit11 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          fitness, params10)
-fit11.load()
+fit11.load(last=200)
 fit11.do_fit(800, popsize=20)
+
+# redo the plots with different starting points
+params11a = params8.update(junction_potential=-0.011962426960236439/2,
+                           RA=7.461321794316308/2,
+                           RM=7.430291533499045/2,
+                           CM=0.06459645379574586/2,
+                           Cond_Kir=16.785027556088167/2,
+                           Kir_offset=-0.004966350334998441/2,
+                           Cond_NaF_0=193235.13881770396/2,
+                           Cond_KaS_0=596.4041260775343/2,
+                           Cond_KaF_0=748.532913089759/2,
+                           Cond_Krp_0=3.9188988122933415/2,
+                           Cond_SKCa_0=0.8627234570253062/2,
+                           Cond_BKCa_0=8.435723459115415/2)
+fitness = aju.fitnesses.new_combined_fitness()
+fit11a = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11a',
+                          ms1.waves5[[0, 7, 17, 18, 21]],
+                          fitness, params11a)
+fit11a.load(last=200)
+fit11a.do_fit(400, popsize=20)
+
+params11b = params8.update(junction_potential=-0.011962426960236439*2,
+                           RA=7.461321794316308*2,
+                           RM=7.430291533499045*1.3,
+                           CM=0.06459645379574586*1.5,
+                           Cond_Kir=16.785027556088167*2,
+                           Kir_offset=-0.004966350334998441,
+                           Cond_NaF_0=193235.13881770396*2,
+                           Cond_KaS_0=596.4041260775343*0.8,
+                           Cond_KaF_0=748.532913089759*1.2,
+                           Cond_Krp_0=3.9188988122933415*2,
+                           Cond_SKCa_0=0.8627234570253062*2,
+                           Cond_BKCa_0=8.435723459115415*2)
+fitness = aju.fitnesses.new_combined_fitness()
+fit11b = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11b',
+                          ms1.waves5[[0, 7, 17, 18, 21]],
+                          fitness, params11b)
+fit11b.load(last=200)
+fit11b.do_fit(400, popsize=20)
