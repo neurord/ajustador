@@ -76,6 +76,19 @@ def option_parser():
     p.add_argument('--Cond-CaR-0', type=real)
     p.add_argument('--Cond-CaT-0', type=real)
 
+    p.add_argument('--Cond-NaF-1', type=real)
+    p.add_argument('--Cond-KaS-1', type=real)
+    p.add_argument('--Cond-KaF-1', type=real)
+    p.add_argument('--Cond-Krp-1', type=real)
+    p.add_argument('--Cond-BKCa-1', type=real)
+    p.add_argument('--Cond-SKCa-1', type=real)
+
+    p.add_argument('--Cond-CaL12-1', type=real)
+    p.add_argument('--Cond-CaL13-1', type=real)
+    p.add_argument('--Cond-CaN-1', type=real)
+    p.add_argument('--Cond-CaR-1', type=real)
+    p.add_argument('--Cond-CaT-1', type=real)
+
     p.add_argument('--save')
     return p
 
@@ -111,6 +124,12 @@ def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, 
 
     return new_file
 
+def setup_conductance(condset, name, index, value):
+    if value is not None:
+        attr = getattr(condset, name)
+        keys = sorted(attr.keys())
+        attr[keys[index]] = value
+
 def setup(param_sim, model):
     condset = getattr(model.Condset, param_sim.neuron_type)
     if param_sim.Cond_Kir is not None:
@@ -121,20 +140,31 @@ def setup(param_sim, model):
         model.Channels.Kir.X.Avhalf += param_sim.Kir_offset
         model.Channels.Kir.X.Bvhalf += param_sim.Kir_offset
 
-    for option, attr in [(param_sim.Cond_NaF_0, condset.NaF),
-                         (param_sim.Cond_KaS_0, condset.KaS),
-                         (param_sim.Cond_KaF_0, condset.KaF),
-                         (param_sim.Cond_Krp_0, condset.Krp),
-                         (param_sim.Cond_BKCa_0, condset.BKCa),
-                         (param_sim.Cond_SKCa_0, condset.SKCa),
-                         (param_sim.Cond_CaL12_0, condset.CaL12),
-                         (param_sim.Cond_CaL13_0, condset.CaL13),
-                         (param_sim.Cond_CaN_0, condset.CaN),
-                         (param_sim.Cond_CaR_0, condset.CaR),
-                         (param_sim.Cond_CaT_0, condset.CaT)]:
-        if option is not None:
-            key = min(attr.keys())
-            attr[key] = option
+    for value, name in [(param_sim.Cond_NaF_0, 'NaF'),
+                        (param_sim.Cond_KaS_0, 'KaS'),
+                        (param_sim.Cond_KaF_0, 'KaF'),
+                        (param_sim.Cond_Krp_0, 'Krp'),
+                        (param_sim.Cond_BKCa_0, 'BKCa'),
+                        (param_sim.Cond_SKCa_0, 'SKCa'),
+                        (param_sim.Cond_CaL12_0, 'CaL12'),
+                        (param_sim.Cond_CaL13_0, 'CaL13'),
+                        (param_sim.Cond_CaN_0, 'CaN'),
+                        (param_sim.Cond_CaR_0, 'CaR'),
+                        (param_sim.Cond_CaT_0, 'CaT')]:
+        setup_conductance(condset, name, 0, value)
+
+    for value, name in [(param_sim.Cond_NaF_1, 'NaF'),
+                        (param_sim.Cond_KaS_1, 'KaS'),
+                        (param_sim.Cond_KaF_1, 'KaF'),
+                        (param_sim.Cond_Krp_1, 'Krp'),
+                        (param_sim.Cond_BKCa_1, 'BKCa'),
+                        (param_sim.Cond_SKCa_1, 'SKCa'),
+                        (param_sim.Cond_CaL12_1, 'CaL12'),
+                        (param_sim.Cond_CaL13_1, 'CaL13'),
+                        (param_sim.Cond_CaN_1, 'CaN'),
+                        (param_sim.Cond_CaR_1, 'CaR'),
+                        (param_sim.Cond_CaT_1, 'CaT')]:
+        setup_conductance(condset, name, 1, value)
 
     new_file = morph_morph_file(model,
                                 param_sim.neuron_type,
