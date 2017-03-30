@@ -17,7 +17,9 @@ try:
     _GRAPHS
 except NameError:
     _GRAPHS = {}
-def _get_graph(name, figsize=None, clear=True):
+def _get_graph(name, figsize=None, clear=True, newplot=False):
+    if newplot:
+        _GRAPHS.pop(name, None)
     try:
         f = _GRAPHS[name]
     except KeyError:
@@ -192,15 +194,16 @@ def plot_param_space(group, measurement=None, *what, **options):
 
 def plot_history(groups, measurement=None, *,
                  show_quit=False, labels=None, ymax=None, fitness=None,
-                 clear=True):
+                 clear=True,
+                 newplot=False):
 
     if hasattr(groups[0], 'name'):
         groups = groups,
 
     func = fitness or groups[0].fitness_func
 
-    f = _get_graph('fit history {}'.format(measurement.name),
-                   clear=clear)
+    name = 'fit history {}'.format(measurement.name)
+    f = _get_graph(name, clear=clear, newplot=newplot)
     ax = f.gca()
 
     colors = list('rgbkmc')
