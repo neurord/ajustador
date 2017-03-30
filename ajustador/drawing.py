@@ -38,8 +38,7 @@ def _get_graph(name, figsize=None, clear=True):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
-def plot_together(*groups, **opts):
-    offset = opts.get('offset', False)
+def plot_together(*groups, offset=False, labels=None):
     f = _get_graph(groups[0].name + ' together')
     ax = f.gca()
     for i, waves in enumerate(groups):
@@ -56,7 +55,10 @@ def plot_together(*groups, **opts):
             c[(i+2) % len(c)] = np.clip((curve.injection - off)/ptp, 0, 1)
             kwargs = {}
             if j == len(waves.waves)-1:
-                kwargs['label'] = waves.name
+                if labels is None or labels[i] is None:
+                    kwargs['label'] = waves.name
+                else:
+                    kwargs['label'] = labels[i]
             y = curve.wave.y - (curve.baseline.x if offset else 0)
             ax.plot(curve.wave.x, y, c=tuple(c), **kwargs)
 
@@ -240,7 +242,8 @@ def plot_history(groups, measurement=None, *,
         x = xdata[ind][0]
         if measurement:
             # FIXME: map from artist to group
-            plot_together(measurement, groups[0][x])
+            plot_together(measurement, groups[0][x],
+                          labels=[None, '{}: {}'.format(x, groups[0][x].name)])
         else:
             plot_together(groups[0][x])
 
