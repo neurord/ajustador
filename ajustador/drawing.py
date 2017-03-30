@@ -240,12 +240,27 @@ def plot_history(groups, measurement=None, *,
         xdata = thisline.get_xdata()
         ind = event.ind
         x = xdata[ind][0]
+        sim = groups[0][x]
+
+        texts = []
+        if hasattr(sim, 'report'):
+            texts.append(sim.report())
+        if hasattr(measurement, 'report'):
+            texts.append(measurement.report())
+
         if measurement:
             # FIXME: map from artist to group
-            plot_together(measurement, groups[0][x],
-                          labels=[None, '{}: {}'.format(x, groups[0][x].name)])
+            f = plot_together(measurement, sim,
+                              labels=[None, '{}: {}'.format(x, sim.name)])
+            if hasattr(func, 'report'):
+                texts.append(func.report(sim, measurement))
         else:
-            plot_together(groups[0][x])
+            plot_together(sim)
+        if texts:
+            f.axes[0].text(0, 1, '\n\n'.join(texts),
+                           verticalalignment='top',
+                           transform=ax.transAxes,
+                           fontsize=7)
 
     if hasattr(f, '_pick_event_id'):
         f.canvas.mpl_disconnect(f._pick_event_id)
