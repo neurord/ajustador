@@ -244,6 +244,8 @@ class Param:
         elif isinstance(args[1], str):
             # a filename or such, cannot optimize
             return Param(*args)
+        elif len(args) == 3 and args[2] == 'fixed':
+            return Param(*args[:2])
         else:
             return AjuParam(*args)
 

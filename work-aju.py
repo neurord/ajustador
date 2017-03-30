@@ -226,3 +226,28 @@ fit11b = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11b',
                           fitness, params11b)
 fit11b.load(last=200)
 fit11b.do_fit(400, popsize=20)
+
+# also allow the medial conductances to vary
+params12 = aju.optimize.ParamSet(
+    ('junction_potential', -0.012, 'fixed'),
+    ('RA',                 12.004,    0, 100),
+    ('RM',                 9.427,     0,  10),
+    ('CM',                 0.03604,   0, 0.10),
+    ('Cond_Kir',           14.502,    0, 100),
+    ('Kir_offset',         -.004,    -0.010, +0.005),
+    ('morph_file', 'MScell-tertDendlongRE.p'),
+    ('neuron_type', 'D1'),
+    ('Cond_NaF_0',      150e3,      0, 600e3),
+    ('Cond_NaF_1',      1894,       0, 10000),
+    ('Cond_KaS_0',      372,        0, 600),
+    ('Cond_KaF_0',      641,        0, 1000),
+    ('Cond_Krp_0',      177,        0, 600),
+    ('Cond_SKCa_0',     0.5,        0, 6),
+    ('Cond_BKCa_0',     10,         0, 100),
+    ('Cond_BKCa_1',     10,         0, 100))
+fitness = aju.fitnesses.new_combined_fitness()
+fit12 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-12',
+                         ms1.waves5[[0, 7, 17, 18, 21]],
+                         fitness, params12)
+fit12.load(last=200)
+fit12.do_fit(400, popsize=20)
