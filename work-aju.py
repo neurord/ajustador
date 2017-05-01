@@ -259,12 +259,27 @@ params12 = aju.optimize.ParamSet(
     ('neuron_type', 'D1'),
     ('Cond_NaF_0',      150e3,      0, 600e3),
     ('Cond_NaF_1',      1894,       0, 10000),
-    ('Cond_KaS_0',      372,        0, 600),
+    ('Cond_KaS_0',      372,        0, 2000),
     ('Cond_KaF_0',      641,        0, 1000),
     ('Cond_Krp_0',      177,        0, 600),
     ('Cond_SKCa_0',     0.5,        0, 6),
     ('Cond_BKCa_0',     10,         0, 100),
     ('Cond_BKCa_1',     10,         0, 100))
+# redo with higher upper bound for KaS density
+# and ahp_curve_fitness updated to take rms of all AHPs
+params12 = params12.update(RA=5.294949868179399,
+                    RM=7.7809771401424435,
+                    CM=0.060402895206330624,
+                    Cond_Kir=17.040420667688142,
+                    Kir_offset=-0.005857481956356754,
+                    Cond_NaF_0=219356.6071179029,
+                    Cond_NaF_1=878.6938806162441,
+                    Cond_KaS_0=599.9317714317569,
+                    Cond_KaF_0=887.4082517102048,
+                    Cond_Krp_0=0.045796847567147546,
+                    Cond_SKCa_0=1.736719977809778,
+                    Cond_BKCa_0=5.634221337003896,
+                    Cond_BKCa_1=9.824714710660963)
 fitness = aju.fitnesses.new_combined_fitness()
 fit12 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-12',
                          ms1.waves5[[0, 7, 17, 18, 21]],
