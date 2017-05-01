@@ -29,7 +29,7 @@ def _calculate_current(fileinfo, IV, IF):
 
 class IVCurve(object):
     """
-    >>> mes = loader.Measurement('docs/static/recording/042811-6ivifcurves_Waves/')
+    >>> mes = loader.IVCurveSeries('docs/static/recording/042811-6ivifcurves_Waves/')
     >>> wave = mes[2]
     >>> wave.baseline
     vartype(-0.080227, 0.000085)
@@ -144,10 +144,10 @@ class Attributable(object):
     def __len__(self):
         return len(self.waves)
 
-class Measurement(Attributable):
+class IVCurveSeries(Attributable):
     """Load a series of recordings from a directory
 
-    >>> mes = loader.Measurement('docs/static/recording/042811-6ivifcurves_Waves')
+    >>> mes = loader.IVCurveSeries('docs/static/recording/042811-6ivifcurves_Waves')
     >>> mes.waves
     array([<ajustador.loader.IVCurve object at ...>,
            <ajustador.loader.IVCurve object at ...>,
@@ -165,34 +165,28 @@ class Measurement(Attributable):
     >>> depol.injection
     array([  2.20000000e-10,   3.20000000e-10])
     """
-    def __init__(self, dirname, params, features=None,
-                 IV=(-500e-12, 50e-12),
-                 IF=(200e-12, 20e-12),
-                 time=.9,
-                 bad_extra=()):
-
+    def __init__(self, dirname, params, *, IV, IF, time, bad_extra=(), features=None):
         if features is None:
             from . import features as _features
             features = _features.standard_features
 
         super().__init__(features)
 
-        self.features = (params, *features)
-
-        self._args = dict(IV=IV, IF=IF, time=time)
-        self.bad_extra = bad_extra
         self.dirname = dirname
         self.name = os.path.basename(dirname)
+        self._bad_extra = bad_extra
+        self._load_args = dict(IV=IV, IF=IF, time=time)
+        self.features = (params, *features)
 
     @property
     @utilities.once
     def waves(self):
         ls = os.listdir(self.dirname)
 
-        waves = [IVCurve.load(self.dirname, f, features=self.features, **self._args)
+        waves = [IVCurve.load(self.dirname, f, features=self.features, **self._load_args)
                  for f in ls]
         waves = np.array([wave for wave in waves
-                          if wave.fileinfo.extra not in self.bad_extra])
+                          if wave.fileinfo.extra not in self._bad_extra])
         order = np.argsort([wave.injection for wave in waves])
         return waves[order]
 

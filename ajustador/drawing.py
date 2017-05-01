@@ -139,7 +139,7 @@ def plot_shape(what, *group):
         inj, val = waves.injection, op(waves)
         ord = inj.argsort()
         ax.plot(inj[ord], val[ord],
-                '-o' if isinstance(waves, loader.Measurement) else '--+',
+                '-o' if waves.__class__.__module__ == 'ajustador.loader' else '--+',
                 label=getattr(waves, 'name', '(mixed)'))
     ax.legend(loc='best', fontsize=8)
 
@@ -154,7 +154,7 @@ def plot_shape2(what, *group):
         x = [wave.falling_curve.y.min() if wave.falling_curve.y.size > 0 else np.nan
              for wave in waves]
         ax.plot(x, getattr(waves, what).x,
-                '-o' if isinstance(waves, loader.Measurement) else '--+',
+                '-o' if waves.__class__.__module__ == 'ajustador.loader' else '--+',
                 label=getattr(waves, 'name', '(mixed)'))
     ax.legend(loc='best', fontsize=8)
 
