@@ -27,33 +27,13 @@ def _calculate_current(fileinfo, IV, IF):
     start, inc = IV if fileinfo.protocol == 1 else IF
     return start + inc * (fileinfo.number - 1)
 
-class IVCurve(object):
-    """
-    >>> mes = loader.IVCurveSeries('docs/static/recording/042811-6ivifcurves_Waves/')
-    >>> wave = mes[2]
-    >>> wave.baseline
-    vartype(-0.080227, 0.000085)
-    >>> print(wave.baseline)
-    -0.08023±0.00009
-    >>> wave.injection
-    -2.5e-10
-    >>> wave.time
-    0.89990000000000003
-    >>> type(wave.wave)
-    <class 'numpy.recarray'>
-    >>> wave.wave.x
-    array([  0.00000000e+00,   1.00000000e-04,   2.00000000e-04, ...,
-             8.99700000e-01,   8.99800000e-01,   8.99900000e-01])
-    >>> wave.wave.y
-    array([-0.0799375 , -0.08028125, -0.08028125, ..., -0.08025   ,
-           -0.08034375, -0.08034375], dtype=float32)
-    """
 
-    def __init__(self, filename, fileinfo, injection, x, y, features):
-        self.filename = filename
-        self.fileinfo = fileinfo
+class Trace(object):
+    def __init__(self, injection, x, y, features):
         self.injection = injection
-        self.wave = np.rec.fromarrays((x, y), names='x,y')
+
+        wave = np.rec.fromarrays((x, y), names='x,y')
+        self.wave = wave
 
         self._attributes = {'wave':self,
                             'injection':self}
@@ -80,6 +60,35 @@ class IVCurve(object):
             return getattr(self._attributes[name], name)
         raise AttributeError(name)
 
+
+class IVCurve(Trace):
+    """
+    >>> mes = loader.IVCurveSeries('docs/static/recording/042811-6ivifcurves_Waves/')
+    >>> wave = mes[2]
+    >>> wave.baseline
+    vartype(-0.080227, 0.000085)
+    >>> print(wave.baseline)
+    -0.08023±0.00009
+    >>> wave.injection
+    -2.5e-10
+    >>> wave.time
+    0.89990000000000003
+    >>> type(wave.wave)
+    <class 'numpy.recarray'>
+    >>> wave.wave.x
+    array([  0.00000000e+00,   1.00000000e-04,   2.00000000e-04, ...,
+             8.99700000e-01,   8.99800000e-01,   8.99900000e-01])
+    >>> wave.wave.y
+    array([-0.0799375 , -0.08028125, -0.08028125, ..., -0.08025   ,
+           -0.08034375, -0.08034375], dtype=float32)
+    """
+
+    def __init__(self, filename, fileinfo, injection, x, y, features):
+        super().__init__(injection, x, y, features)
+
+        self.filename = filename
+        self.fileinfo = fileinfo
+
     @classmethod
     def load(cls, dirname, filename, IV, IF, time, features):
         path = os.path.join(dirname, filename)
@@ -96,6 +105,7 @@ class IVCurve(object):
     @property
     def time(self):
         return self.wave.x[-1]
+
 
 class Attributable(object):
     def __init__(self, features=None):
@@ -144,7 +154,41 @@ class Attributable(object):
     def __len__(self):
         return len(self.waves)
 
-class IVCurveSeries(Attributable):
+
+class Measurement(Attributable):
+    def __init__(self, dirname, params, *, features=None):
+        if features is None:
+            from . import features as _features
+            features = _features.standard_features
+
+        super().__init__(features)
+
+        self.dirname = dirname
+        self.name = os.path.basename(dirname)
+        self.features = (params, *features)
+
+    @property
+    @utilities.once
+    def waves(self):
+        waves = np.array(self._waves())
+        order = np.argsort([wave.injection for wave in waves])
+        return waves[order]
+
+    @waves.setter
+    def waves(self, value):
+        self._waves_value = value
+
+    def __lt__(self, other):
+        try:
+            return self.name < other.name
+        except AttributeError:
+            raise TypeError
+
+    def __repr__(self):
+        return '<{} {}>'.format(self.__class__.__name__, self.name)
+
+
+class IVCurveSeries(Measurement):
     """Load a series of recordings from a directory
 
     >>> mes = loader.IVCurveSeries('docs/static/recording/042811-6ivifcurves_Waves')
@@ -166,39 +210,49 @@ class IVCurveSeries(Attributable):
     array([  2.20000000e-10,   3.20000000e-10])
     """
     def __init__(self, dirname, params, *, IV, IF, time, bad_extra=(), features=None):
-        if features is None:
-            from . import features as _features
-            features = _features.standard_features
+        super().__init__(dirname, params, features=features)
 
-        super().__init__(features)
-
-        self.dirname = dirname
-        self.name = os.path.basename(dirname)
-        self._bad_extra = bad_extra
         self._load_args = dict(IV=IV, IF=IF, time=time)
-        self.features = (params, *features)
+        self._bad_extra = bad_extra
 
-    @property
-    @utilities.once
-    def waves(self):
+    def _waves(self):
         ls = os.listdir(self.dirname)
-
         waves = [IVCurve.load(self.dirname, f, features=self.features, **self._load_args)
                  for f in ls]
-        waves = np.array([wave for wave in waves
-                          if wave.fileinfo.extra not in self._bad_extra])
-        order = np.argsort([wave.injection for wave in waves])
-        return waves[order]
+        return [wave for wave in waves
+                if wave.fileinfo.extra not in self._bad_extra]
 
-    @waves.setter
-    def waves(self, value):
-        self._waves_value = value
+_known_units = {
+    'pA':1e-12,
+}
 
-    def __lt__(self, other):
-        try:
-            return self.name < other.name
-        except AttributeError:
-            raise TypeError
+def parse_current(text):
+    parts = text.split(' ')
+    if len(parts) != 2:
+        raise ValueError
+    mult = _known_units[parts[1]]
+    value = float(parts[0])
+    return value * mult
 
-    def __repr__(self):
-        return '<{} {}>'.format(self.__class__.__name__, self.name)
+class CSVSeries(Measurement):
+    """Load a series of measurements from a CSV file
+
+    Each CSV file contains data for multiple injection currents::
+
+      Time (ms),-200 pA,-150 pA,-100 pA,-50 pA,0 pA
+      0,-46.6918945313,-44.2504882813,-48.5229492188,-47.3022460938,-46.38671875
+      0.1000000015,-46.38671875,-45.7763671875,-46.38671875,-46.9970703125,-49.1333007813
+
+    The time and injection values are extracted automatically.
+    """
+    def __init__(self, dirname, params, *, features=None):
+        super().__init__(dirname, params, features=features)
+
+    def _waves(self):
+        import pandas as pd
+
+        csv = pd.read_csv(self.dirname, index_col=0)
+        x = csv.index.values
+        waves = [Trace(parse_current(column), x, csv[column].values, self.features)
+                 for column in csv.columns]
+        return waves
