@@ -77,13 +77,23 @@ def option_parser():
 
 @util.listize
 def serialize_options(opts):
+    conds = []
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
             continue
         if val is not None:
-            key = key.replace('_', '-')
-            yield '--{}={}'.format(key, val)
+            parts = key.split('_')
+            if parts[0] == 'Cond' and len(parts) == 3: # e.g. Cond_NaF_0
+                conds.append('{},{}={}'.format(parts[1], parts[2], val))
+            elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir
+                conds.append('{},:={}'.format(parts[1], val))
+            else:
+                key = key.replace('_', '-')
+                yield '--{}={}'.format(key, val)
+    if conds:
+        yield '--cond'
+        yield from conds
 
 def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, CM=None):
     if morph_file:
