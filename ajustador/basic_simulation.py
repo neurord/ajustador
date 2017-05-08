@@ -43,6 +43,14 @@ def real(s):
         raise ValueError
     return f
 
+def cond_setting(s):
+    "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
+    lhs, rhs = s.split('=', 1)
+    rhs = float(rhs)
+    chan, comp = lhs.split(',', 1)
+    comp = int(comp)
+    return chan, comp, rhs
+
 def option_parser():
     p = standard_options.standard_options(
         default_injection_delay=0.2,
@@ -61,31 +69,7 @@ def option_parser():
     p.add_argument('--Cond-Kir', type=real)
     p.add_argument('--Kir-offset', type=real)
 
-    p.add_argument('--Cond-NaF-0', type=real)
-    p.add_argument('--Cond-KaS-0', type=real)
-    p.add_argument('--Cond-KaF-0', type=real)
-    p.add_argument('--Cond-Krp-0', type=real)
-    p.add_argument('--Cond-BKCa-0', type=real)
-    p.add_argument('--Cond-SKCa-0', type=real)
-
-    p.add_argument('--Cond-CaL12-0', type=real)
-    p.add_argument('--Cond-CaL13-0', type=real)
-    p.add_argument('--Cond-CaN-0', type=real)
-    p.add_argument('--Cond-CaR-0', type=real)
-    p.add_argument('--Cond-CaT-0', type=real)
-
-    p.add_argument('--Cond-NaF-1', type=real)
-    p.add_argument('--Cond-KaS-1', type=real)
-    p.add_argument('--Cond-KaF-1', type=real)
-    p.add_argument('--Cond-Krp-1', type=real)
-    p.add_argument('--Cond-BKCa-1', type=real)
-    p.add_argument('--Cond-SKCa-1', type=real)
-
-    p.add_argument('--Cond-CaL12-1', type=real)
-    p.add_argument('--Cond-CaL13-1', type=real)
-    p.add_argument('--Cond-CaN-1', type=real)
-    p.add_argument('--Cond-CaR-1', type=real)
-    p.add_argument('--Cond-CaT-1', type=real)
+    p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
 
     p.add_argument('--save')
     return p
@@ -138,31 +122,10 @@ def setup(param_sim, model):
         model.Channels.Kir.X.Avhalf += param_sim.Kir_offset
         model.Channels.Kir.X.Bvhalf += param_sim.Kir_offset
 
-    for value, name in [(param_sim.Cond_NaF_0, 'NaF'),
-                        (param_sim.Cond_KaS_0, 'KaS'),
-                        (param_sim.Cond_KaF_0, 'KaF'),
-                        (param_sim.Cond_Krp_0, 'Krp'),
-                        (param_sim.Cond_BKCa_0, 'BKCa'),
-                        (param_sim.Cond_SKCa_0, 'SKCa'),
-                        (param_sim.Cond_CaL12_0, 'CaL12'),
-                        (param_sim.Cond_CaL13_0, 'CaL13'),
-                        (param_sim.Cond_CaN_0, 'CaN'),
-                        (param_sim.Cond_CaR_0, 'CaR'),
-                        (param_sim.Cond_CaT_0, 'CaT')]:
-        setup_conductance(condset, name, 0, value)
-
-    for value, name in [(param_sim.Cond_NaF_1, 'NaF'),
-                        (param_sim.Cond_KaS_1, 'KaS'),
-                        (param_sim.Cond_KaF_1, 'KaF'),
-                        (param_sim.Cond_Krp_1, 'Krp'),
-                        (param_sim.Cond_BKCa_1, 'BKCa'),
-                        (param_sim.Cond_SKCa_1, 'SKCa'),
-                        (param_sim.Cond_CaL12_1, 'CaL12'),
-                        (param_sim.Cond_CaL13_1, 'CaL13'),
-                        (param_sim.Cond_CaN_1, 'CaN'),
-                        (param_sim.Cond_CaR_1, 'CaR'),
-                        (param_sim.Cond_CaT_1, 'CaT')]:
-        setup_conductance(condset, name, 1, value)
+    for cond in sorted(param_sim.cond):
+        name, comp, value = cond
+        print('cond:', name, comp, value)
+        setup_conductance(condset, name, comp, value)
 
     new_file = morph_morph_file(model,
                                 param_sim.neuron_type,
