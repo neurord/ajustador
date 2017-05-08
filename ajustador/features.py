@@ -48,12 +48,15 @@ class Feature:
         ax.set_ylabel('membrane potential / V')
         return ax
 
-    def spike_plot(self, figure, bottom=None, spike_bounds=None,
-                   lmargin=0.0010, rmargin=0.0015, rowsize=3):
+    def spike_plot(self, figure, max_spikes=20,
+                   bottom=None, spike_bounds=None,
+                   lmargin=0.0010, rmargin=0.0015, rowsize=None):
         wave = self._obj.wave
         spikes = self._obj.spikes
 
-        spike_count = len(spikes)
+        spike_count = min(len(spikes), max_spikes)
+        if rowsize is None:
+            rowsize = 3 if spike_count < 19 else 5
         rows = math.ceil(spike_count / rowsize)
         columns = min(spike_count, rowsize)
 
@@ -478,7 +481,7 @@ class Spikes(Feature):
                                   lmargin=lmargin, rmargin=rmargin,
                                   **kwargs)
 
-        for i in range(self.spike_count):
+        for i in range(len(axes)):
             y = thresholds[i] + height[i] / 2
             axes[i].annotate('FWHM',
                              xy=(spike_bounds[i].left, y),
