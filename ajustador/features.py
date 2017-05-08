@@ -124,8 +124,11 @@ class SteadyState(Feature):
         wave = self._obj.wave
         before = self._obj.baseline_before
         after = self._obj.baseline_after
-
-        what = wave.y[(wave.x < before) | (wave.x > after)]
+        if before is None and after is None:
+            raise ValueError('cannot determine baseline')
+        region = ((wave.x < before if before is not None else False) |
+                  (wave.x > after if after is not None else False))
+        what = wave.y[region]
         cutoffa, cutoffb = np.percentile(what, (5, 95))
         cut = what[(what > cutoffa) & (what < cutoffb)]
         return vartype.array_mean(cut)
@@ -140,6 +143,8 @@ class SteadyState(Feature):
         """
         wave = self._obj.wave
         before = self._obj.baseline_before
+        if before is None:
+            return vartype.vartype.nan
 
         what = wave.y[(wave.x < before)]
         cutoffa, cutoffb = np.percentile(what, (5, 95))
@@ -156,6 +161,8 @@ class SteadyState(Feature):
         """
         wave = self._obj.wave
         after = self._obj.baseline_after
+        if after is None:
+            return vartype.vartype.nan
 
         what = wave.y[(wave.x > after)]
         cutoffa, cutoffb = np.percentile(what, (5, 95))
@@ -200,14 +207,16 @@ class SteadyState(Feature):
                        self.baseline,
                        'baseline', 'k')
         else:
-            _plot_line(ax,
-                       [(0, before)],
-                       self.baseline_pre,
-                       'baseline_pre', 'k')
-            _plot_line(ax,
-                       [(after, time)],
-                       self.baseline_post,
-                       'baseline_post', 'k')
+            if before is not None:
+                _plot_line(ax,
+                           [(0, before)],
+                           self.baseline_pre,
+                           'baseline_pre', 'k')
+            if after is not None:
+                _plot_line(ax,
+                           [(after, time)],
+                           self.baseline_post,
+                           'baseline_post', 'k')
 
         _plot_line(ax,
                    [(steady_after, steady_before)],
