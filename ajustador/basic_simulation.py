@@ -36,8 +36,6 @@ from spspine import (cell_proto,
                      standard_options)
 from spspine.graph import neuron_graph
 
-# FIXME
-d1d2.neurontypes = lambda: ('D1',)
 
 def real(s):
     f = float(s)
@@ -179,7 +177,7 @@ def setup(param_sim, model):
     vmtab,catab,plastab,currtab = tables.graphtables(model, neurons,
                                                      param_sim.plot_current,
                                                      param_sim.plot_current_message)
-    simpaths=['/'+neurotype for neurotype in model.neurontypes()]
+    simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
     return pg
@@ -207,15 +205,12 @@ def run_simulation(injection_current, simtime, param_sim):
 def main(args):
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
+    d1d2.neurontypes([param_sim.neuron_type])
     pulse_gen = setup(param_sim, d1d2)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim)
 
-    elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
     if param_sim.plot_current:
-        neuron_graph.graphs(d1d2,
-                            [[moose.element(elemname)]],
-                            False,
-                            param_sim.simtime)
+        neuron_graph.graphs(d1d2, False, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save:
         np.save(param_sim.save, moose.element(elemname).vector)
