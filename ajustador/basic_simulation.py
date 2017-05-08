@@ -48,7 +48,8 @@ def cond_setting(s):
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
     chan, comp = lhs.split(',', 1)
-    comp = int(comp)
+    if comp != ':':
+        comp = int(comp)
     return chan, comp, rhs
 
 def option_parser():
@@ -66,7 +67,6 @@ def option_parser():
     p.add_argument('--RM', type=real)
     p.add_argument('--CM', type=real)
 
-    p.add_argument('--Cond-Kir', type=real)
     p.add_argument('--Kir-offset', type=real)
 
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
@@ -107,16 +107,16 @@ def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, 
     return new_file
 
 def setup_conductance(condset, name, index, value):
-    if value is not None:
-        attr = getattr(condset, name)
-        keys = sorted(attr.keys())
+    attr = getattr(condset, name)
+    keys = sorted(attr.keys())
+    if index == ':':
+        for k in keys:
+            attr[k] = value
+    else:
         attr[keys[index]] = value
 
 def setup(param_sim, model):
     condset = getattr(model.Condset, param_sim.neuron_type)
-    if param_sim.Cond_Kir is not None:
-        for key in condset.Kir:
-            condset.Kir[key] = param_sim.Cond_Kir
 
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.Avhalf += param_sim.Kir_offset
@@ -156,13 +156,18 @@ def reset_baseline(neuron, baseline, Cond_Kir):
                 print("%s Em %f -> %f" % (w.path, w.Em, Em))
             w.Em = Em
 
-def run_simulation(injection_current, simtime, param_sim):
+def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
     if param_sim.baseline is not None:
-        reset_baseline(param_sim.neuron_type, param_sim.baseline, param_sim.Cond_Kir)
+        condset = getattr(model.Condset, param_sim.neuron_type)
+        attr = getattr(condset, 'Kir')
+        keys = sorted(attr.keys())
+        Cond_Kir = attr[keys[0]]
+
+        reset_baseline(param_sim.neuron_type, param_sim.baseline, Cond_Kir)
     moose.start(simtime)
 
 def main(args):
@@ -170,7 +175,7 @@ def main(args):
     param_sim = option_parser().parse_args(args)
     d1d2.neurontypes([param_sim.neuron_type])
     pulse_gen = setup(param_sim, d1d2)
-    run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim)
+    run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, d1d2)
 
     if param_sim.plot_current:
         neuron_graph.graphs(d1d2, False, param_sim.simtime, compartments=[0])
