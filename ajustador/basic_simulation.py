@@ -25,9 +25,9 @@ An explicit import is needed:
 import sys
 import tempfile
 import re
+import importlib
 import numpy as np
 import moose
-from spspine import d1d2
 from spspine import (cell_proto,
                      clocks,
                      inject_func,
@@ -61,7 +61,8 @@ def option_parser():
     )
     p.add_argument('--morph-file')
     p.add_argument('--baseline', type=real)
-    p.add_argument('--neuron-type')
+    p.add_argument('--model', required=True)
+    p.add_argument('--neuron-type', required=True)
 
     p.add_argument('--RA', type=real)
     p.add_argument('--RM', type=real)
@@ -173,12 +174,13 @@ def run_simulation(injection_current, simtime, param_sim, model):
 def main(args):
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
-    d1d2.neurontypes([param_sim.neuron_type])
-    pulse_gen = setup(param_sim, d1d2)
-    run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, d1d2)
+    model = importlib.import_module('spspine.' + param_sim.model)
+    model.neurontypes([param_sim.neuron_type])
+    pulse_gen = setup(param_sim, model)
+    run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
 
     if param_sim.plot_current:
-        neuron_graph.graphs(d1d2, False, param_sim.simtime, compartments=[0])
+        neuron_graph.graphs(model, False, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save:
         np.save(param_sim.save, moose.element(elemname).vector)
