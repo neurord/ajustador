@@ -508,13 +508,21 @@ class AHP(Feature):
         spikes = self._obj.spikes
         spike_bounds = self._obj.spike_bounds
         thresholds = self._obj.spike_threshold
+        injection_start = self._obj.injection_start
         injection_end = self._obj.injection_end
 
         x = self._obj.wave.x
         y = self._obj.wave.y
         ans = []
         for i in range(len(spikes)):
-            rlimit = spike_bounds[i+1].left if i < len(spikes)-1 else injection_end
+            beg = spike_bounds[i].right_i
+
+            # Don't allow the ahp to straddle an injection start/stop edge.
+            # The ahp will be invalid anyway.
+            rlimit = min(spike_bounds[i+1].left if i < len(spikes)-1 else x[-1],
+                         injection_start if injection_start > x[beg] else np.infty,
+                         injection_end if injection_end > x[beg] else np.infty)
+
             w = spike_bounds[i].width
             if not np.isnan(w):
                 n_rolling_window = int(w // (x[1] - x[0])) + 1
@@ -522,7 +530,6 @@ class AHP(Feature):
                 # FIXME: consider rejecting those outright
                 n_rolling_window = 5
 
-            beg = spike_bounds[i].right_i
             # if we are before the AHP, or mostly going down, advance
             while (beg < y.size and
                    y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
@@ -631,13 +638,13 @@ class AHP(Feature):
 
     def plot(self, figure):
         ax = super().plot(figure)
-        ax.set_xlim(self._obj.injection_start - self._obj.injection_interval*0.05,
-                    self._obj.injection_end + self._obj.injection_interval*0.05)
         if self._obj.spike_count == 0:
             ax.text(0.5, 0.5, 'no spikes',
                     horizontalalignment='center',
                     transform=ax.transAxes)
         else:
+            ax.set_xlim(self._obj.spikes[0].x - self._obj.injection_interval*0.05,
+                        self._obj.spikes[-1].x + self._obj.injection_interval*0.05)
             self._do_plots([ax] * self._obj.spike_count)
         figure.tight_layout()
 
