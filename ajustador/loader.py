@@ -60,6 +60,10 @@ class Trace(object):
             return getattr(self._attributes[name], name)
         raise AttributeError(name)
 
+    @property
+    def time(self):
+        return self.wave.x[-1]
+
 
 class IVCurve(Trace):
     """
@@ -101,10 +105,6 @@ class IVCurve(Trace):
         injection = _calculate_current(fileinfo, IV, IF)
 
         return cls(filename, fileinfo, injection, time, data, features)
-
-    @property
-    def time(self):
-        return self.wave.x[-1]
 
 
 class Attributable(object):

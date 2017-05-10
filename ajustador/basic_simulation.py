@@ -198,6 +198,7 @@ def main(args):
         neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save:
+        elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
         np.save(param_sim.save, moose.element(elemname).vector)
 
 if __name__ == '__main__':

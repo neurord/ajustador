@@ -340,9 +340,11 @@ class ParamSet:
 class Fit:
     fitness_max = 200
 
-    def __init__(self, dirname, measurement, fitness_func, params, feature_list=None):
+    def __init__(self, dirname, measurement, model, neuron_type, fitness_func, params, feature_list=None):
         self.dirname = dirname
         self.measurement = measurement
+        self.model = model
+        self.neuron_type = neuron_type
         self.fitness_func = fitness_func
         self.params = params
         self._history = []
@@ -383,6 +385,8 @@ class Fit:
         baseline = self.measurement.mean_baseline.x
         simtime = self.measurement.waves[0].time
         return Simulation(dir=self.dirname,
+                          model=self.model,
+                          neuron_type=self.neuron_type,
                           currents=self.measurement.injection,
                           baseline=baseline,
                           simtime=simtime,
