@@ -254,6 +254,6 @@ class CSVSeries(Measurement):
         csv = pd.read_csv(self.dirname, index_col=0)
         # FIXME: verify that units are really ms, mV
         x = csv.index.values / 1000
-        waves = [Trace(parse_current(column), x, csv[column].values, self.features)
+        waves = [Trace(parse_current(column), x, csv[column].values / 1000, self.features)
                  for column in csv.columns]
         return waves
