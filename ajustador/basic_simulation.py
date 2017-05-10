@@ -29,6 +29,7 @@ import importlib
 import numpy as np
 import moose
 from spspine import (cell_proto,
+                     calcium,
                      clocks,
                      inject_func,
                      tables,
@@ -154,6 +155,10 @@ def setup(param_sim, model):
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
+
+    if param_sim.hsolve and model.calYN:
+        calcium.fix_calcium(model.neurontypes(), model)
+
     return pg
 
 def reset_baseline(neuron, baseline, Cond_Kir):
