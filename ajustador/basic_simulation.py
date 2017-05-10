@@ -59,6 +59,7 @@ def option_parser():
         default_injection_width=0.4,
         default_injection_current=[-0.15e-9, 0.15e-9, 0.35e-9],
         default_simulation_time=.9,
+        default_plot_vm=None,
     )
     p.add_argument('--morph-file')
     p.add_argument('--baseline', type=real)
@@ -179,11 +180,14 @@ def run_simulation(injection_current, simtime, param_sim, model):
     moose.reinit()
     if param_sim.baseline is not None:
         condset = getattr(model.Condset, param_sim.neuron_type)
-        attr = getattr(condset, 'Kir')
-        keys = sorted(attr.keys())
-        Cond_Kir = attr[keys[0]]
-
-        reset_baseline(param_sim.neuron_type, param_sim.baseline, Cond_Kir)
+        try:
+            attr = condset.Kir
+        except KeyError:
+            pass
+        else:
+            keys = sorted(attr.keys())
+            Cond_Kir = attr[keys[0]]
+            reset_baseline(param_sim.neuron_type, param_sim.baseline, Cond_Kir)
     moose.start(simtime)
 
 def main(args):
