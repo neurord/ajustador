@@ -194,8 +194,8 @@ def main(args):
     pulse_gen = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
 
-    if param_sim.plot_current:
-        neuron_graph.graphs(model, False, param_sim.simtime, compartments=[0])
+    if param_sim.plot_vm:
+        neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save:
         np.save(param_sim.save, moose.element(elemname).vector)
