@@ -391,6 +391,8 @@ class Fit:
                           baseline=baseline,
                           simtime=simtime,
                           async=self._async,
+                          injection_delay=self.measurement[0].injection_start,
+                          injection_width=self.measurement[0].injection_interval,
                           features=self.measurement.features,
                           **unscaled)
 
