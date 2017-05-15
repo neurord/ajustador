@@ -703,7 +703,7 @@ def _fit_falling_curve(ccut, baseline, steady):
 
 class FallingCurve(Feature):
     requires = ('wave',
-                'steady_before', 'baseline_before',
+                'injection_start', 'steady_before',
                 'falling_curve_window',
                  'baseline', 'steady')
     provides = ('falling_curve', 'falling_curve_fit',
@@ -717,6 +717,7 @@ class FallingCurve(Feature):
     def falling_curve(self):
         return _find_falling_curve(self._obj.wave,
                                    window=self._obj.falling_curve_window,
+                                   after=self._obj.injection_start,
                                    before=self._obj.steady_before)
 
     @property
@@ -746,7 +747,7 @@ class FallingCurve(Feature):
         baseline = self._obj.baseline
         steady = self._obj.steady
         ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
-        ax.set_xlim(self._obj.baseline_before - 0.005, ccut.x.max() + .01)
+        ax.set_xlim(self._obj.injection_start - 0.005, ccut.x.max() + .01)
 
         func, popt, good = self.falling_curve_fit
         if good:
