@@ -164,7 +164,7 @@ class Measurement(Attributable):
         super().__init__(features)
 
         self.dirname = dirname
-        self.name = os.path.basename(dirname)
+        self.name = os.path.basename(dirname).split('.', 1)[0]
         self.features = (params, *features)
 
     @property
