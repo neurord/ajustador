@@ -608,7 +608,9 @@ class AHP(Feature):
         ahps = self.spike_ahp
         low, high = np.inf, -np.inf
 
-        for i in range(self._obj.spike_count):
+        spike_count = len(axes)
+
+        for i in range(spike_count):
             window = windows[i]
             x = spikes.x[i]
             width = window.right - x
