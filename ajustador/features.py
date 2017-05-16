@@ -764,7 +764,8 @@ class FallingCurve(Feature):
 
 
 class Rectification(Feature):
-    requires = ('baseline_before', 'steady_after', 'steady_before',
+    requires = ('injection_start',
+                'steady_after', 'steady_before',
                 'falling_curve', 'steady')
     provides = 'rectification',
     array_attributes = 'rectification',
@@ -793,7 +794,7 @@ class Rectification(Feature):
         before = self._obj.steady_before
         steady = self._obj.steady
 
-        ax.set_xlim(self._obj.baseline_before - 0.005, before)
+        ax.set_xlim(self._obj.injection_start - 0.005, before)
 
         _plot_line(ax,
                    [(after, before)],
