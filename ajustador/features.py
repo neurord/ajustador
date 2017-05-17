@@ -531,7 +531,7 @@ class AHP(Feature):
                 n_rolling_window = 5
 
             # if we are before the AHP, or mostly going down, advance
-            while (beg < y.size and
+            while (beg < y.size - n_rolling_window and
                    y[beg] >= thresholds[i] and x[beg + 1] < rlimit and
                    y[beg] > y[beg + n_rolling_window]):
                 beg += 1
@@ -573,7 +573,7 @@ class AHP(Feature):
     @property
     @utilities.once
     def spike_ahp_position(self):
-        """Returns the (averaged) x or the minimum in y of each AHP window
+        """Returns the (averaged) x of the minimum in y of each AHP window
 
         `spike_ahp_window` is used to determine the extent of the AHP.
         An average of the bottom area of the window of the width of the
@@ -587,14 +587,19 @@ class AHP(Feature):
 
         ans = np.empty((len(windows), 2))
         for i in range(len(windows)):
-            w = spike_bounds[i].width
+            step = windows[i].x[1] - windows[i].x[0]
+            # Make sure that we have at least a few points in the window,
+            # even if the spike is very narrow.
+            w = max(spike_bounds[i].width, 8 * step)
             left = windows[i].x[windows[i].y.argmin()] - w/2
             right = windows[i].x[windows[i].y.argmin()] + w/2
             cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
             bottom = vartype.array_mean(cut.y)
             weights = 1/(cut.y - bottom.x)**2
             avg = (cut.x * weights).sum() / weights.sum()
+            assert not np.isnan(avg)
             dev = ((cut.x-avg)**2 * weights).sum()**0.5 / weights.sum()**0.5
+            assert not np.isnan(dev)
             # TODO: check the formula for dev
             ans[i] = (avg, dev)
 
