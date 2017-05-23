@@ -458,8 +458,8 @@ class new_combined_fitness:
                         (self.spike_ahp, spike_ahp_fitness),
                         (self.ahp_curve, ahp_curve_fitness),
                         (self.spike_range_y_histogram, spike_range_y_histogram_fitness)):
-            yield (func(sim, measurement, error=self.error) if w else 0,
-                   func.__name__)
+            if w:
+                yield (func(sim, measurement, error=self.error), func.__name__)
 
     def __call__(self, sim, measurement, full=False):
         parts = [w for w, name in self._parts(sim, measurement)]
