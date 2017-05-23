@@ -266,7 +266,10 @@ class WaveRegion:
     @property
     def left(self):
         "x coordinate of the left edge of FWHM"
-        return self._wave.x[self.left_i-1:self.left_i+1].mean()
+        if self.left_i == 0:    # arr[-1:1] is an empty slice
+            return self._wave.x[0]
+        else:
+            return self._wave.x[self.left_i-1:self.left_i+1].mean()
 
     @property
     def right(self):
