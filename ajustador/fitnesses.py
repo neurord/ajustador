@@ -224,8 +224,9 @@ def ahp_curve_compare(cut1, cut2):
     if cut1 is None or cut2 is None:
         return 1
 
-    cut1 = interpolate(cut1, cut2)
-    diff = np.tanh((cut1.y - cut2.y) / cut2.y)
+    cut1i = interpolate(cut1, cut2)
+    diff = np.tanh((cut1i.y - cut2.y) / cut2.y)
+    diff[np.isnan(diff)] = np.nanmax(diff)
     return ((diff**2).sum()/diff.size)**0.5
 
 def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
