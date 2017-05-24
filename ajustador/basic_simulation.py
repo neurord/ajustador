@@ -1,7 +1,7 @@
 """Run a single simulation from the command-line
 
 This module takes a set of parameters which override the defaults
-provides by the spspine module and runs the simulation and saves the
+provides by the moose_nerp module and runs the simulation and saves the
 results. In particular, this is useful when running multiple simulation
 in parallel, where each one should be run out-of-process::
 
@@ -28,14 +28,14 @@ import re
 import importlib
 import numpy as np
 import moose
-from spspine import (cell_proto,
-                     calcium,
-                     clocks,
-                     inject_func,
-                     tables,
-                     util,
-                     standard_options)
-from spspine.graph import neuron_graph
+from moose_nerp.prototypes import (cell_proto,
+                                   calcium,
+                                   clocks,
+                                   inject_func,
+                                   tables,
+                                   util,
+                                   standard_options)
+from moose_nerp.graph import neuron_graph
 
 
 def real(s):
@@ -193,7 +193,7 @@ def run_simulation(injection_current, simtime, param_sim, model):
 def main(args):
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
-    model = importlib.import_module('spspine.' + param_sim.model)
+    model = importlib.import_module('moose_nerp.' + param_sim.model)
     model.neurontypes([param_sim.neuron_type])
     pulse_gen = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
