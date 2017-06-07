@@ -69,6 +69,8 @@ def option_parser():
     p.add_argument('--RA', type=real)
     p.add_argument('--RM', type=real)
     p.add_argument('--CM', type=real)
+    p.add_argument('--Erest', type=real)
+    p.add_argument('--Eleak', type=real)
 
     p.add_argument('--Kir-offset', type=real)
 
@@ -97,7 +99,8 @@ def serialize_options(opts):
         yield '--cond'
         yield from conds
 
-def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, CM=None):
+def morph_morph_file(model, ntype, morph_file, new_file=None,
+                     RA=None, RM=None, CM=None, Erest=None, Eleak=None):
     if morph_file:
         morph_file = util.find_model_file(model, morph_file)
     else:
@@ -108,12 +111,19 @@ def morph_morph_file(model, ntype, morph_file, new_file=None, RA=None, RM=None, 
     if new_file is None:
         new_file = tempfile.NamedTemporaryFile('wt', prefix='morphology-', suffix='.p')
 
-    for param in ('RA', 'RM', 'CM'):
-        value = locals()[param]
+    for param, value in (('RA', RA),
+                         ('RM', RM),
+                         ('CM', CM),
+                         ('EREST_ACT', Erest),
+                         ('ELEAK', Eleak)):
         if value is not None:
-            pat = r'(\*set_global {}) .*'.format(param)
+            pat = r'(\*(set_global|set_compt_param) {})\s.*'.format(param)
             repl = r'\1 {}'.format(value)
-            t = re.sub(pat, repl, t, count=1)
+            t_new = re.sub(pat, repl, t, count=1)
+            if t_new == t:
+                raise ValueError('substitution failed on {}: {!r}'.format(morph_file, pat))
+            t = t_new
+
     new_file.write(t)
     new_file.flush()
 
@@ -143,7 +153,8 @@ def setup(param_sim, model):
     new_file = morph_morph_file(model,
                                 param_sim.neuron_type,
                                 param_sim.morph_file,
-                                RA=param_sim.RA, RM=param_sim.RM, CM=param_sim.CM)
+                                RA=param_sim.RA, RM=param_sim.RM, CM=param_sim.CM,
+                                Erest=param_sim.Erest, Eleak=param_sim.Eleak)
     model.morph_file[param_sim.neuron_type] = new_file.name
 
     MSNsyn, neurons = cell_proto.neuronclasses(model)
