@@ -229,6 +229,14 @@ def ahp_curve_compare(cut1, cut2):
     diff[np.isnan(diff)] = np.nanmax(diff)
     return ((diff**2).sum()/diff.size)**0.5
 
+def _pick_spikes(wave1, wave2):
+    n = max(wave1.spike_count, wave2.spike_count)
+    # let's compare max 10 spikes
+    if n <= 10:
+        return range(n)
+    else:
+        return np.linspace(0, n-1, 10, dtype=int)
+
 def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement,
                      sim.spike_count + measurement.spike_count > 0)
@@ -236,7 +244,7 @@ def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     diffs = [ahp_curve_compare(ahp_curve_centered(wave1, i),
                                ahp_curve_centered(wave2, i))
              for wave1, wave2 in zip(m1, m2)
-             for i in range(max(wave1.spike_count, wave2.spike_count))]
+             for i in _pick_spikes(wave1, wave2)]
     if not diffs:
         return 0
 
