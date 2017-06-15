@@ -148,8 +148,8 @@ def _measurement_to_spikes(meas):
     frames = [pd.DataFrame(wave.spikes) for wave in meas]
     for frame, wave in zip(frames, meas):
         frame['injection'] = wave.injection
-        frame.reset_index(inplace=1)
-        frame.set_index(['index', 'injection'], inplace=1)
+        frame.reset_index(inplace=True)
+        frame.set_index(['index', 'injection'], inplace=True)
     return pd.concat(frames)
 
 def spike_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
