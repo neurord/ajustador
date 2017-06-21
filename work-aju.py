@@ -257,7 +257,6 @@ params12 = aju.optimize.ParamSet(
     ('Cond_Kir',           14.502,    0, 100),
     ('Kir_offset',         -.004,    -0.010, +0.005),
     ('morph_file', 'MScell-tertDendlongRE.p'),
-    ('neuron_type', 'D1'),
     ('Cond_NaF_0',      150e3,      0, 600e3),
     ('Cond_NaF_1',      1894,       0, 10000),
     ('Cond_KaS_0',      372,        0, 2000),
@@ -284,13 +283,14 @@ params12 = params12.update(RA=5.294949868179399,
 fitness = aju.fitnesses.new_combined_fitness()
 fit12 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-12',
                          ms1.waves5[[0, 7, 17, 18, 21]],
+                         'd1d2', 'D1',
                          fitness, params12)
 fit12.load(last=200)
-fit12.do_fit(120, popsize=20)
+fit12.do_fit(1, popsize=3)
 
 
 paramsgp1 = aju.optimize.ParamSet(
-    # ('junction_potential', -0.012, 'fixed'),
+    ('junction_potential', -0.012, -0.020, -0.005),
     ('RA',                 5 ,     0, 100),
     ('RM',                 5,      0,  10),
     ('CM',                 0.07,   0, 0.10),
@@ -300,13 +300,17 @@ paramsgp1 = aju.optimize.ParamSet(
 
     ('Cond_KDr_0', 300, 0, 1000),
     ('Cond_KDr_1', 58.2, 0, 300),
-    # ('Cond_KDr_2', 58.2, 0, 1000),
+    ('Cond_KDr_2', 58.2, 0, 1000),
 
     # Kv3={prox: 266, dist: 46.6, axon: 466},
     ('Cond_Kv3_0', 266, 0, 1000),
+    ('Cond_Kv3_1', 46.6, 0, 1000),
+    ('Cond_Kv3_2', 266, 0, 1000),
 
     # KvF={prox: 2.5, dist: 2.5, axon: 25},
     ('Cond_KvF_0',  2.5, 0, 10),
+    ('Cond_KvF_0',  2.5, 0, 10),
+    ('Cond_KvF_0',  25, 0, 100),
 
     # KvS={prox: 0.75, dist: 0.75, axon: 7.5},
     ('Cond_KvS_0', 0.75, 0, 10),
@@ -314,10 +318,12 @@ paramsgp1 = aju.optimize.ParamSet(
     # NaF={prox: 40000, dist: 400, axon: 40000},
     ('Cond_NaF_0', 40e3, 0, 100e3),
     ('Cond_NaF_1', 400, 0, 2000),
+    ('Cond_NaF_2', 40000, 0, 100000),
 
     # HCN1={prox: 0.2, dist: 0.2, axon: 0},
     # HCN2={prox: 0.25, dist: 0.25, axon: 0},
     # KCNQ={prox: 0.04, dist: 0.04, axon: 0.04},
+    ('Cond_KCNQ_0', 0.04, 0, 10),
 
     # NaS={prox: 0.15, dist: 0.15, axon: 0.5},
     ('Cond_NaS_0', 0.15, 0, 10),
@@ -330,6 +336,22 @@ paramsgp1 = aju.optimize.ParamSet(
     # BKCa={prox: 200, dist: 200, axon: 0},
     ('Cond_BKCa_0', 200, 0, 800),
 )
+paramsgp1.update(Cond_KvF_0=7.61,
+                 Cond_BKCa_0=199,
+                 Cond_KDr_0=277,
+                 Cond_KDr_1=99.9,
+                 Cond_Kv3_0=917,
+                 Cond_KvS_0=0.61,
+                 Cond_NaF_0=2.37e+04,
+                 Cond_NaF_1=185,
+                 Cond_NaS_0=3.16,
+                 Cond_SKCa_0=46.9,
+                 RA=4.08,
+                 RM=5.51,
+                 CM=0.0781,
+                 Eleak=-0.0304,
+                 baseline=-0.0456)
+
 fitness = aju.fitnesses.new_combined_fitness(response=1,
                                              baseline_pre=0,
                                              baseline_post=1,
@@ -343,5 +365,5 @@ fitness = aju.fitnesses.new_combined_fitness(response=1,
                                              spike_ahp=1,
                                              ahp_curve=1,
                                              spike_range_y_histogram=1)
-fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-4', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1)
-fitgp1.do_fit(20, popsize=20)
+fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-5.3', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1)
+fitgp1.do_fit(500, popsize=3)
