@@ -79,7 +79,7 @@ def plot_waves(waves):
     for i, curve in enumerate(waves.waves):
         ax = f.add_subplot(int(math.ceil(n/columns)), columns, i+1)
         ax.plot(curve.wave.x, curve.wave.y)
-        ax.set_title('{0.filename} / {0.injection}V'.format(curve), fontsize=8)
+        ax.set_title('{} / {}V'.format(waves.name, curve.injection), fontsize=8)
 
         baseline = curve.baseline
         ax.hlines([baseline.x, baseline.x + baseline.dev*3, baseline.x - baseline.dev*3],
