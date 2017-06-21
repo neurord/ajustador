@@ -40,9 +40,17 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
-def plot_together(*groups, offset=False, labels=None):
+def plot_together(*groups, offset=False, labels=None, separate=False):
     f = _get_graph(groups[0].name + ' together')
-    ax = f.gca()
+
+    if separate:
+        f.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97,
+                          wspace=0.26, hspace=0.20)
+        n = len(groups[0].waves)
+        columns = 1 if n == 1 else 2 if n in (2, 4) else 3 if n <= 9 else 4 if n <= 16 else 5
+    else:
+        ax = f.gca()
+
     for i, waves in enumerate(groups):
         c = [0, 0, 0]
         ptp = waves.injection.ptp()
@@ -54,6 +62,9 @@ def plot_together(*groups, offset=False, labels=None):
             ptp = 100e-12
 
         for j, curve in enumerate(waves.waves):
+            if separate:
+                ax = f.add_subplot(int(math.ceil(n/columns)), columns, j+1)
+
             c[(i+2) % len(c)] = np.clip((curve.injection - off)/ptp, 0, 1)
             kwargs = {}
             if j == len(waves.waves)-1:
