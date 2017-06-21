@@ -75,6 +75,7 @@ def _evaluate(a, b, error=ErrorCalc.relative):
         ans = vartype.array_rms(diff)
     elif error == ErrorCalc.relative:
         diff = relative_diff(a, b)
+        diff[np.isnan(diff)] = NAN_REPLACEMENT
         ans = vartype.array_rms(diff)
     else:
         assert False, error
