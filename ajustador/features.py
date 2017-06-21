@@ -672,18 +672,19 @@ class AHP(Feature):
 
 def _find_falling_curve(wave, window=20, after=0.2, before=0.6):
     d = vartype.array_diff(wave)
-    dd = smooth(d.y, window='hanning')[(d.x > after) & (d.x < before)]
+    dd = smooth(d.y, window='hanning', window_len=window)[(d.x > after) & (d.x < before)]
     start = end = dd.argmin() + (d.x <= after).sum()
     while start > 0 and wave[start - 1].y > wave[start].y and wave[start].x > after:
         start -= 1
-    sm = smooth(wave.y, window='hanning')
+    sm = smooth(wave.y, window='hanning', window_len=window)
     smallest = sm[end]
     # find minimum
     while (end+window < wave.size and wave[end+window].x < before
            and sm[end:end + window].min() < smallest):
         smallest = sm[end]
         end += window // 2
-    ccut = wave[start + 1 : end]
+    start_override = (d.x > after).argmax()
+    ccut = wave[start_override + 1 : end]
     return ccut
 
 def simple_exp(x, amp, tau):
