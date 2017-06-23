@@ -132,7 +132,7 @@ class SteadyState(Feature):
         region = ((wave.x < before if before is not None else False) |
                   (wave.x > after if after is not None else False))
         what = wave.y[region]
-        cutoffa, cutoffb = np.percentile(what, (5, 95))
+        cutoffa, cutoffb = np.percentile(what, (40, 60))
         cut = what[(what > cutoffa) & (what < cutoffb)]
         return vartype.array_mean(cut)
 
@@ -150,7 +150,7 @@ class SteadyState(Feature):
             return vartype.vartype.nan
 
         what = wave.y[(wave.x < before)]
-        cutoffa, cutoffb = np.percentile(what, (5, 95))
+        cutoffa, cutoffb = np.percentile(what, (40, 60))
         cut = what[(what > cutoffa) & (what < cutoffb)]
         return vartype.array_mean(cut)
 
@@ -168,7 +168,7 @@ class SteadyState(Feature):
             return vartype.vartype.nan
 
         what = wave.y[(wave.x > after)]
-        cutoffa, cutoffb = np.percentile(what, (5, 95))
+        cutoffa, cutoffb = np.percentile(what, (40, 60))
         cut = what[(what > cutoffa) & (what < cutoffb)]
         return vartype.array_mean(cut)
 
@@ -696,6 +696,7 @@ falling_param = namedtuple('falling_param', 'amp tau')
 function_fit = namedtuple('function_fit', 'function params good')
 
 def _fit_falling_curve(ccut, baseline, steady):
+    import pdb;pdb.set_trace()
     if ccut.size < 5 or not (steady-baseline).negative:
         func = None
         params = falling_param(vartype.vartype.nan,
