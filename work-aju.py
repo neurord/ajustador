@@ -387,3 +387,68 @@ fitness = aju.fitnesses.new_combined_fitness(response=1,
                                              spike_range_y_histogram=1)
 fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-5.3', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1)
 fitgp1.do_fit(500, popsize=3)
+
+
+
+paramsgp2 = aju.optimize.ParamSet(
+    ('junction_potential', -0.012, -0.020, -0.005),
+    ('RA',                 5 ,     0, 100),
+    ('RM',                 5,      0,  10),
+    ('CM',                 0.07,   0, 0.10),
+    # ('morph_file', 'GP_arky_41comp.p'),
+    # ('neuron_type',     'arky'),
+    ('Eleak', -0.056, -0.080, -0.030),
+
+    ('Cond_KDr_0', 300, 0, 1000),
+    ('Cond_KDr_1', 58.2, 0, 300),
+    ('Cond_KDr_2', 58.2, 0, 1000),
+
+    # Kv3={prox: 266, dist: 46.6, axon: 466},
+    ('Cond_Kv3_0', 266, 0, 1000),
+    ('Cond_Kv3_1', 46.6, 0, 1000),
+    ('Cond_Kv3_2', 266, 0, 1000),
+
+    # KvF={prox: 2.5, dist: 2.5, axon: 25},
+    ('Cond_KvF_0',  2.5, 0, 10),
+    ('Cond_KvF_1',  2.5, 0, 10),
+    ('Cond_KvF_2',  25, 0, 100),
+
+    # KvS={prox: 0.75, dist: 0.75, axon: 7.5},
+    ('Cond_KvS_0', 0.75, 0, 10),
+
+    # NaF={prox: 40000, dist: 400, axon: 40000},
+    ('Cond_NaF_0', 40e3, 0, 100e3),
+    ('Cond_NaF_1', 400, 0, 2000),
+    ('Cond_NaF_2', 40000, 0, 100000),
+
+    # HCN1={prox: 0.2, dist: 0.2, axon: 0},
+    # HCN2={prox: 0.25, dist: 0.25, axon: 0},
+    # KCNQ={prox: 0.04, dist: 0.04, axon: 0.04},
+    ('Cond_KCNQ_0', 0.04, 0, 10),
+
+    # NaS={prox: 0.15, dist: 0.15, axon: 0.5},
+    ('Cond_NaS_0', 0.15, 0, 10),
+
+    # Ca={prox: 0.1, dist: 0.06, axon: 0},
+
+    # SKCa={prox: 35, dist: 3.5, axon: 0},
+    ('Cond_SKCa_0', 35, 0, 100),
+
+    # BKCa={prox: 200, dist: 200, axon: 0},
+    ('Cond_BKCa_0', 200, 0, 800),
+)
+fitness = aju.fitnesses.new_combined_fitness(response=1,
+                                             baseline_pre=0,
+                                             baseline_post=1,
+                                             rectification=1,
+                                             falling_curve_time=1,
+                                             spike_time=1,
+                                             spike_width=1,
+                                             spike_height=1,
+                                             spike_latency=0,
+                                             spike_count=1,
+                                             spike_ahp=1,
+                                             ahp_curve=1,
+                                             spike_range_y_histogram=1)
+fitgp2 = aju.optimize.Fit('../fit-2017-gp-nr144-2', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp2)
+fitgp2.do_fit(500, popsize=10)
