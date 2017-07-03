@@ -696,7 +696,6 @@ falling_param = namedtuple('falling_param', 'amp tau')
 function_fit = namedtuple('function_fit', 'function params good')
 
 def _fit_falling_curve(ccut, baseline, steady):
-    import pdb;pdb.set_trace()
     if ccut.size < 5 or not (steady-baseline).negative:
         func = None
         params = falling_param(vartype.vartype.nan,
