@@ -17,7 +17,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,9 +27,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
     <link rel="next" title="Additional plots for SteadyState" href="features_steady_state_more.html" />
-    <link rel="prev" title="ajustador.vartype" href="vartype.html" />
+    <link rel="prev" title="ajustador.loader" href="loader.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -60,6 +60,43 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <div class="figure">
 <img alt="_images/features_steady_state.png" src="_images/features_steady_state.png" />
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">measurements1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ajustador</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">SteadyState</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">/tmp/nebish/home/zbyszek/neuro/ajustador/ajustador/vartype.py:166: RuntimeWarning: Mean of empty slice.</span>
+<span class="go">  return vartype(data.mean(), data.var(ddof=1)**0.5)</span>
+<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in true_divide</span>
+<span class="go">  ret = ret.dtype.type(ret / rcount)</span>
+<span class="go">/tmp/nebish/home/zbyszek/neuro/ajustador/ajustador/vartype.py:166: RuntimeWarning: Degrees of freedom &lt;= 0 for slice</span>
+<span class="go">  return vartype(data.mean(), data.var(ddof=1)**0.5)</span>
+<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:105: RuntimeWarning: invalid value encountered in true_divide</span>
+<span class="go">  arrmean, rcount, out=arrmean, casting=&#39;unsafe&#39;, subok=False)</span>
+<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:127: RuntimeWarning: invalid value encountered in true_divide</span>
+<span class="go">  ret = ret.dtype.type(ret / rcount)</span>
+<span class="go">baseline = nan±nan</span>
+<span class="go">steady = -0.08322±0.00008</span>
+<span class="go">response = nan±nan</span>
+<span class="go">baseline_pre = -0.080156259±0.000000007</span>
+<span class="go">baseline_post = -0.08011±0.00002</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//features_steady_state2.py">Source code</a>, <a class="reference external" href=".//features_steady_state2.png">png</a>, <a class="reference external" href=".//features_steady_state2.hires.png">hires.png</a>, <a class="reference external" href=".//features_steady_state2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_steady_state2.png" src="_images/features_steady_state2.png" />
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">strange1</span><span class="o">.</span><span class="n">high_baseline_post</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">SteadyState</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">baseline = -0.07±0.02</span>
+<span class="go">steady = -0.04±0.02</span>
+<span class="go">response = 0.03±0.03</span>
+<span class="go">baseline_pre = -0.078265±0.000002</span>
+<span class="go">baseline_post = -0.01533±0.00006</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="features_steady_state_more.html"><span class="doc">Additional plots for SteadyState</span></a></p>
 <dl class="attribute">
 <dt id="ajustador.features.SteadyState.requires">
@@ -68,18 +105,50 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 
 <dl class="attribute">
 <dt id="ajustador.features.SteadyState.provides">
-<code class="descname">provides</code><em class="property"> = ('baseline', 'steady', 'response')</em><a class="headerlink" href="#ajustador.features.SteadyState.provides" title="Permalink to this definition">¶</a></dt>
+<code class="descname">provides</code><em class="property"> = ('baseline', 'steady', 'response', 'baseline_pre', 'baseline_post')</em><a class="headerlink" href="#ajustador.features.SteadyState.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.mean_attributes">
+<code class="descname">mean_attributes</code><em class="property"> = ('baseline', 'steady', 'response', 'baseline_pre', 'baseline_post')</em><a class="headerlink" href="#ajustador.features.SteadyState.mean_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('baseline', 'steady', 'response', 'baseline_pre', 'baseline_post')</em><a class="headerlink" href="#ajustador.features.SteadyState.array_attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.SteadyState.baseline">
 <code class="descname">baseline</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The mean voltage of the area outside of injection interval</p>
+<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+&gt; 95th or &lt; 5th percentile.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.baseline_pre">
+<code class="descname">baseline_pre</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline_pre" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mean voltage of the area before the injection interval</p>
+<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+&gt; 95th or &lt; 5th percentile.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.SteadyState.baseline_post">
+<code class="descname">baseline_post</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mean voltage of the area after the injection interval</p>
+<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+&gt; 95th or &lt; 5th percentile.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.SteadyState.steady">
 <code class="descname">steady</code><a class="headerlink" href="#ajustador.features.SteadyState.steady" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns mean value of wave between <code class="xref any docutils literal"><span class="pre">steady_after</span></code> and <code class="xref any docutils literal"><span class="pre">steady_before</span></code>.</p>
+<p>&#8220;Outliers&#8221;, values &gt; 80th percentile (which is a parameter), are excluded.
+80th percentile excludes the spikes.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.SteadyState.response">
@@ -88,7 +157,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 
 <dl class="method">
 <dt id="ajustador.features.SteadyState.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em>, <em>pre_post=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -101,20 +170,138 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <div class="figure">
 <img alt="_images/features_spikes.png" src="_images/features_spikes.png" />
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Spikes</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">spike_i = 5433</span>
+<span class="go">          6795</span>
+<span class="go">          8121</span>
+<span class="go">          9518</span>
+<span class="go">          11077</span>
+<span class="go">spikes = (0.27165, 0.042249999940395355)</span>
+<span class="go">         (0.33975, 0.04143749922513962)</span>
+<span class="go">         (0.40605, 0.040031250566244125)</span>
+<span class="go">         (0.47590000000000005, 0.039281249046325684)</span>
+<span class="go">         (0.5538500000000001, 0.038343749940395355)</span>
+<span class="go">spike_count = 5</span>
+<span class="go">spike_threshold = -0.0497187487781</span>
+<span class="go">                  -0.047187499702</span>
+<span class="go">                  -0.046250000596</span>
+<span class="go">                  -0.0472187511623</span>
+<span class="go">                  -0.0475312508643</span>
+<span class="go">                = -0.048±0.001</span>
+<span class="go">mean_isi = 0.071±0.005</span>
+<span class="go">isi_spread = 0.01165</span>
+<span class="go">spike_latency = 0.07165</span>
+<span class="go">spike_bounds = WaveRegion[16 points, x=0.2714-0.2722, y=0.001-0.042]</span>
+<span class="go">               WaveRegion[16 points, x=0.3395-0.3403, y=0.001-0.041]</span>
+<span class="go">               WaveRegion[16 points, x=0.4058-0.4066, y=0.000-0.040]</span>
+<span class="go">               WaveRegion[17 points, x=0.4756-0.4765, y=-0.002-0.039]</span>
+<span class="go">               WaveRegion[17 points, x=0.5536-0.5544, y=-0.004-0.038]</span>
+<span class="go">spike_height = 0.0919687487185</span>
+<span class="go">               0.0886249989271</span>
+<span class="go">               0.0862812511623</span>
+<span class="go">               0.0865000002086</span>
+<span class="go">               0.0858750008047</span>
+<span class="go">             = 0.088±0.003</span>
+<span class="go">spike_width = 0.0008</span>
+<span class="go">              0.0008</span>
+<span class="go">              0.0008</span>
+<span class="go">              0.00085</span>
+<span class="go">              0.00085</span>
+<span class="go">            = 0.00082±0.00003</span>
+<span class="go">mean_spike_height = 0.040±0.002</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//features_spikes2.py">Source code</a>, <a class="reference external" href=".//features_spikes2.png">png</a>, <a class="reference external" href=".//features_spikes2.hires.png">hires.png</a>, <a class="reference external" href=".//features_spikes2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_spikes2.png" src="_images/features_spikes2.png" />
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">strange1</span><span class="o">.</span><span class="n">high_baseline_post</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Spikes</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">spike_i = 1139</span>
+<span class="go">          1298</span>
+<span class="go">          1491</span>
+<span class="go">          1686</span>
+<span class="go">          1881</span>
+<span class="go">          2078</span>
+<span class="go">spikes = (0.22782531673705267, 0.057194696302130574)</span>
+<span class="go">         (0.2596288508557457, 0.05766577375785903)</span>
+<span class="go">         (0.2982331406979329, 0.05768073942459968)</span>
+<span class="go">         (0.33723747499444323, 0.05737642815217372)</span>
+<span class="go">         (0.3762418092909535, 0.0578476478258447)</span>
+<span class="go">         (0.41564618804178705, 0.05776826735137781)</span>
+<span class="go">spike_count = 6</span>
+<span class="go">spike_threshold = -0.0434335444769</span>
+<span class="go">                  -0.0422116029017</span>
+<span class="go">                  -0.0418710702884</span>
+<span class="go">                  -0.0406300647089</span>
+<span class="go">                  -0.0425443984716</span>
+<span class="go">                  -0.0418791194138</span>
+<span class="go">                = -0.0421±0.0009</span>
+<span class="go">mean_isi = 0.038±0.003</span>
+<span class="go">isi_spread = 0.00760084463214</span>
+<span class="go">spike_latency = 0.0278253167371</span>
+<span class="go">spike_bounds = WaveRegion[5 points, x=0.2277-0.2287, y=0.008-0.057]</span>
+<span class="go">               WaveRegion[5 points, x=0.2595-0.2605, y=0.024-0.058]</span>
+<span class="go">               WaveRegion[5 points, x=0.2981-0.2991, y=0.025-0.058]</span>
+<span class="go">               WaveRegion[6 points, x=0.3369-0.3381, y=0.019-0.057]</span>
+<span class="go">               WaveRegion[6 points, x=0.3761-0.3773, y=0.013-0.058]</span>
+<span class="go">               WaveRegion[6 points, x=0.4155-0.4167, y=0.008-0.058]</span>
+<span class="go">spike_height = 0.100628240779</span>
+<span class="go">               0.0998773766596</span>
+<span class="go">               0.099551809713</span>
+<span class="go">               0.0980064928611</span>
+<span class="go">               0.100392046297</span>
+<span class="go">               0.0996473867652</span>
+<span class="go">             = 0.0997±0.0009</span>
+<span class="go">spike_width = 0.00100011113581</span>
+<span class="go">              0.00100011113581</span>
+<span class="go">              0.00100011113581</span>
+<span class="go">              0.00120013336297</span>
+<span class="go">              0.00120013336297</span>
+<span class="go">              0.00120013336297</span>
+<span class="go">            = 0.0011±0.0001</span>
+<span class="go">mean_spike_height = 0.0576±0.0003</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="features_spikes_more.html"><span class="doc">Additional plots for Spikes</span></a></p>
 <dl class="attribute">
 <dt id="ajustador.features.Spikes.requires">
-<code class="descname">requires</code><em class="property"> = ('wave', 'depolarization_interval')</em><a class="headerlink" href="#ajustador.features.Spikes.requires" title="Permalink to this definition">¶</a></dt>
+<code class="descname">requires</code><em class="property"> = ('wave', 'injection_interval', 'injection_start')</em><a class="headerlink" href="#ajustador.features.Spikes.requires" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.Spikes.provides">
-<code class="descname">provides</code><em class="property"> = ('spike_i', 'spikes', 'spike_count', 'mean_isi', 'isi_spread', 'spike_latency', 'spike_bounds', 'spike_width', 'mean_spike_height')</em><a class="headerlink" href="#ajustador.features.Spikes.provides" title="Permalink to this definition">¶</a></dt>
+<code class="descname">provides</code><em class="property"> = ('spike_i', 'spikes', 'spike_count', 'spike_threshold', 'mean_isi', 'isi_spread', 'spike_latency', 'spike_bounds', 'spike_height', 'spike_width', 'mean_spike_height')</em><a class="headerlink" href="#ajustador.features.Spikes.provides" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('spike_count', 'spike_height', 'spike_width', 'mean_isi', 'isi_spread', 'spike_latency')</em><a class="headerlink" href="#ajustador.features.Spikes.array_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.mean_attributes">
+<code class="descname">mean_attributes</code><em class="property"> = ('spike_height', 'spike_width', 'spike_threshold')</em><a class="headerlink" href="#ajustador.features.Spikes.mean_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_i_and_threshold">
+<code class="descname">spike_i_and_threshold</code><a class="headerlink" href="#ajustador.features.Spikes.spike_i_and_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indices of spike maximums in the wave.x, wave.y arrays</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.Spikes.spike_i">
 <code class="descname">spike_i</code><a class="headerlink" href="#ajustador.features.Spikes.spike_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indices of spike maximums in the wave.x, wave.y arrays</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_threshold">
+<code class="descname">spike_threshold</code><a class="headerlink" href="#ajustador.features.Spikes.spike_threshold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indices of spike maximums in the wave.x, wave.y arrays</p>
 </dd></dl>
 
@@ -142,7 +329,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <p>Defined as:</p>
 <ul class="simple">
 <li><span class="math">\(&lt;x_{i+1} - x_i&gt;\)</span>, if there are at least two spikes,</li>
-<li>the length of the depolarization interval otherwise (<code class="xref any docutils literal"><span class="pre">depolarization_interval</span></code>)</li>
+<li>the length of the depolarization interval otherwise (<code class="xref any docutils literal"><span class="pre">injection_interval</span></code>)</li>
 </ul>
 <p>If there less than three spikes, the variance is fixed as
 <a class="reference internal" href="#ajustador.features.Spikes.mean_isi_fallback_variance" title="ajustador.features.Spikes.mean_isi_fallback_variance"><code class="xref any py py-attr docutils literal"><span class="pre">mean_isi_fallback_variance</span></code></a>.</p>
@@ -158,13 +345,19 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dl class="attribute">
 <dt id="ajustador.features.Spikes.spike_latency">
 <code class="descname">spike_latency</code><a class="headerlink" href="#ajustador.features.Spikes.spike_latency" title="Permalink to this definition">¶</a></dt>
-<dd><p>Latency until the first spike or end of injection if no spikes</p>
+<dd><p>Latency until the first spike or nan if no spikes</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.Spikes.spike_bounds">
 <code class="descname">spike_bounds</code><a class="headerlink" href="#ajustador.features.Spikes.spike_bounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>The halfheight left and right positions of spikes</p>
+<dd><p>The FWHM box and other measurements for each spike</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Spikes.spike_height">
+<code class="descname">spike_height</code><a class="headerlink" href="#ajustador.features.Spikes.spike_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>The difference between spike peaks and spike threshold</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -183,26 +376,94 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ajustador.features.Spikes.spike_plot">
+<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.spike_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="ajustador.features.AHP">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">AHP</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the depth of &#8220;after hyperpolarization&#8221;</p>
-<p>.... plot:: features_ahp.py</p>
+<p>(<a class="reference external" href=".//features_ahp.py">Source code</a>, <a class="reference external" href=".//features_ahp.png">png</a>, <a class="reference external" href=".//features_ahp.hires.png">hires.png</a>, <a class="reference external" href=".//features_ahp.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/features_ahp.png" src="_images/features_ahp.png" />
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">AHP</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">spike_ahp_window = WaveRegion[1259 points, x=0.2729-0.3358, y=-0.057--0.050]</span>
+<span class="go">                   WaveRegion[1287 points, x=0.3409-0.4053, y=-0.056--0.047]</span>
+<span class="go">                   WaveRegion[1360 points, x=0.4073-0.4753, y=-0.055--0.046]</span>
+<span class="go">                   WaveRegion[1496 points, x=0.4772-0.5520, y=-0.055--0.047]</span>
+<span class="go">                   WaveRegion[896 points, x=0.5552-0.6000, y=-0.055--0.048]</span>
+<span class="go">spike_ahp = -0.05640±0.00009</span>
+<span class="go">            -0.05551±0.00012</span>
+<span class="go">            -0.05481±0.00012</span>
+<span class="go">            -0.05487±0.00013</span>
+<span class="go">            -0.05452±0.00010</span>
+<span class="go">          = -0.05533±0.00005</span>
+<span class="go">spike_ahp_position = 0.28625±0.00020</span>
+<span class="go">                     0.35594±0.00019</span>
+<span class="go">                     0.42259±0.00005</span>
+<span class="go">                     0.49091±0.00021</span>
+<span class="go">                     0.56793±0.00034</span>
+</pre></div>
+</div>
 <dl class="attribute">
 <dt id="ajustador.features.AHP.requires">
-<code class="descname">requires</code><em class="property"> = ('wave', 'spike_bounds')</em><a class="headerlink" href="#ajustador.features.AHP.requires" title="Permalink to this definition">¶</a></dt>
+<code class="descname">requires</code><em class="property"> = ('wave', 'injection_start', 'injection_end', 'injection_interval', 'spikes', 'spike_count', 'spike_bounds', 'spike_threshold')</em><a class="headerlink" href="#ajustador.features.AHP.requires" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.AHP.provides">
-<code class="descname">provides</code><em class="property"> = ('spike_ahp',)</em><a class="headerlink" href="#ajustador.features.AHP.provides" title="Permalink to this definition">¶</a></dt>
+<code class="descname">provides</code><em class="property"> = ('spike_ahp_window', 'spike_ahp', 'spike_ahp_position')</em><a class="headerlink" href="#ajustador.features.AHP.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('spike_ahp_window', 'spike_ahp', 'spike_ahp_position')</em><a class="headerlink" href="#ajustador.features.AHP.array_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.mean_attributes">
+<code class="descname">mean_attributes</code><em class="property"> = ('spike_ahp',)</em><a class="headerlink" href="#ajustador.features.AHP.mean_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.spike_ahp_window">
+<code class="descname">spike_ahp_window</code><a class="headerlink" href="#ajustador.features.AHP.spike_ahp_window" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.AHP.spike_ahp">
 <code class="descname">spike_ahp</code><a class="headerlink" href="#ajustador.features.AHP.spike_ahp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the (averaged) minimum in y of each AHP window</p>
+<p><a class="reference internal" href="#ajustador.features.AHP.spike_ahp_window" title="ajustador.features.AHP.spike_ahp_window"><code class="xref any py py-attr docutils literal"><span class="pre">spike_ahp_window</span></code></a> is used to determine the extent of the AHP.
+An average of the bottom area of the window of the width of the
+spike is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.AHP.spike_ahp_position">
+<code class="descname">spike_ahp_position</code><a class="headerlink" href="#ajustador.features.AHP.spike_ahp_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the (averaged) x of the minimum in y of each AHP window</p>
+<p><a class="reference internal" href="#ajustador.features.AHP.spike_ahp_window" title="ajustador.features.AHP.spike_ahp_window"><code class="xref any py py-attr docutils literal"><span class="pre">spike_ahp_window</span></code></a> is used to determine the extent of the AHP.
+An average of the bottom area of the window of the width of the
+spike is used.</p>
+<p>TODO: add to plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.AHP.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.features.AHP.spike_plot">
+<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.spike_plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -214,15 +475,117 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <div class="figure">
 <img alt="_images/features_falling_curve.png" src="_images/features_falling_curve.png" />
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">FallingCurve</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">falling_curve = (0.2001, -0.07778125256299973)</span>
+<span class="go">                (0.20020000000000002, -0.07925000041723251)</span>
+<span class="go">                (0.2003, -0.08025000244379044)</span>
+<span class="go">                (0.20040000000000002, -0.08096875250339508)</span>
+<span class="go">                (0.2005, -0.08178125321865082)</span>
+<span class="go">                (0.2006, -0.08228124678134918)</span>
+<span class="go">                (0.20070000000000002, -0.08287499845027924)</span>
+<span class="go">                (0.2008, -0.08321875333786011)</span>
+<span class="go">                (0.20090000000000002, -0.08349999785423279)</span>
+<span class="go">                (0.201, -0.08384375274181366)</span>
+<span class="go">                (0.2011, -0.08412499725818634)</span>
+<span class="go">                (0.20120000000000002, -0.0846562534570694)</span>
+<span class="go">                (0.2013, -0.08493749797344208)</span>
+<span class="go">                (0.20140000000000002, -0.08518750220537186)</span>
+<span class="go">                (0.2015, -0.08553124964237213)</span>
+<span class="go">                (0.2016, -0.0859375)</span>
+<span class="go">                (0.20170000000000002, -0.08609375357627869)</span>
+<span class="go">                (0.2018, -0.08649999648332596)</span>
+<span class="go">                (0.2019, -0.08665625005960464)</span>
+<span class="go">                (0.202, -0.08681250363588333)</span>
+<span class="go">                (0.2021, -0.08734375238418579)</span>
+<span class="go">                (0.20220000000000002, -0.08743750303983688)</span>
+<span class="go">                (0.2023, -0.08784375339746475)</span>
+<span class="go">                (0.2024, -0.08778125047683716)</span>
+<span class="go">                (0.2025, -0.08799999952316284)</span>
+<span class="go">                (0.2026, -0.0884687528014183)</span>
+<span class="go">                (0.20270000000000002, -0.0885000005364418)</span>
+<span class="go">                (0.2028, -0.08881250023841858)</span>
+<span class="go">                (0.2029, -0.08881250023841858)</span>
+<span class="go">                (0.203, -0.08906249701976776)</span>
+<span class="go">                (0.2031, -0.08928125351667404)</span>
+<span class="go">                (0.20320000000000002, -0.08968749642372131)</span>
+<span class="go">                (0.2033, -0.0898125022649765)</span>
+<span class="go">                (0.2034, -0.08984375)</span>
+<span class="go">                (0.20350000000000001, -0.09000000357627869)</span>
+<span class="go">                (0.2036, -0.09009374678134918)</span>
+<span class="go">                (0.20370000000000002, -0.09009374678134918)</span>
+<span class="go">                (0.2038, -0.09056250005960464)</span>
+<span class="go">                (0.2039, -0.09056250005960464)</span>
+<span class="go">                (0.20400000000000001, -0.09068749845027924)</span>
+<span class="go">                (0.2041, -0.09075000137090683)</span>
+<span class="go">                (0.20420000000000002, -0.09099999815225601)</span>
+<span class="go">                (0.2043, -0.09090624749660492)</span>
+<span class="go">                (0.2044, -0.0911249965429306)</span>
+<span class="go">                (0.20450000000000002, -0.0911562517285347)</span>
+<span class="go">                (0.2046, -0.09134375303983688)</span>
+<span class="go">                (0.20470000000000002, -0.09159374982118607)</span>
+<span class="go">                (0.2048, -0.09149999916553497)</span>
+<span class="go">                (0.2049, -0.09171874821186066)</span>
+<span class="go">                (0.20500000000000002, -0.09159374982118607)</span>
+<span class="go">                (0.2051, -0.09190624952316284)</span>
+<span class="go">                (0.20520000000000002, -0.09181249886751175)</span>
+<span class="go">                (0.2053, -0.09178125113248825)</span>
+<span class="go">                (0.2054, -0.09203124791383743)</span>
+<span class="go">                (0.20550000000000002, -0.09178125113248825)</span>
+<span class="go">                (0.2056, -0.09184374660253525)</span>
+<span class="go">                (0.20570000000000002, -0.09203124791383743)</span>
+<span class="go">                (0.2058, -0.09218750149011612)</span>
+<span class="go">                (0.2059, -0.09218750149011612)</span>
+<span class="go">                (0.20600000000000002, -0.09218750149011612)</span>
+<span class="go">                (0.2061, -0.09221874922513962)</span>
+<span class="go">                (0.20620000000000002, -0.09228125214576721)</span>
+<span class="go">                (0.2063, -0.09234374761581421)</span>
+<span class="go">                (0.2064, -0.09228125214576721)</span>
+<span class="go">                (0.20650000000000002, -0.09231249988079071)</span>
+<span class="go">                (0.2066, -0.09224999696016312)</span>
+<span class="go">                (0.20670000000000002, -0.09224999696016312)</span>
+<span class="go">                (0.2068, -0.09234374761581421)</span>
+<span class="go">                (0.2069, -0.0924374982714653)</span>
+<span class="go">                (0.20700000000000002, -0.0924687534570694)</span>
+<span class="go">                (0.2071, -0.0924687534570694)</span>
+<span class="go">                (0.20720000000000002, -0.09259375184774399)</span>
+<span class="go">                (0.2073, -0.0925000011920929)</span>
+<span class="go">                (0.2074, -0.0924687534570694)</span>
+<span class="go">                (0.20750000000000002, -0.09265624731779099)</span>
+<span class="go">                (0.2076, -0.0924687534570694)</span>
+<span class="go">                (0.20770000000000002, -0.09262499958276749)</span>
+<span class="go">                (0.2078, -0.0924062505364418)</span>
+<span class="go">                (0.2079, -0.0925000011920929)</span>
+<span class="go">                (0.20800000000000002, -0.0924062505364418)</span>
+<span class="go">                (0.2081, -0.09262499958276749)</span>
+<span class="go">                (0.2082, -0.0925312489271164)</span>
+<span class="go">                (0.2083, -0.09265624731779099)</span>
+<span class="go">                (0.2084, -0.09265624731779099)</span>
+<span class="go">                (0.20850000000000002, -0.09259375184774399)</span>
+<span class="go">                (0.2086, -0.0925312489271164)</span>
+<span class="go">falling_curve_fit = &lt;function negative_exp at 0x7fea28316510&gt;</span>
+<span class="go">                    falling_param(amp=vartype(-0.01329, 0.00011), tau=vartype(0.002526, 0.000058))</span>
+<span class="go">                    True</span>
+<span class="go">falling_curve_amp = -0.0133±0.0001</span>
+<span class="go">falling_curve_tau = 0.00253±0.00006</span>
+<span class="go">falling_curve_function = &lt;function negative_exp at 0x7fea28316510&gt;</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="features_falling_curve_more.html"><span class="doc">Additional plots for FallingCurve</span></a></p>
 <dl class="attribute">
 <dt id="ajustador.features.FallingCurve.requires">
-<code class="descname">requires</code><em class="property"> = ('wave', 'steady_before', 'baseline_before', 'falling_curve_window', 'baseline', 'steady')</em><a class="headerlink" href="#ajustador.features.FallingCurve.requires" title="Permalink to this definition">¶</a></dt>
+<code class="descname">requires</code><em class="property"> = ('wave', 'injection_start', 'steady_before', 'falling_curve_window', 'baseline', 'steady')</em><a class="headerlink" href="#ajustador.features.FallingCurve.requires" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.FallingCurve.provides">
-<code class="descname">provides</code><em class="property"> = ('falling_curve',)</em><a class="headerlink" href="#ajustador.features.FallingCurve.provides" title="Permalink to this definition">¶</a></dt>
+<code class="descname">provides</code><em class="property"> = ('falling_curve', 'falling_curve_fit', 'falling_curve_amp', 'falling_curve_tau', 'falling_curve_function')</em><a class="headerlink" href="#ajustador.features.FallingCurve.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('falling_curve_amp', 'falling_curve_tau', 'falling_curve_function')</em><a class="headerlink" href="#ajustador.features.FallingCurve.array_attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -233,6 +596,21 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dl class="attribute">
 <dt id="ajustador.features.FallingCurve.falling_curve_fit">
 <code class="descname">falling_curve_fit</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.falling_curve_amp">
+<code class="descname">falling_curve_amp</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve_amp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.falling_curve_tau">
+<code class="descname">falling_curve_tau</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve_tau" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.FallingCurve.falling_curve_function">
+<code class="descname">falling_curve_function</code><a class="headerlink" href="#ajustador.features.FallingCurve.falling_curve_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -249,15 +627,31 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <div class="figure">
 <img alt="_images/features_rectification.png" src="_images/features_rectification.png" />
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Rectification</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">rectification = 0.0017±0.0001</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="features_rectification_more.html"><span class="doc">Additional plots for Rectification</span></a></p>
 <dl class="attribute">
 <dt id="ajustador.features.Rectification.requires">
-<code class="descname">requires</code><em class="property"> = ('baseline_before', 'steady_after', 'steady_before', 'falling_curve', 'steady')</em><a class="headerlink" href="#ajustador.features.Rectification.requires" title="Permalink to this definition">¶</a></dt>
+<code class="descname">requires</code><em class="property"> = ('injection_start', 'steady_after', 'steady_before', 'falling_curve', 'steady')</em><a class="headerlink" href="#ajustador.features.Rectification.requires" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ajustador.features.Rectification.provides">
 <code class="descname">provides</code><em class="property"> = ('rectification',)</em><a class="headerlink" href="#ajustador.features.Rectification.provides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('rectification',)</em><a class="headerlink" href="#ajustador.features.Rectification.array_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.Rectification.mean_attributes">
+<code class="descname">mean_attributes</code><em class="property"> = ('rectification',)</em><a class="headerlink" href="#ajustador.features.Rectification.mean_attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -284,10 +678,16 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <div class="figure">
 <img alt="_images/features_charging_curve.png" src="_images/features_charging_curve.png" />
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">ChargingCurve</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">charging_curve_halfheight = 0.014867±0.000008</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="features_charging_curve_more.html"><span class="doc">Additional plots for ChargingCurve</span></a></p>
 <dl class="attribute">
 <dt id="ajustador.features.ChargingCurve.requires">
-<code class="descname">requires</code><em class="property"> = ('wave', 'steady_after', 'steady', 'spikes', 'spike_count')</em><a class="headerlink" href="#ajustador.features.ChargingCurve.requires" title="Permalink to this definition">¶</a></dt>
+<code class="descname">requires</code><em class="property"> = ('wave', 'injection_start', 'baseline', 'baseline_before', 'spikes', 'spike_count', 'spike_threshold')</em><a class="headerlink" href="#ajustador.features.ChargingCurve.requires" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -296,10 +696,20 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ajustador.features.ChargingCurve.array_attributes">
+<code class="descname">array_attributes</code><em class="property"> = ('charging_curve_halfheight',)</em><a class="headerlink" href="#ajustador.features.ChargingCurve.array_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ajustador.features.ChargingCurve.charging_curve_halfheight">
 <code class="descname">charging_curve_halfheight</code><a class="headerlink" href="#ajustador.features.ChargingCurve.charging_curve_halfheight" title="Permalink to this definition">¶</a></dt>
 <dd><p>The height in the middle between depolarization start and first spike</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.features.ChargingCurve.charging_curve">
+<code class="descname">charging_curve</code><a class="headerlink" href="#ajustador.features.ChargingCurve.charging_curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ajustador.features.ChargingCurve.plot">
@@ -319,7 +729,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="vartype.html" title="previous chapter">ajustador.vartype</a></li>
+      <li>Previous: <a href="loader.html" title="previous chapter">ajustador.loader</a></li>
       <li>Next: <a href="features_steady_state_more.html" title="next chapter">Additional plots for SteadyState</a></li>
   </ul></li>
 </ul>
@@ -327,7 +737,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/features.txt"
+      <li><a href="_sources/features.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -346,14 +756,14 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/features.txt"
+      <a href="_sources/features.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

@@ -17,7 +17,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
@@ -26,8 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -60,6 +59,7 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.lib</span> <span class="k">import</span> <span class="n">recfunctions</span>
 <span class="kn">from</span> <span class="nn">igor</span> <span class="k">import</span> <span class="n">binarywave</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utilities</span>
@@ -72,9 +72,47 @@
     <span class="n">start</span><span class="p">,</span> <span class="n">inc</span> <span class="o">=</span> <span class="n">IV</span> <span class="k">if</span> <span class="n">fileinfo</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">IF</span>
     <span class="k">return</span> <span class="n">start</span> <span class="o">+</span> <span class="n">inc</span> <span class="o">*</span> <span class="p">(</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
-<div class="viewcode-block" id="IVCurve"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurve">[docs]</a><span class="k">class</span> <span class="nc">IVCurve</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Trace"><a class="viewcode-back" href="../../loader.html#ajustador.loader.Trace">[docs]</a><span class="k">class</span> <span class="nc">Trace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injection</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">injection</span> <span class="o">=</span> <span class="n">injection</span>
+
+        <span class="n">wave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,y&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wave</span> <span class="o">=</span> <span class="n">wave</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;wave&#39;</span><span class="p">:</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="s1">&#39;injection&#39;</span><span class="p">:</span><span class="bp">self</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Trace.register_feature"><a class="viewcode-back" href="../../loader.html#ajustador.loader.Trace.register_feature">[docs]</a>    <span class="k">def</span> <span class="nf">register_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">):</span>
+        <span class="c1"># check requirements and provides</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">requires</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown attribute: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)))</span>
+        <span class="n">doubled</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">provides</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doubled</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Doubled attribute: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">doubled</span><span class="p">)))</span>
+
+        <span class="c1"># register</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">feature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">feature</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">feature</span><span class="o">.</span><span class="n">provides</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span></div>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;_attributes&#39;</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="IVCurve"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurve">[docs]</a><span class="k">class</span> <span class="nc">IVCurve</span><span class="p">(</span><span class="n">Trace</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    &gt;&gt;&gt; mes = loader.Measurement(&#39;docs/static/recording/042811-6ivifcurves_Waves/&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; mes = loader.IVCurveSeries(&#39;docs/static/recording/042811-6ivifcurves_Waves/&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; wave = mes[2]</span>
 <span class="sd">    &gt;&gt;&gt; wave.baseline</span>
 <span class="sd">    vartype(-0.080227, 0.000085)</span>
@@ -95,37 +133,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fileinfo</span><span class="p">,</span> <span class="n">injection</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">injection</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fileinfo</span> <span class="o">=</span> <span class="n">fileinfo</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">injection</span> <span class="o">=</span> <span class="n">injection</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,y&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;wave&#39;</span><span class="p">:</span><span class="bp">self</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">register_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
-
-<div class="viewcode-block" id="IVCurve.register_feature"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurve.register_feature">[docs]</a>    <span class="k">def</span> <span class="nf">register_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">):</span>
-        <span class="c1"># check requirements and provides</span>
-        <span class="n">missing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">requires</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown attribute: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)))</span>
-        <span class="n">doubled</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">provides</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">doubled</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Doubled attribute: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">doubled</span><span class="p">)))</span>
-
-        <span class="c1"># register</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">feature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">feature</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">feature</span><span class="o">.</span><span class="n">provides</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span></div>
-
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="IVCurve.load"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurve.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+<div class="viewcode-block" id="IVCurve.load"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurve.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">binarywave</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="s1">&#39;wave&#39;</span><span class="p">][</span><span class="s1">&#39;wData&#39;</span><span class="p">]</span>
         <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -135,46 +149,47 @@
 
         <span class="n">injection</span> <span class="o">=</span> <span class="n">_calculate_current</span><span class="p">(</span><span class="n">fileinfo</span><span class="p">,</span> <span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fileinfo</span><span class="p">,</span> <span class="n">injection</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fileinfo</span><span class="p">,</span> <span class="n">injection</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span></div></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Attributable"><a class="viewcode-back" href="../../loader.html#ajustador.loader.Attributable">[docs]</a><span class="k">class</span> <span class="nc">Attributable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="n">_MEAN_ATTRIBUTES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mean_baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_spike_width&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_spike_ahp&#39;</span><span class="p">}</span>
-    <span class="n">_VAR_ARRAY_ATTRIBUTES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;response&#39;</span><span class="p">,</span> <span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
-                             <span class="s1">&#39;mean_isi&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_height&#39;</span><span class="p">}</span>
-    <span class="n">_ARRAY_ATTRIBUTES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;injection&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;spike_latency&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_count&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_ahp&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;falling_curve_fit|params|amp&#39;</span><span class="p">,</span> <span class="s1">&#39;falling_curve_fit|params|tau&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;falling_curve_fit|function&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;charging_curve_halfheight&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;isi_spread&#39;</span><span class="p">}</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO: check duplicates, check dependencies between mean_attrs and array_attrs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_array_attributes</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span>
+                                  <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span>
+                                  <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="s1">&#39;array_attributes&#39;</span><span class="p">,</span> <span class="p">())}</span> <span class="o">|</span> \
+                                 <span class="p">{</span><span class="s1">&#39;injection&#39;</span><span class="p">,</span> <span class="s1">&#39;filename&#39;</span><span class="p">}</span> <span class="c1"># FIXME</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mean_attributes</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span>
+                                 <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span>
+                                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="s1">&#39;mean_attributes&#39;</span><span class="p">,</span> <span class="p">())}</span>
 
-    <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;mean_spike_height&#39;</span><span class="p">:</span>
-            <span class="n">spikes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">spikes</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
-            <span class="k">return</span> <span class="n">array_mean</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;mean_spike_width&#39;</span><span class="p">:</span>
-            <span class="n">widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">spike_width</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
-            <span class="k">return</span> <span class="n">array_mean</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;mean_spike_ahp&#39;</span><span class="p">:</span>
-            <span class="n">ahps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">w</span><span class="o">.</span><span class="n">spike_ahp</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
-            <span class="k">return</span> <span class="n">array_mean</span><span class="p">(</span><span class="n">ahps</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">Attributable</span><span class="o">.</span><span class="n">_MEAN_ATTRIBUTES</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
-        <span class="k">elif</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">Attributable</span><span class="o">.</span><span class="n">_VAR_ARRAY_ATTRIBUTES</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waves</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">Attributable</span><span class="o">.</span><span class="n">_ARRAY_ATTRIBUTES</span><span class="p">:</span>
-            <span class="n">op</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">))</span>
-            <span class="n">ans</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span><span class="p">(</span><span class="n">wave</span><span class="p">)</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waves</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Attributable</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">):</span>
+            <span class="c1"># we get asked for __setstate__ by copy.copy before we&#39;re</span>
+            <span class="c1"># fully initialized. Just say no to all special names.</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array_attributes</span><span class="p">:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waves</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arr</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vartype</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">recfunctions</span><span class="o">.</span><span class="n">stack_arrays</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">asrecarray</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">usemask</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;mean_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean_attributes</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> object does not have </span><span class="si">{}</span><span class="s1"> attribute&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="nb">slice</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="nb">slice</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="n">c</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">c</span><span class="o">.</span><span class="n">waves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">c</span>
@@ -184,10 +199,44 @@
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="Measurement"><a class="viewcode-back" href="../../loader.html#ajustador.loader.Measurement">[docs]</a><span class="k">class</span> <span class="nc">Measurement</span><span class="p">(</span><span class="n">Attributable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">features</span> <span class="k">as</span> <span class="n">_features</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">_features</span><span class="o">.</span><span class="n">standard_features</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">waves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">waves</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_waves</span><span class="p">())</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">([</span><span class="n">wave</span><span class="o">.</span><span class="n">injection</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="n">waves</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">waves</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+
+    <span class="nd">@waves</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">waves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_waves_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IVCurveSeries"><a class="viewcode-back" href="../../loader.html#ajustador.loader.IVCurveSeries">[docs]</a><span class="k">class</span> <span class="nc">IVCurveSeries</span><span class="p">(</span><span class="n">Measurement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Load a series of recordings from a directory</span>
 
-<span class="sd">    &gt;&gt;&gt; mes = loader.Measurement(&#39;docs/static/recording/042811-6ivifcurves_Waves&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; mes = loader.IVCurveSeries(&#39;docs/static/recording/042811-6ivifcurves_Waves&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; mes.waves</span>
 <span class="sd">    array([&lt;ajustador.loader.IVCurve object at ...&gt;,</span>
 <span class="sd">           &lt;ajustador.loader.IVCurve object at ...&gt;,</span>
@@ -205,32 +254,54 @@
 <span class="sd">    &gt;&gt;&gt; depol.injection</span>
 <span class="sd">    array([  2.20000000e-10,   3.20000000e-10])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">IV</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">500</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">50</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">),</span>
-                 <span class="n">IF</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">),</span>
-                 <span class="n">time</span><span class="o">=.</span><span class="mi">9</span><span class="p">,</span>
-                 <span class="n">bad_extra</span><span class="o">=</span><span class="p">()):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">IV</span><span class="o">=</span><span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="o">=</span><span class="n">IF</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bad_extra</span> <span class="o">=</span> <span class="n">bad_extra</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">features</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">standard_features</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">bad_extra</span><span class="o">=</span><span class="p">(),</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
-    <span class="k">def</span> <span class="nf">waves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">IV</span><span class="o">=</span><span class="n">IV</span><span class="p">,</span> <span class="n">IF</span><span class="o">=</span><span class="n">IF</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_extra</span> <span class="o">=</span> <span class="n">bad_extra</span>
+
+    <span class="k">def</span> <span class="nf">_waves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ls</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">)</span>
-
-        <span class="n">waves</span> <span class="o">=</span> <span class="p">[</span><span class="n">IVCurve</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">)</span>
+        <span class="n">waves</span> <span class="o">=</span> <span class="p">[</span><span class="n">IVCurve</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_args</span><span class="p">)</span>
                  <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">]</span>
-        <span class="n">waves</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">wave</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="n">waves</span>
-                          <span class="k">if</span> <span class="n">wave</span><span class="o">.</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">extra</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bad_extra</span><span class="p">])</span>
-        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">([</span><span class="n">wave</span><span class="o">.</span><span class="n">injection</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="n">waves</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">waves</span><span class="p">[</span><span class="n">order</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">wave</span> <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="n">waves</span>
+                <span class="k">if</span> <span class="n">wave</span><span class="o">.</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">extra</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bad_extra</span><span class="p">]</span></div>
+
+<span class="n">_known_units</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;pA&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="parse_current"><a class="viewcode-back" href="../../loader.html#ajustador.loader.parse_current">[docs]</a><span class="k">def</span> <span class="nf">parse_current</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+    <span class="n">mult</span> <span class="o">=</span> <span class="n">_known_units</span><span class="p">[</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="n">mult</span></div>
+
+<div class="viewcode-block" id="CSVSeries"><a class="viewcode-back" href="../../loader.html#ajustador.loader.CSVSeries">[docs]</a><span class="k">class</span> <span class="nc">CSVSeries</span><span class="p">(</span><span class="n">Measurement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a series of measurements from a CSV file</span>
+
+<span class="sd">    Each CSV file contains data for multiple injection currents::</span>
+
+<span class="sd">      Time (ms),-200 pA,-150 pA,-100 pA,-50 pA,0 pA</span>
+<span class="sd">      0,-46.6918945313,-44.2504882813,-48.5229492188,-47.3022460938,-46.38671875</span>
+<span class="sd">      0.1000000015,-46.38671875,-45.7763671875,-46.38671875,-46.9970703125,-49.1333007813</span>
+
+<span class="sd">    The time and injection values are extracted automatically.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_waves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># FIXME: verify that units are really ms, mV</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="mi">1000</span>
+        <span class="n">waves</span> <span class="o">=</span> <span class="p">[</span><span class="n">Trace</span><span class="p">(</span><span class="n">parse_current</span><span class="p">(</span><span class="n">column</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">csv</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">csv</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">waves</span></div>
 </pre></div>
 
           </div>
@@ -261,10 +332,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

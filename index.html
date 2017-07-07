@@ -17,7 +17,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,7 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="#" />
     <link rel="next" title="ajustador.vartype" href="vartype.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -48,9 +48,14 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="vartype.html">ajustador.vartype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loader.html">ajustador.loader</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">ajustador.features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fitnesses.html">ajustador.fitnesses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="loader.html">ajustador.loader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimize.html">ajustador.optimize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drawing.html">ajustador.drawing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="drawing.html#wave-drawings">Wave drawings</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="utilities.html">ajustador.utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utilities.html#module-ajustador.compat">ajustador.compat</a></li>
 <li class="toctree-l1"><a class="reference internal" href="signal_smooth.html">ajustador.signal_smooth</a></li>
@@ -61,7 +66,7 @@
 <span id="ajustador-basic-simulation"></span><h2>ajustador.basic_simulation<a class="headerlink" href="#module-ajustador.basic_simulation" title="Permalink to this headline">¶</a></h2>
 <p>Run a single simulation from the command-line</p>
 <p>This module takes a set of parameters which override the defaults
-provides by the spspine module and runs the simulation and saves the
+provides by the moose_nerp module and runs the simulation and saves the
 results. In particular, this is useful when running multiple simulation
 in parallel, where each one should be run out-of-process:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ python3 -m ajustador.basic_simulation \
@@ -69,7 +74,7 @@ in parallel, where each one should be run out-of-process:</p>
     --RA=9.273975490852102 \
     --RM=0.11241922550664576 \
     --CM=0.0298401595465488 \
-    --Cond-D1-Kir=6.441375022294002 \
+    --Cond-Kir=6.441375022294002 \
     --Kir-offset=6.529897906031442e-07 \
     --morph-file=MScell-tertDendlongRE.p \
     --simtime=0.9 \
@@ -77,24 +82,33 @@ in parallel, where each one should be run out-of-process:</p>
     --save=ivdata--5.0000000000000034e-11.npy
 </pre></div>
 </div>
+<p>This module is not automatically imported as a child of ajustador.
+An explicit import is needed:
+&gt;&gt;&gt; import ajustador.basic_simulation</p>
+<dl class="function">
+<dt id="ajustador.basic_simulation.cond_setting">
+<code class="descclassname">ajustador.basic_simulation.</code><code class="descname">cond_setting</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/basic_simulation.html#cond_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.basic_simulation.cond_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits &#8216;NaF,0=123.4&#8217; → (&#8216;NaF&#8217;, 0, 123.4)</p>
+</dd></dl>
+
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">basic_simulation</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">simtime</span> <span class="n">SIMTIME</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">simdt</span> <span class="n">SIMDT</span><span class="p">]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plotdt</span> <span class="n">PLOTDT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">hsolve</span> <span class="p">[</span><span class="n">HSOLVE</span><span class="p">]]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">injection</span><span class="o">-</span><span class="n">current</span> <span class="n">CURRENT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">injection</span><span class="o">-</span><span class="n">delay</span> <span class="n">TIME</span><span class="p">]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">injection</span><span class="o">-</span><span class="n">width</span> <span class="n">TIME</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">stimtimes</span> <span class="n">TIMEPOINTS</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">syncomp</span> <span class="n">SYNCOMP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">current</span> <span class="p">[</span><span class="n">PLOT_CURRENT</span><span class="p">]]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">syncomp</span> <span class="n">SYNCOMP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">vm</span> <span class="p">[</span><span class="n">PLOT_VM</span><span class="p">]]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">current</span> <span class="p">[</span><span class="n">PLOT_CURRENT</span><span class="p">]]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">calcium</span> <span class="p">[</span><span class="n">PLOT_CALCIUM</span><span class="p">]]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">current</span><span class="o">-</span><span class="n">message</span> <span class="n">NAME</span><span class="p">]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">current</span><span class="o">-</span><span class="n">label</span> <span class="n">LABEL</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">synapse</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">synapse</span><span class="o">-</span><span class="n">message</span> <span class="n">NAME</span><span class="p">]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">synapse</span><span class="o">-</span><span class="n">label</span> <span class="n">LABEL</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">channels</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span>
                         <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">activation</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">network</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">xxx</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">morph</span><span class="o">-</span><span class="n">file</span> <span class="n">MORPH_FILE</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">baseline</span> <span class="n">BASELINE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">RA</span> <span class="n">RA</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">RM</span> <span class="n">RM</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">CM</span> <span class="n">CM</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">Kir</span> <span class="n">COND_D1_KIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">Kir</span><span class="o">-</span><span class="n">offset</span> <span class="n">KIR_OFFSET</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">NaF</span><span class="o">-</span><span class="mi">0</span> <span class="n">COND_D1_NAF_0</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">KaS</span><span class="o">-</span><span class="mi">0</span> <span class="n">COND_D1_KAS_0</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">KaF</span><span class="o">-</span><span class="mi">0</span> <span class="n">COND_D1_KAF_0</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">Krp</span><span class="o">-</span><span class="mi">0</span> <span class="n">COND_D1_KRP_0</span><span class="p">]</span>
-                        <span class="p">[</span><span class="o">--</span><span class="n">Cond</span><span class="o">-</span><span class="n">D1</span><span class="o">-</span><span class="n">BKCa</span><span class="o">-</span><span class="mi">0</span> <span class="n">COND_D1_BKCA_0</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">save</span> <span class="n">SAVE</span><span class="p">]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="o">-</span><span class="n">netvm</span> <span class="p">[</span><span class="n">BOOL</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">morph</span><span class="o">-</span><span class="n">file</span> <span class="n">MORPH_FILE</span><span class="p">]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">baseline</span> <span class="n">BASELINE</span><span class="p">]</span> <span class="o">--</span><span class="n">model</span> <span class="n">MODEL</span> <span class="o">--</span><span class="n">neuron</span><span class="o">-</span><span class="nb">type</span>
+                        <span class="n">NEURON_TYPE</span> <span class="p">[</span><span class="o">--</span><span class="n">RA</span> <span class="n">RA</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">RM</span> <span class="n">RM</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">CM</span> <span class="n">CM</span><span class="p">]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">Erest</span> <span class="n">EREST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">Eleak</span> <span class="n">ELEAK</span><span class="p">]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">Kir</span><span class="o">-</span><span class="n">offset</span> <span class="n">KIR_OFFSET</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cond</span> <span class="n">COND</span> <span class="p">[</span><span class="n">COND</span> <span class="o">...</span><span class="p">]]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">save</span> <span class="n">SAVE</span><span class="p">]</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -136,10 +150,15 @@ in parallel, where each one should be run out-of-process:</p>
 <tr><td class="option-group">
 <kbd><span class="option">--syncomp=4</span></kbd></td>
 <td>Synapse compartment number</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-current=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Whether to plot the current</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-vm</span></kbd></td>
+<td>Whether to plot membrane potential Vm</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-current</span></kbd></td>
+<td>Whether to plot the current</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-calcium</span></kbd></td>
+<td>Whether to plot calcium</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-current-message=getGk</span></kbd></td>
 </tr>
@@ -148,10 +167,9 @@ in parallel, where each one should be run out-of-process:</p>
 <kbd><span class="option">--plot-current-label=Cond, S</span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td>Current plot label</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-synapse=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-synapse</span></kbd></td>
+<td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-synapse-message=getGk</span></kbd></td>
 </tr>
@@ -161,26 +179,30 @@ in parallel, where each one should be run out-of-process:</p>
 </tr>
 <tr><td>&nbsp;</td><td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-channels=False</span></kbd></td>
+<kbd><span class="option">--plot-channels</span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-activation=False</span></kbd></td>
+<kbd><span class="option">--plot-activation</span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-network=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--plot-xxx=False</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-network</span></kbd></td>
+<td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--plot-netvm</span></kbd></td>
+<td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--morph-file</span></kbd></td>
 <td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--baseline</span></kbd></td>
+<td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--model</span></kbd></td>
+<td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--neuron-type</span></kbd></td>
 <td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--RA</span></kbd></td>
@@ -192,31 +214,17 @@ in parallel, where each one should be run out-of-process:</p>
 <kbd><span class="option">--CM</span></kbd></td>
 <td>Undocumented</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">--Cond-D1-Kir</span></kbd></td>
+<kbd><span class="option">--Erest</span></kbd></td>
+<td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--Eleak</span></kbd></td>
 <td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--Kir-offset</span></kbd></td>
 <td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--Cond-D1-NaF-0</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--Cond-D1-KaS-0</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--Cond-D1-KaF-0</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--Cond-D1-Krp-0</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--Cond-D1-BKCa-0</span></kbd></td>
-</tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--cond=[]</span></kbd></td>
+<td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--save</span></kbd></td>
 <td>Undocumented</td></tr>
@@ -268,7 +276,7 @@ in parallel, where each one should be run out-of-process:</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
+      <li><a href="_sources/index.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -287,14 +295,14 @@ in parallel, where each one should be run out-of-process:</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/index.txt"
+      <a href="_sources/index.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

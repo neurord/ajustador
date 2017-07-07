@@ -17,7 +17,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -26,8 +27,7 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
-    <link rel="next" title="ajustador.loader" href="loader.html" />
+    <link rel="next" title="ajustador.optimize" href="optimize.html" />
     <link rel="prev" title="Additional plots for ChargingCurve" href="features_charging_curve_more.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -46,25 +46,119 @@
             
   <div class="section" id="module-ajustador.fitnesses">
 <span id="ajustador-fitnesses"></span><h1>ajustador.fitnesses<a class="headerlink" href="#module-ajustador.fitnesses" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="ajustador.fitnesses.ErrorCalc">
+<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">ErrorCalc</code><a class="reference internal" href="_modules/ajustador/fitnesses.html#ErrorCalc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.ErrorCalc" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="attribute">
+<dt id="ajustador.fitnesses.ErrorCalc.normal">
+<code class="descname">normal</code><em class="property"> = 1</em><a class="headerlink" href="#ajustador.fitnesses.ErrorCalc.normal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.fitnesses.ErrorCalc.relative">
+<code class="descname">relative</code><em class="property"> = 2</em><a class="headerlink" href="#ajustador.fitnesses.ErrorCalc.relative" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.fitnesses.WaveHistogram">
+<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">WaveHistogram</code><span class="sig-paren">(</span><em>wave1</em>, <em>wave2</em>, <em>left=-inf</em>, <em>right=inf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the difference between cumulative histograms of two waves</p>
+<p>Since the x step might be different, we need to scale to the same
+range. This is done by doing a frequency histogram, which
+abstracts away the number of points in either plot.</p>
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.bins">
+<code class="descname">bins</code><span class="sig-paren">(</span><em>n=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.diff">
+<code class="descname">diff</code><span class="sig-paren">(</span><em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.hist">
+<code class="descname">hist</code><span class="sig-paren">(</span><em>bins</em>, <em>y</em>, <em>cumulative=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.hist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.x1">
+<code class="descname">x1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.x1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.x1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.x2">
+<code class="descname">x2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.x2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.x2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.y1">
+<code class="descname">y1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.y1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.y1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.WaveHistogram.y2">
+<code class="descname">y2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#WaveHistogram.y2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.WaveHistogram.y2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.ahp_curve_centered">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">ahp_curve_centered</code><span class="sig-paren">(</span><em>wave</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#ahp_curve_centered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.ahp_curve_centered" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.ahp_curve_compare">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">ahp_curve_compare</code><span class="sig-paren">(</span><em>cut1</em>, <em>cut2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#ahp_curve_compare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.ahp_curve_compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a number from [0, 1] which compares how close they are.</p>
+<p>0 means the same, 1 means very different.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.ahp_curve_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">ahp_curve_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#ahp_curve_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.ahp_curve_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="ajustador.fitnesses.baseline_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">baseline_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#baseline_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.baseline_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">baseline_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#baseline_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.baseline_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similarity of baselines</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.baseline_post_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">baseline_post_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#baseline_post_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.baseline_post_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similarity of baselines</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.baseline_pre_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">baseline_pre_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#baseline_pre_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.baseline_pre_fitness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similarity of baselines</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.charging_curve_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">charging_curve_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#charging_curve_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.charging_curve_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">charging_curve_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#charging_curve_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.charging_curve_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.combined_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajustador.fitnesses.combined_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#ajustador.fitnesses.combined_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.falling_curve_time_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">falling_curve_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#falling_curve_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.falling_curve_time_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">falling_curve_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#falling_curve_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.falling_curve_time_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -117,28 +211,34 @@
 
 <dl class="function">
 <dt id="ajustador.fitnesses.hyperpol_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">hyperpol_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#hyperpol_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.hyperpol_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">hyperpol_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#hyperpol_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.hyperpol_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ajustador.fitnesses.interpolate">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">interpolate</code><span class="sig-paren">(</span><em>wave1</em>, <em>wave2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate wave1 to wave2.x</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ajustador.fitnesses.isi_spread_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">isi_spread_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#isi_spread_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.isi_spread_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">isi_spread_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#isi_spread_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.isi_spread_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.mean_isi_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">mean_isi_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#mean_isi_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.mean_isi_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">mean_isi_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#mean_isi_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.mean_isi_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ajustador.fitnesses.measurement_to_spikes">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">measurement_to_spikes</code><span class="sig-paren">(</span><em>meas</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#measurement_to_spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.measurement_to_spikes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
+<dl class="class">
 <dt id="ajustador.fitnesses.new_combined_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">new_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">new_combined_fitness</code><span class="sig-paren">(</span><em>*</em>, <em>response=1</em>, <em>baseline_pre=1</em>, <em>baseline_post=1</em>, <em>rectification=1</em>, <em>falling_curve_time=1</em>, <em>spike_time=1</em>, <em>spike_width=1</em>, <em>spike_height=1</em>, <em>spike_latency=1</em>, <em>spike_count=0</em>, <em>spike_ahp=1</em>, <em>ahp_curve=1</em>, <em>spike_range_y_histogram=1</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ajustador.fitnesses.new_combined_fitness.report">
+<code class="descname">report</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness.report" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.normalize_dimensions">
@@ -147,73 +247,95 @@
 
 <dl class="function">
 <dt id="ajustador.fitnesses.parametrized_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">parametrized_fitness</code><span class="sig-paren">(</span><em>response=1</em>, <em>baseline=0.3</em>, <em>rectification=1</em>, <em>falling_curve_param=1</em>, <em>mean_isi=1</em>, <em>spike_latency=1</em>, <em>spike_height=1</em>, <em>spike_width=1</em>, <em>spike_ahp=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#parametrized_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.parametrized_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">parametrized_fitness</code><span class="sig-paren">(</span><em>response=1</em>, <em>baseline=0.3</em>, <em>rectification=1</em>, <em>falling_curve_param=1</em>, <em>mean_isi=1</em>, <em>spike_latency=1</em>, <em>spike_height=1</em>, <em>spike_width=1</em>, <em>spike_ahp=1</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#parametrized_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.parametrized_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.rectification_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">rectification_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#rectification_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.rectification_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">rectification_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#rectification_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.rectification_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.relative_diff">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">relative_diff</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#relative_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.relative_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>A difference between a and b using b as the yardstick</p>
+<div class="math">
+\[W = |a - b| / (|b| + |a| * RELATIVE_MAX_RATIO)
+w = rms(W)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajustador.fitnesses.relative_diff_single">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">relative_diff_single</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>extra=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#relative_diff_single"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.relative_diff_single" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.response_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">response_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#response_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.response_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">response_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#response_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.response_fitness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similarity of response to hyperpolarizing injection</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.simple_combined_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">simple_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#simple_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.simple_combined_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">simple_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#simple_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.simple_combined_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_ahp_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_ahp_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_ahp_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_ahp_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_ahp_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_ahp_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_ahp_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_count_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_count_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_count_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_count_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_count_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_count_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_count_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_fitness_0">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness_0</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness_0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness_0" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_fitness_0</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_fitness_0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_fitness_0" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_height_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_height_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_height_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_height_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_height_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_height_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_height_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_latency_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_latency_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_latency_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_latency_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_latency_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_latency_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_latency_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="ajustador.fitnesses.spike_onset_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_onset_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_onset_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_onset_fitness" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="ajustador.fitnesses.spike_range_y_histogram_fitness">
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_range_y_histogram_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_range_y_histogram_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_range_y_histogram_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match histograms of y-values in spiking regions</p>
+<p>This returns an rms of <a class="reference internal" href="#ajustador.fitnesses.WaveHistogram.diff" title="ajustador.fitnesses.WaveHistogram.diff"><code class="xref any py py-meth docutils literal"><span class="pre">WaveHistogram.diff</span></code></a> over the injection
+region. Waves are filtered to have at at least one spike between
+the pair. This is done to make this fitness function sensitive to
+depolarization block. Otherwise, the result would be dominated by
+baseline mismatches and response mismatches.</p>
+<p><a class="reference internal" href="#ajustador.fitnesses.baseline_post_fitness" title="ajustador.fitnesses.baseline_post_fitness"><code class="xref any py py-func docutils literal"><span class="pre">baseline_post_fitness</span></code></a> and <a class="reference internal" href="#ajustador.fitnesses.response_fitness" title="ajustador.fitnesses.response_fitness"><code class="xref any py py-func docutils literal"><span class="pre">response_fitness</span></code></a> are better fitted
+to detect mismatches in other regions.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_time_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_time_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_time_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_time_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_time_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_width_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_width_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_width_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_width_fitness" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">spike_width_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#spike_width_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.spike_width_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.sub_mes_dev">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">sub_mes_dev</code><span class="sig-paren">(</span><em>reca</em>, <em>recb</em>, <em>min_dev=0.005</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#sub_mes_dev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.sub_mes_dev" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ajustador.fitnesses.</code><code class="descname">sub_mes_dev</code><span class="sig-paren">(</span><em>reca</em>, <em>recb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#sub_mes_dev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.sub_mes_dev" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -228,14 +350,14 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="features_charging_curve_more.html" title="previous chapter">Additional plots for ChargingCurve</a></li>
-      <li>Next: <a href="loader.html" title="next chapter">ajustador.loader</a></li>
+      <li>Next: <a href="optimize.html" title="next chapter">ajustador.optimize</a></li>
   </ul></li>
 </ul>
 </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/fitnesses.txt"
+      <li><a href="_sources/fitnesses.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -254,14 +376,14 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="_sources/fitnesses.txt"
+      <a href="_sources/fitnesses.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

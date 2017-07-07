@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.basic_simulation &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ajustador.basic_simulation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Run a single simulation from the command-line</span>
+
+<span class="sd">This module takes a set of parameters which override the defaults</span>
+<span class="sd">provides by the moose_nerp module and runs the simulation and saves the</span>
+<span class="sd">results. In particular, this is useful when running multiple simulation</span>
+<span class="sd">in parallel, where each one should be run out-of-process::</span>
+
+<span class="sd">  $ python3 -m ajustador.basic_simulation \\</span>
+<span class="sd">      --baseline=-0.07639880161359705 \\</span>
+<span class="sd">      --RA=9.273975490852102 \\</span>
+<span class="sd">      --RM=0.11241922550664576 \\</span>
+<span class="sd">      --CM=0.0298401595465488 \\</span>
+<span class="sd">      --Cond-Kir=6.441375022294002 \\</span>
+<span class="sd">      --Kir-offset=6.529897906031442e-07 \\</span>
+<span class="sd">      --morph-file=MScell-tertDendlongRE.p \\</span>
+<span class="sd">      --simtime=0.9 \\</span>
+<span class="sd">      -i=-5.0000000000000034e-11 \\</span>
+<span class="sd">      --save=ivdata--5.0000000000000034e-11.npy</span>
+
+<span class="sd">This module is not automatically imported as a child of ajustador.</span>
+<span class="sd">An explicit import is needed:</span>
+<span class="sd">&gt;&gt;&gt; import ajustador.basic_simulation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">moose</span>
+<span class="kn">from</span> <span class="nn">moose_nerp.prototypes</span> <span class="k">import</span> <span class="p">(</span><span class="n">cell_proto</span><span class="p">,</span>
+                                   <span class="n">calcium</span><span class="p">,</span>
+                                   <span class="n">clocks</span><span class="p">,</span>
+                                   <span class="n">inject_func</span><span class="p">,</span>
+                                   <span class="n">tables</span><span class="p">,</span>
+                                   <span class="n">util</span><span class="p">,</span>
+                                   <span class="n">standard_options</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">moose_nerp.graph</span> <span class="k">import</span> <span class="n">neuron_graph</span>
+
+
+<span class="k">def</span> <span class="nf">real</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+<div class="viewcode-block" id="cond_setting"><a class="viewcode-back" href="../../index.html#ajustador.basic_simulation.cond_setting">[docs]</a><span class="k">def</span> <span class="nf">cond_setting</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="s2">&quot;Splits &#39;NaF,0=123.4&#39; → (&#39;NaF&#39;, 0, 123.4)&quot;</span>
+    <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">rhs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+    <span class="n">chan</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">comp</span> <span class="o">!=</span> <span class="s1">&#39;:&#39;</span><span class="p">:</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">chan</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">rhs</span></div>
+
+<span class="k">def</span> <span class="nf">option_parser</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">standard_options</span><span class="o">.</span><span class="n">standard_options</span><span class="p">(</span>
+        <span class="n">default_injection_delay</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">default_injection_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+        <span class="n">default_injection_current</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.15e-9</span><span class="p">,</span> <span class="mf">0.15e-9</span><span class="p">,</span> <span class="mf">0.35e-9</span><span class="p">],</span>
+        <span class="n">default_simulation_time</span><span class="o">=.</span><span class="mi">9</span><span class="p">,</span>
+        <span class="n">default_plot_vm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--morph-file&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--baseline&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--model&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--neuron-type&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--RA&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--RM&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--CM&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--Erest&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--Eleak&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--Kir-offset&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--cond&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[],</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">cond_setting</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">standard_options</span><span class="o">.</span><span class="n">AppendFlat</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--save&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+<span class="nd">@util</span><span class="o">.</span><span class="n">listize</span>
+<span class="k">def</span> <span class="nf">serialize_options</span><span class="p">(</span><span class="n">opts</span><span class="p">):</span>
+    <span class="n">conds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;junction_potential&#39;</span><span class="p">:</span>
+            <span class="c1"># ignore, handled by the caller</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Cond&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="c1"># e.g. Cond_NaF_0</span>
+                <span class="n">conds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">val</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Cond&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># e.g. Cond_Kir</span>
+                <span class="n">conds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">,:=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="s1">&#39;--</span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="s1">&#39;--cond&#39;</span>
+        <span class="k">yield from</span> <span class="n">conds</span>
+
+<span class="k">def</span> <span class="nf">morph_morph_file</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">morph_file</span><span class="p">,</span> <span class="n">new_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">RA</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">RM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">CM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Erest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Eleak</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">morph_file</span><span class="p">:</span>
+        <span class="n">morph_file</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">find_model_file</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">morph_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">morph_file</span> <span class="o">=</span> <span class="n">cell_proto</span><span class="o">.</span><span class="n">find_morph_file</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ntype</span><span class="p">)</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">morph_file</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">new_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;wt&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;morphology-&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.p&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;RA&#39;</span><span class="p">,</span> <span class="n">RA</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;RM&#39;</span><span class="p">,</span> <span class="n">RM</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;CM&#39;</span><span class="p">,</span> <span class="n">CM</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;EREST_ACT&#39;</span><span class="p">,</span> <span class="n">Erest</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;ELEAK&#39;</span><span class="p">,</span> <span class="n">Eleak</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(\*(set_global|set_compt_param) </span><span class="si">{}</span><span class="s1">)\s.*&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+            <span class="n">repl</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\1 </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">t_new</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="n">repl</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">t_new</span> <span class="o">==</span> <span class="n">t</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;substitution failed on </span><span class="si">{}</span><span class="s1">: </span><span class="si">{!r}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">morph_file</span><span class="p">,</span> <span class="n">pat</span><span class="p">))</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t_new</span>
+
+    <span class="n">new_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">new_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">new_file</span>
+
+<span class="k">def</span> <span class="nf">setup_conductance</span><span class="p">(</span><span class="n">condset</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">condset</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="s1">&#39;:&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">attr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attr</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">param_sim</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">condset</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Condset</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">Kir_offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Channels</span><span class="o">.</span><span class="n">Kir</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">Avhalf</span> <span class="o">+=</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">Kir_offset</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Channels</span><span class="o">.</span><span class="n">Kir</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">Bvhalf</span> <span class="o">+=</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">Kir_offset</span>
+
+    <span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">param_sim</span><span class="o">.</span><span class="n">cond</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">cond</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cond:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">setup_conductance</span><span class="p">(</span><span class="n">condset</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="n">new_file</span> <span class="o">=</span> <span class="n">morph_morph_file</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                <span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">,</span>
+                                <span class="n">param_sim</span><span class="o">.</span><span class="n">morph_file</span><span class="p">,</span>
+                                <span class="n">RA</span><span class="o">=</span><span class="n">param_sim</span><span class="o">.</span><span class="n">RA</span><span class="p">,</span> <span class="n">RM</span><span class="o">=</span><span class="n">param_sim</span><span class="o">.</span><span class="n">RM</span><span class="p">,</span> <span class="n">CM</span><span class="o">=</span><span class="n">param_sim</span><span class="o">.</span><span class="n">CM</span><span class="p">,</span>
+                                <span class="n">Erest</span><span class="o">=</span><span class="n">param_sim</span><span class="o">.</span><span class="n">Erest</span><span class="p">,</span> <span class="n">Eleak</span><span class="o">=</span><span class="n">param_sim</span><span class="o">.</span><span class="n">Eleak</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">morph_file</span><span class="p">[</span><span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="n">MSNsyn</span><span class="p">,</span> <span class="n">neurons</span> <span class="o">=</span> <span class="n">cell_proto</span><span class="o">.</span><span class="n">neuronclasses</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">neuron_paths</span> <span class="o">=</span> <span class="p">{</span><span class="n">ntype</span><span class="p">:[</span><span class="n">neuron</span><span class="o">.</span><span class="n">path</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="n">neurons</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">pg</span> <span class="o">=</span> <span class="n">inject_func</span><span class="o">.</span><span class="n">setupinj</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">injection_delay</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">injection_width</span><span class="p">,</span> <span class="n">neuron_paths</span><span class="p">)</span>
+    <span class="n">vmtab</span><span class="p">,</span><span class="n">catab</span><span class="p">,</span><span class="n">plastab</span><span class="p">,</span><span class="n">currtab</span> <span class="o">=</span> <span class="n">tables</span><span class="o">.</span><span class="n">graphtables</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">neurons</span><span class="p">,</span>
+                                                     <span class="n">param_sim</span><span class="o">.</span><span class="n">plot_current</span><span class="p">,</span>
+                                                     <span class="n">param_sim</span><span class="o">.</span><span class="n">plot_current_message</span><span class="p">)</span>
+    <span class="n">simpaths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">]</span>
+    <span class="n">clocks</span><span class="o">.</span><span class="n">assign_clocks</span><span class="p">(</span><span class="n">simpaths</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">simdt</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">plotdt</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">hsolve</span><span class="p">,</span>
+                         <span class="n">model</span><span class="o">.</span><span class="n">param_cond</span><span class="o">.</span><span class="n">NAME_SOMA</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">hsolve</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">calYN</span><span class="p">:</span>
+        <span class="n">calcium</span><span class="o">.</span><span class="n">fix_calcium</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">neurontypes</span><span class="p">(),</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pg</span>
+
+<span class="k">def</span> <span class="nf">reset_baseline</span><span class="p">(</span><span class="n">neuron</span><span class="p">,</span> <span class="n">baseline</span><span class="p">,</span> <span class="n">Cond_Kir</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">moose</span><span class="o">.</span><span class="n">wildcardFind</span><span class="p">(</span><span class="s1">&#39;/</span><span class="si">{}</span><span class="s1">/#[TYPE=Compartment]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">neuron</span><span class="p">))):</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">initVm</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">Vm</span> <span class="o">=</span> <span class="n">baseline</span>
+
+        <span class="k">if</span> <span class="n">Cond_Kir</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">kir</span> <span class="o">=</span> <span class="n">moose</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;/Kir&#39;</span><span class="p">)</span>
+            <span class="n">Em</span> <span class="o">=</span> <span class="n">baseline</span> <span class="o">+</span> <span class="n">kir</span><span class="o">.</span><span class="n">Gk</span> <span class="o">*</span> <span class="n">w</span><span class="o">.</span><span class="n">Rm</span> <span class="o">*</span> <span class="p">(</span><span class="n">baseline</span> <span class="o">-</span> <span class="n">kir</span><span class="o">.</span><span class="n">Ek</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> Em </span><span class="si">%f</span><span class="s2"> -&gt; </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">Em</span><span class="p">,</span> <span class="n">Em</span><span class="p">))</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">Em</span> <span class="o">=</span> <span class="n">Em</span>
+
+<span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="n">injection_current</span><span class="p">,</span> <span class="n">simtime</span><span class="p">,</span> <span class="n">param_sim</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">pulse_gen</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;◢◤◢◤◢◤◢◤ injection_current = </span><span class="si">{}</span><span class="s1"> ◢◤◢◤◢◤◢◤&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">injection_current</span><span class="p">))</span>
+    <span class="n">pulse_gen</span><span class="o">.</span><span class="n">firstLevel</span> <span class="o">=</span> <span class="n">injection_current</span>
+    <span class="n">moose</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">baseline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">condset</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Condset</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="n">condset</span><span class="o">.</span><span class="n">Kir</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">Cond_Kir</span> <span class="o">=</span> <span class="n">attr</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">reset_baseline</span><span class="p">(</span><span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">baseline</span><span class="p">,</span> <span class="n">Cond_Kir</span><span class="p">)</span>
+    <span class="n">moose</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">simtime</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">param_sim</span><span class="p">,</span> <span class="n">pulse_gen</span>
+    <span class="n">param_sim</span> <span class="o">=</span> <span class="n">option_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;moose_nerp.&#39;</span> <span class="o">+</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">neurontypes</span><span class="p">([</span><span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">])</span>
+    <span class="n">pulse_gen</span> <span class="o">=</span> <span class="n">setup</span><span class="p">(</span><span class="n">param_sim</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="n">run_simulation</span><span class="p">(</span><span class="n">param_sim</span><span class="o">.</span><span class="n">injection_current</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">simtime</span><span class="p">,</span> <span class="n">param_sim</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">plot_vm</span><span class="p">:</span>
+        <span class="n">neuron_graph</span><span class="o">.</span><span class="n">graphs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">plot_current</span><span class="p">,</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">simtime</span><span class="p">,</span> <span class="n">compartments</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">block_if_noninteractive</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">param_sim</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+        <span class="n">elemname</span> <span class="o">=</span> <span class="s1">&#39;/data/Vm</span><span class="si">{}</span><span class="s1">_0&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param_sim</span><span class="o">.</span><span class="n">neuron_type</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">param_sim</span><span class="o">.</span><span class="n">save</span><span class="p">,</span> <span class="n">moose</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">elemname</span><span class="p">)</span><span class="o">.</span><span class="n">vector</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

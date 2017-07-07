@@ -17,7 +17,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
@@ -26,8 +27,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -44,24 +43,44 @@
           <div class="body" role="main">
             
   <h1>Source code for ajustador.features</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">optimize</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utilities</span><span class="p">,</span> <span class="n">detect</span><span class="p">,</span> <span class="n">vartype</span>
 <span class="kn">from</span> <span class="nn">.signal_smooth</span> <span class="k">import</span> <span class="n">smooth</span>
 
-<span class="k">def</span> <span class="nf">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ranges</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">],</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># we only need one line labeled</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">value</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">dev</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">dev</span><span class="p">],</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
-                      <span class="n">color</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">],</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">dev</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">],</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">value</span><span class="o">.</span><span class="n">dev</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">color</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_plot_spike</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="n">spikes</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lmargin</span><span class="o">=</span><span class="mf">0.0010</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">lmargin</span><span class="p">,</span> <span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">rmargin</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;recording&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bottom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">spike_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">right</span><span class="p">,</span>
+                   <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">plural</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
+    <span class="n">requires</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">provides</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">mean_attributes</span> <span class="o">=</span> <span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
 
@@ -74,8 +93,53 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;membrane potential / V&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span>
 
-    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                   <span class="n">bottom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">lmargin</span><span class="o">=</span><span class="mf">0.0010</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span> <span class="n">rowsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
+
+        <span class="n">spike_count</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">),</span> <span class="n">max_spikes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rowsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rowsize</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">spike_count</span> <span class="o">&lt;</span> <span class="mi">19</span> <span class="k">else</span> <span class="mi">5</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">spike_count</span> <span class="o">/</span> <span class="n">rowsize</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">spike_count</span><span class="p">,</span> <span class="n">rowsize</span><span class="p">)</span>
+
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sharey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spike_count</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">sharey</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sharey</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelleft</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+            <span class="n">_plot_spike</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="n">spikes</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">bottom</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="n">spike_bounds</span><span class="p">,</span>
+                        <span class="n">lmargin</span><span class="o">=</span><span class="n">lmargin</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="n">rmargin</span><span class="p">)</span>
+
+        <span class="n">figure</span><span class="o">.</span><span class="n">autofmt_xdate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">axes</span>
+
+    <span class="k">def</span> <span class="nf">report_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> = &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;report&#39;</span><span class="p">):</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;dev&#39;</span><span class="p">):</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">format_array</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+            <span class="n">joiner</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="o">*</span><span class="s1">&#39; &#39;</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">joiner</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_attributes</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">ans</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">{:</span><span class="si">{}</span><span class="s1">} = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">mean</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ans</span>
+
+    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">report_attr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provides</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SteadyState"><a class="viewcode-back" href="../../features.html#ajustador.features.SteadyState">[docs]</a><span class="k">class</span> <span class="nc">SteadyState</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Find the baseline and injection steady states</span>
@@ -89,23 +153,78 @@
     <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;baseline_before&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_after&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;steady_after&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_before&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_cutoff&#39;</span><span class="p">)</span>
-    <span class="n">provides</span> <span class="o">=</span> <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;response&#39;</span>
+    <span class="n">provides</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;response&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;baseline_pre&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_post&#39;</span><span class="p">)</span>
+
+    <span class="n">mean_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;response&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;baseline_pre&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_post&#39;</span><span class="p">)</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;response&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;baseline_pre&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_post&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">baseline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mean voltage of the area outside of injection interval</span>
+
+<span class="sd">        Returns mean value of wave after excluding &quot;outliers&quot;, values</span>
+<span class="sd">        &gt; 95th or &lt; 5th percentile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span>
         <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_after</span>
+        <span class="k">if</span> <span class="n">before</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">after</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot determine baseline&#39;</span><span class="p">)</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="p">((</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span> <span class="k">if</span> <span class="n">before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span> <span class="o">|</span>
+                  <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span> <span class="k">if</span> <span class="n">after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">region</span><span class="p">]</span>
+        <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
-        <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)]</span>
-        <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">))</span>
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">baseline_pre</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mean voltage of the area before the injection interval</span>
+
+<span class="sd">        Returns mean value of wave after excluding &quot;outliers&quot;, values</span>
+<span class="sd">        &gt; 95th or &lt; 5th percentile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span>
+        <span class="k">if</span> <span class="n">before</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)]</span>
+        <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">baseline_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mean voltage of the area after the injection interval</span>
+
+<span class="sd">        Returns mean value of wave after excluding &quot;outliers&quot;, values</span>
+<span class="sd">        &gt; 95th or &lt; 5th percentile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
+        <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_after</span>
+        <span class="k">if</span> <span class="n">after</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)]</span>
+        <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
         <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">steady</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns mean value of wave between `steady_after` and `steady_before`.</span>
+
+<span class="sd">        &quot;Outliers&quot;, values &gt; 80th percentile (which is a parameter), are excluded.</span>
+<span class="sd">        80th percentile excludes the spikes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_after</span>
         <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_before</span>
@@ -121,21 +240,36 @@
     <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">steady</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span>
 
-<div class="viewcode-block" id="SteadyState.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.SteadyState.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="SteadyState.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.SteadyState.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">pre_post</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span>
         <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_after</span>
+        <span class="n">steady_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_after</span>
+        <span class="n">steady_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_before</span>
         <span class="n">time</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pre_post</span><span class="p">:</span>
+            <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                       <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">before</span><span class="p">),</span> <span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">time</span><span class="p">)],</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span><span class="p">,</span>
+                       <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">before</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                           <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">before</span><span class="p">)],</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">baseline_pre</span><span class="p">,</span>
+                           <span class="s1">&#39;baseline_pre&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                           <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">time</span><span class="p">)],</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">baseline_post</span><span class="p">,</span>
+                           <span class="s1">&#39;baseline_post&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
         <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
-                   <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">before</span><span class="p">),</span> <span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">time</span><span class="p">)],</span>
-                   <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span><span class="p">,</span>
-                   <span class="s1">&#39;k&#39;</span><span class="p">)</span>
-        <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
-                   <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)],</span>
+                   <span class="p">[(</span><span class="n">steady_after</span><span class="p">,</span> <span class="n">steady_before</span><span class="p">)],</span>
                    <span class="bp">self</span><span class="o">.</span><span class="n">steady</span><span class="p">,</span>
-                   <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                   <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;response&#39;</span><span class="p">,</span>
                     <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
                     <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
@@ -143,29 +277,117 @@
                                     <span class="n">shrink</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
                     <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;center right&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
         <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">_find_spikes</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">min_height</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-    <span class="n">peaks</span> <span class="o">=</span> <span class="n">detect</span><span class="o">.</span><span class="n">detect_peaks</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">P_low</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">P_high</span><span class="o">=</span><span class="mf">0.20</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">peaks</span><span class="p">[</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">peaks</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_height</span><span class="p">]</span>
+<span class="n">peak_and_threshold</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;peak_and_threshold&#39;</span><span class="p">,</span> <span class="s1">&#39;peaks thresholds&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_find_spikes</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">min_height</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_charge_time</span><span class="o">=</span><span class="mf">0.004</span><span class="p">,</span> <span class="n">charge_threshold</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="n">detect</span><span class="o">.</span><span class="n">detect_peaks</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">P_low</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">P_high</span><span class="o">=</span><span class="mf">0.50</span><span class="p">)</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">peaks</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_height</span><span class="p">]</span>
+
+    <span class="n">thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">peaks</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)):</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="n">max_charge_time</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">peaks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">yderiv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="c1">#spike threshold is point where derivative is 2% of steepest</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ythresh</span> <span class="o">=</span> <span class="n">charge_threshold</span> <span class="o">*</span> <span class="n">yderiv</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="n">thresh</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">:][</span><span class="n">yderiv</span> <span class="o">&gt;</span> <span class="n">ythresh</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">thresh</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span> <span class="n">peak_and_threshold</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">WaveRegion</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="n">left_i</span><span class="p">,</span> <span class="n">right_i</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span> <span class="o">=</span> <span class="n">wave</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_i</span> <span class="o">=</span> <span class="n">left_i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_i</span> <span class="o">=</span> <span class="n">right_i</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;x coordinate of the left edge of FWHM&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>    <span class="c1"># arr[-1:1] is an empty slice</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">left_i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">left_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;x coordinate of the right edge of FWHM&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">right_i</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">right_i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">left_i</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">right_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">left_i</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">right_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">left_i</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">right_i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,y&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WaveRegion</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="s1">&#39;WaveRegion[</span><span class="si">{}</span><span class="s1"> points, x=</span><span class="si">{:.04f}</span><span class="s1">-</span><span class="si">{:.04f}</span><span class="s1">, y=</span><span class="si">{:.03f}</span><span class="s1">-</span><span class="si">{:.03f}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right_i</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;WaveRegion = &#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Spikes"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes">[docs]</a><span class="k">class</span> <span class="nc">Spikes</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Find the position and height of spikes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span> <span class="s1">&#39;depolarization_interval&#39;</span><span class="p">)</span>
+    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span> <span class="s1">&#39;injection_interval&#39;</span><span class="p">,</span> <span class="s1">&#39;injection_start&#39;</span><span class="p">)</span>
     <span class="n">provides</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_i&#39;</span><span class="p">,</span> <span class="s1">&#39;spikes&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_count&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;spike_threshold&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;mean_isi&#39;</span><span class="p">,</span> <span class="s1">&#39;isi_spread&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;spike_latency&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;spike_bounds&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_width&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;mean_spike_height&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;spike_bounds&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_width&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;mean_spike_height&#39;</span><span class="p">,</span> <span class="c1"># TODO: is it OK to have mean_spike_height as</span>
+                                     <span class="c1">#       here and as an aggregated attribute?</span>
+                <span class="p">)</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_count&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_width&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;mean_isi&#39;</span><span class="p">,</span> <span class="s1">&#39;isi_spread&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;spike_latency&#39;</span><span class="p">)</span>
+    <span class="n">mean_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_width&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_threshold&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
-    <span class="k">def</span> <span class="nf">spike_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">spike_i_and_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Indices of spike maximums in the wave.x, wave.y arrays&quot;</span>
         <span class="k">return</span> <span class="n">_find_spikes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spike_i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Indices of spike maximums in the wave.x, wave.y arrays&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_i_and_threshold</span><span class="o">.</span><span class="n">peaks</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spike_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Indices of spike maximums in the wave.x, wave.y arrays&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_i_and_threshold</span><span class="o">.</span><span class="n">thresholds</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
@@ -188,7 +410,7 @@
 <span class="sd">        Defined as:</span>
 
 <span class="sd">        * :math:`&lt;x_{i+1} - x_i&gt;`, if there are at least two spikes,</span>
-<span class="sd">        * the length of the depolarization interval otherwise (`depolarization_interval`)</span>
+<span class="sd">        * the length of the depolarization interval otherwise (`injection_interval`)</span>
 
 <span class="sd">        If there less than three spikes, the variance is fixed as</span>
 <span class="sd">        `mean_isi_fallback_variance`.</span>
@@ -199,7 +421,7 @@
             <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">depolarization_interval</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_interval</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
@@ -217,23 +439,22 @@
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">spike_latency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Latency until the first spike or end of injection if no spikes&quot;</span>
+        <span class="s2">&quot;Latency until the first spike or nan if no spikes&quot;</span>
         <span class="c1"># TODO: add spike_latency to plot</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">spike_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;The halfheight left and right positions of spikes&quot;</span>
-        <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span>
+        <span class="s2">&quot;The FWHM box and other measurements for each spike&quot;</span>
+        <span class="n">spikes</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_i_and_threshold</span>
 
-        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span>
-        <span class="n">halfheight</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">steady</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">steady</span>
+        <span class="n">halfheight</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">thresholds</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_i</span><span class="p">):</span>
             <span class="n">beg</span> <span class="o">=</span> <span class="n">end</span> <span class="o">=</span> <span class="n">k</span>
@@ -241,13 +462,21 @@
                 <span class="n">beg</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="k">while</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">y</span><span class="p">[</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">halfheight</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="n">end</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">beg</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">beg</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">end</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">ans</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveRegion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="p">,</span> <span class="n">beg</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ans</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">spike_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;The difference between spike peaks and spike threshold&quot;</span>
+        <span class="n">spikes</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_i_and_threshold</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">thresholds</span>
+        <span class="k">return</span> <span class="n">height</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">spike_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">bounds</span><span class="o">.</span><span class="n">width</span> <span class="k">for</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
@@ -257,12 +486,15 @@
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Spikes.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">drawing_util</span>
+
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.06</span> <span class="c1"># self._obj.steady.x</span>
                        <span class="c1"># Doing the &quot;proper&quot; thing makes the plot hard to read</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">vline1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;timing of spike maximum&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">plural</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span><span class="p">,</span> <span class="s1">&#39;spike&#39;</span><span class="p">),</span>
                 <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                 <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
@@ -270,61 +502,234 @@
         <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
                    <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_after</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_before</span><span class="p">)],</span>
                    <span class="bp">self</span><span class="o">.</span><span class="n">mean_spike_height</span><span class="p">,</span>
-                   <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
+                   <span class="s1">&#39;spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span>
+                  <span class="n">handler_map</span><span class="o">=</span><span class="p">{</span><span class="n">vline1</span><span class="p">:</span> <span class="n">drawing_util</span><span class="o">.</span><span class="n">HandlerVLineCollection</span><span class="p">()})</span>
         <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span>
             <span class="n">ax2</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="o">.</span><span class="mi">45</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">])</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.001</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.0015</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;recording&#39;</span><span class="p">)</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span> <span class="n">bottom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
             <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;first spike&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;smaller&#39;</span><span class="p">)</span>
 
-            <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span>
-            <span class="n">ax2</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="o">*</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">)</span></div></div>
+            <span class="n">_plot_spike</span><span class="p">(</span><span class="n">ax2</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">bottom</span><span class="o">=-</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Spikes.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_threshold</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_height</span>
+
+        <span class="n">lmargin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">rmargin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
+
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spike_plot</span><span class="p">(</span><span class="n">figure</span><span class="p">,</span>
+                                  <span class="n">spike_bounds</span><span class="o">=</span><span class="n">spike_bounds</span><span class="p">,</span>
+                                  <span class="n">lmargin</span><span class="o">=</span><span class="n">lmargin</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="n">rmargin</span><span class="p">,</span>
+                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">height</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;FWHM&#39;</span><span class="p">,</span>
+                             <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+                             <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+                             <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                                             <span class="n">shrink</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                             <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="AHP"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP">[docs]</a><span class="k">class</span> <span class="nc">AHP</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Find the depth of &quot;after hyperpolarization&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_bounds&#39;</span><span class="p">)</span>
-    <span class="n">provides</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_ahp&#39;</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;injection_start&#39;</span><span class="p">,</span> <span class="s1">&#39;injection_end&#39;</span><span class="p">,</span> <span class="s1">&#39;injection_interval&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;spikes&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_count&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_bounds&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_threshold&#39;</span><span class="p">)</span>
+    <span class="n">provides</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_ahp_window&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_ahp&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_ahp_position&#39;</span><span class="p">)</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_ahp_window&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_ahp&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_ahp_position&#39;</span><span class="p">)</span>
+    <span class="n">mean_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;spike_ahp&#39;</span><span class="p">,)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">spike_ahp_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_threshold</span>
+        <span class="n">injection_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span>
+        <span class="n">injection_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_end</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)):</span>
+            <span class="n">beg</span> <span class="o">=</span> <span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">right_i</span>
+
+            <span class="c1"># Don&#39;t allow the ahp to straddle an injection start/stop edge.</span>
+            <span class="c1"># The ahp will be invalid anyway.</span>
+            <span class="n">rlimit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                         <span class="n">injection_start</span> <span class="k">if</span> <span class="n">injection_start</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">beg</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">,</span>
+                         <span class="n">injection_end</span> <span class="k">if</span> <span class="n">injection_end</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="n">beg</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">)</span>
+
+            <span class="n">w</span> <span class="o">=</span> <span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+                <span class="n">n_rolling_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span> <span class="o">//</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># FIXME: consider rejecting those outright</span>
+                <span class="n">n_rolling_window</span> <span class="o">=</span> <span class="mi">5</span>
+
+            <span class="c1"># if we are before the AHP, or mostly going down, advance</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">beg</span> <span class="o">&lt;</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">n_rolling_window</span> <span class="ow">and</span>
+                   <span class="n">y</span><span class="p">[</span><span class="n">beg</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="n">beg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">rlimit</span> <span class="ow">and</span>
+                   <span class="n">y</span><span class="p">[</span><span class="n">beg</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">[</span><span class="n">beg</span> <span class="o">+</span> <span class="n">n_rolling_window</span><span class="p">]):</span>
+                <span class="n">beg</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">end</span> <span class="o">=</span> <span class="n">beg</span> <span class="o">+</span> <span class="n">n_rolling_window</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">end</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span>
+                   <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">end</span> <span class="o">-</span> <span class="n">beg</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="ow">and</span>
+                   <span class="n">x</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">rlimit</span><span class="p">):</span>
+                <span class="n">end</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">ans</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WaveRegion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="p">,</span> <span class="n">beg</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">ans</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">spike_ahp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="sd">&quot;&quot;&quot;Returns the (averaged) minimum in y of each AHP window</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span>
-        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)):</span>
-            <span class="n">beg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">left</span> <span class="o">=</span> <span class="n">y</span><span class="p">[(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">beg</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-            <span class="n">right</span> <span class="o">=</span> <span class="n">y</span><span class="p">[(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-            <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span>
-        <span class="k">return</span> <span class="n">ans</span></div>
+<span class="sd">        `spike_ahp_window` is used to determine the extent of the AHP.</span>
+<span class="sd">        An average of the bottom area of the window of the width of the</span>
+<span class="sd">        spike is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp_window</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
 
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">windows</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">windows</span><span class="p">)):</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span> <span class="o">-</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span> <span class="o">+</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">cut</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">wave</span><span class="p">[(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">)]</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="o">.</span><span class="n">dev</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">(</span><span class="n">ans</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,dev&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">spike_ahp_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the (averaged) x of the minimum in y of each AHP window</span>
+
+<span class="sd">        `spike_ahp_window` is used to determine the extent of the AHP.</span>
+<span class="sd">        An average of the bottom area of the window of the width of the</span>
+<span class="sd">        spike is used.</span>
+
+<span class="sd">        TODO: add to plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp_window</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
+
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">windows</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">windows</span><span class="p">)):</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Make sure that we have at least a few points in the window,</span>
+            <span class="c1"># even if the spike is very narrow.</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">step</span><span class="p">)</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span> <span class="o">-</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span> <span class="o">+</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">cut</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">wave</span><span class="p">[(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">)]</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">bottom</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">avg</span><span class="p">)</span>
+            <span class="n">dev</span> <span class="o">=</span> <span class="p">((</span><span class="n">cut</span><span class="o">.</span><span class="n">x</span><span class="o">-</span><span class="n">avg</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+            <span class="c1"># TODO: check the formula for dev</span>
+            <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">avg</span><span class="p">,</span> <span class="n">dev</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromarrays</span><span class="p">(</span><span class="n">ans</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s1">&#39;x,dev&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_do_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_threshold</span>
+        <span class="n">windows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp_window</span>
+        <span class="n">ahps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="n">spike_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spike_count</span><span class="p">):</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="n">x</span>
+
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;AHP&#39;</span><span class="p">)</span>
+            <span class="n">_plot_line</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                       <span class="p">[(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                         <span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">width</span><span class="p">)],</span>
+                       <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                       <span class="s1">&#39;spike threshold&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            <span class="n">_plot_line</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                       <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">right</span><span class="p">)],</span>
+                       <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="o">*</span><span class="n">ahps</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                       <span class="s1">&#39;AHP bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;AHP&#39;</span><span class="p">,</span>
+                             <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">ahps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+                             <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                             <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                                             <span class="n">shrink</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                             <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ahps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">low</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ahps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">diff</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">diff</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">low</span><span class="p">)</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">diff</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AHP.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;no spikes&#39;</span><span class="p">,</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_interval</span><span class="o">*</span><span class="mf">0.05</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_interval</span><span class="o">*</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_do_plots</span><span class="p">([</span><span class="n">ax</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span><span class="p">)</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AHP.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
+
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spike_plot</span><span class="p">(</span><span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_plots</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span><span class="p">):</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="n">spike_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">left</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp_window</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">right</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">r</span> <span class="o">-</span> <span class="n">l</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="n">diff</span><span class="o">*</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">r</span> <span class="o">+</span> <span class="n">diff</span><span class="o">*</span><span class="mf">0.15</span><span class="p">)</span></div></div>
 
 <span class="k">def</span> <span class="nf">_find_falling_curve</span><span class="p">(</span><span class="n">wave</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="mf">0.6</span><span class="p">):</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_diff</span><span class="p">(</span><span class="n">wave</span><span class="p">)</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hanning&#39;</span><span class="p">)[(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)]</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hanning&#39;</span><span class="p">,</span> <span class="n">window_len</span><span class="o">=</span><span class="n">window</span><span class="p">)[(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)]</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">after</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">while</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">wave</span><span class="p">[</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">wave</span><span class="p">[</span><span class="n">start</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="ow">and</span> <span class="n">wave</span><span class="p">[</span><span class="n">start</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">:</span>
         <span class="n">start</span> <span class="o">-=</span> <span class="mi">1</span>
-    <span class="n">sm</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hanning&#39;</span><span class="p">)</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">smooth</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hanning&#39;</span><span class="p">,</span> <span class="n">window_len</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
     <span class="n">smallest</span> <span class="o">=</span> <span class="n">sm</span><span class="p">[</span><span class="n">end</span><span class="p">]</span>
     <span class="c1"># find minimum</span>
     <span class="k">while</span> <span class="p">(</span><span class="n">end</span><span class="o">+</span><span class="n">window</span> <span class="o">&lt;</span> <span class="n">wave</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">wave</span><span class="p">[</span><span class="n">end</span><span class="o">+</span><span class="n">window</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span>
            <span class="ow">and</span> <span class="n">sm</span><span class="p">[</span><span class="n">end</span><span class="p">:</span><span class="n">end</span> <span class="o">+</span> <span class="n">window</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">smallest</span><span class="p">):</span>
         <span class="n">smallest</span> <span class="o">=</span> <span class="n">sm</span><span class="p">[</span><span class="n">end</span><span class="p">]</span>
         <span class="n">end</span> <span class="o">+=</span> <span class="n">window</span> <span class="o">//</span> <span class="mi">2</span>
-    <span class="n">ccut</span> <span class="o">=</span> <span class="n">wave</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end</span><span class="p">]</span>
+    <span class="n">start_override</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+    <span class="n">ccut</span> <span class="o">=</span> <span class="n">wave</span><span class="p">[</span><span class="n">start_override</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">end</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">ccut</span>
 
 <span class="k">def</span> <span class="nf">simple_exp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">amp</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
@@ -333,41 +738,63 @@
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">amp</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">tau</span><span class="p">)))</span>
 
 <span class="n">falling_param</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;falling_param&#39;</span><span class="p">,</span> <span class="s1">&#39;amp tau&#39;</span><span class="p">)</span>
-<span class="n">function_fit</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;function_fit&#39;</span><span class="p">,</span> <span class="s1">&#39;function params&#39;</span><span class="p">)</span>
+<span class="n">function_fit</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;function_fit&#39;</span><span class="p">,</span> <span class="s1">&#39;function params good&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_fit_falling_curve</span><span class="p">(</span><span class="n">ccut</span><span class="p">,</span> <span class="n">baseline</span><span class="p">,</span> <span class="n">steady</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">ccut</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ccut</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">steady</span><span class="o">-</span><span class="n">baseline</span><span class="p">)</span><span class="o">.</span><span class="n">negative</span><span class="p">:</span>
         <span class="n">func</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="n">falling_param</span><span class="p">(</span><span class="n">vartype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
-                               <span class="n">vartype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">))</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">falling_param</span><span class="p">(</span><span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                               <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">baseline</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">ptp</span><span class="p">())</span>
-        <span class="n">func</span> <span class="o">=</span> <span class="n">negative_exp</span> <span class="k">if</span> <span class="p">(</span><span class="n">steady</span><span class="o">-</span><span class="n">baseline</span><span class="p">)</span><span class="o">.</span><span class="n">negative</span> <span class="k">else</span> <span class="n">simple_exp</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">negative_exp</span>
         <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="o">-</span><span class="n">baseline</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">pcov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="n">pcov</span>
         <span class="n">params</span> <span class="o">=</span> <span class="n">falling_param</span><span class="p">(</span><span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mf">0.5</span><span class="p">),</span>
                                <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcov</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mf">0.5</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">function_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">negative</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">tau</span><span class="o">.</span><span class="n">positive</span>
+    <span class="k">return</span> <span class="n">function_fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FallingCurve"><a class="viewcode-back" href="../../features.html#ajustador.features.FallingCurve">[docs]</a><span class="k">class</span> <span class="nc">FallingCurve</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
     <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;steady_before&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_before&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;injection_start&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_before&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;falling_curve_window&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">)</span>
-    <span class="n">provides</span> <span class="o">=</span> <span class="s1">&#39;falling_curve&#39;</span><span class="p">,</span>
+    <span class="n">provides</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;falling_curve&#39;</span><span class="p">,</span> <span class="s1">&#39;falling_curve_fit&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;falling_curve_amp&#39;</span><span class="p">,</span> <span class="s1">&#39;falling_curve_tau&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;falling_curve_function&#39;</span><span class="p">)</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;falling_curve_amp&#39;</span><span class="p">,</span> <span class="s1">&#39;falling_curve_tau&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;falling_curve_function&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">falling_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_find_falling_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="p">,</span>
                                    <span class="n">window</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">falling_curve_window</span><span class="p">,</span>
+                                   <span class="n">after</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span><span class="p">,</span>
                                    <span class="n">before</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_before</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">falling_curve_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_fit_falling_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">falling_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">falling_curve_amp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
+        <span class="k">return</span> <span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">amp</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">good</span> <span class="k">else</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">falling_curve_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
+        <span class="k">return</span> <span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">tau</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">good</span> <span class="k">else</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">falling_curve_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
+        <span class="k">return</span> <span class="n">fit</span><span class="o">.</span><span class="n">function</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">good</span> <span class="k">else</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="FallingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.FallingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
@@ -376,20 +803,29 @@
         <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span>
         <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;falling curve&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="o">.</span><span class="mi">01</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="o">.</span><span class="mi">01</span><span class="p">)</span>
 
-        <span class="n">func</span><span class="p">,</span> <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;fitted </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">func</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">),</span> <span class="s1">&#39;g--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">func</span><span class="p">,</span> <span class="n">popt</span><span class="p">,</span> <span class="n">good</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
+        <span class="k">if</span> <span class="n">good</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;fitted </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">func</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">),</span> <span class="s1">&#39;g--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;bad fit&#39;</span><span class="p">,</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
         <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="Rectification"><a class="viewcode-back" href="../../features.html#ajustador.features.Rectification">[docs]</a><span class="k">class</span> <span class="nc">Rectification</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
-    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;baseline_before&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_after&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_before&#39;</span><span class="p">,</span>
+    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;injection_start&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;steady_after&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_before&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;falling_curve&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">)</span>
     <span class="n">provides</span> <span class="o">=</span> <span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
+    <span class="n">mean_attributes</span> <span class="o">=</span> <span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
 
     <span class="n">window_len</span> <span class="o">=</span> <span class="mi">11</span>
 
@@ -400,7 +836,7 @@
         <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span>
 
         <span class="k">if</span> <span class="n">ccut</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
         <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">pos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_len</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">ccut</span><span class="p">[</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">window_len</span> <span class="p">:</span> <span class="n">end</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">window_len</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
@@ -414,71 +850,94 @@
         <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_before</span>
         <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="n">before</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="n">before</span><span class="p">)</span>
 
         <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
                    <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)],</span>
                    <span class="n">steady</span><span class="p">,</span>
-                   <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                   <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
         <span class="n">right</span> <span class="o">=</span> <span class="p">(</span><span class="n">after</span> <span class="o">+</span> <span class="n">before</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">bottom</span> <span class="o">=</span> <span class="n">steady</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rectification</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
-                   <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">right</span><span class="p">)],</span>
-                   <span class="n">bottom</span><span class="p">,</span>
-                   <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
-                    <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
-                    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
-                    <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">),</span>
-                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">bottom</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;rectification not detected&#39;</span><span class="p">,</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                       <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">right</span><span class="p">)],</span>
+                       <span class="n">bottom</span><span class="p">,</span>
+                       <span class="s1">&#39;rectification bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;rectification&#39;</span><span class="p">,</span>
+                        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">),</span>
+                        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+                        <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                                        <span class="n">shrink</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
         <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="ChargingCurve"><a class="viewcode-back" href="../../features.html#ajustador.features.ChargingCurve">[docs]</a><span class="k">class</span> <span class="nc">ChargingCurve</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
-    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span> <span class="s1">&#39;steady_after&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;spikes&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_count&#39;</span><span class="p">)</span>
+    <span class="n">requires</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;wave&#39;</span><span class="p">,</span> <span class="s1">&#39;injection_start&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_before&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;spikes&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_count&#39;</span><span class="p">,</span> <span class="s1">&#39;spike_threshold&#39;</span><span class="p">)</span>
     <span class="n">provides</span> <span class="o">=</span> <span class="s1">&#39;charging_curve_halfheight&#39;</span><span class="p">,</span>
+    <span class="n">array_attributes</span> <span class="o">=</span> <span class="s1">&#39;charging_curve_halfheight&#39;</span><span class="p">,</span>
 
     <span class="nd">@property</span>
     <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
     <span class="k">def</span> <span class="nf">charging_curve_halfheight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;The height in the middle between depolarization start and first spike&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
-            <span class="n">steady_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_after</span>
-            <span class="n">spike0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ccut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charging_curve</span>
+        <span class="k">if</span> <span class="n">ccut</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">vartype</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_threshold</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span>
 
-            <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">steady_after</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">spike0</span><span class="o">.</span><span class="n">x</span><span class="p">)]</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">what</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">threshold</span> <span class="o">-</span> <span class="n">baseline</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@utilities</span><span class="o">.</span><span class="n">once</span>
+    <span class="k">def</span> <span class="nf">charging_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
+        <span class="n">injection_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_start</span>
+        <span class="n">spike0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_threshold</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">injection_start</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">spike0</span><span class="o">.</span><span class="n">x</span><span class="p">)]</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="n">what</span><span class="p">[</span><span class="n">what</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">what</span>
 
 <div class="viewcode-block" id="ChargingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.ChargingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span>
 
-        <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady_after</span>
-        <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">steady</span>
-
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charging_curve_halfheight</span><span class="p">):</span>
+        <span class="n">ccut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charging_curve</span>
+        <span class="k">if</span> <span class="n">ccut</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;cannot determine charging curve&#39;</span><span class="p">,</span>
                     <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
-                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
-            <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">after</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="n">before</span> <span class="o">+</span> <span class="mf">0.005</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;charging curve&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.005</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
             <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
-                       <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)],</span>
-                       <span class="bp">self</span><span class="o">.</span><span class="n">charging_curve_halfheight</span><span class="p">,</span>
-                       <span class="s1">&#39;g&#39;</span><span class="p">)</span>
+                       <span class="p">[(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span>
+                       <span class="n">baseline</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">charging_curve_halfheight</span><span class="p">,</span>
+                       <span class="s1">&#39;charging curve halfheight&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
 
         <span class="n">_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
-                   <span class="p">[(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)],</span>
-                   <span class="n">steady</span><span class="p">,</span>
-                   <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                   <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span><span class="p">)],</span>
+                   <span class="n">baseline</span><span class="p">,</span>
+                   <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
         <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
@@ -520,10 +979,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

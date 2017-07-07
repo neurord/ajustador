@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.optimize &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ajustador.drawing" href="drawing.html" />
+    <link rel="prev" title="ajustador.fitnesses" href="fitnesses.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajustador.optimize">
+<span id="ajustador-optimize"></span><h1>ajustador.optimize<a class="headerlink" href="#module-ajustador.optimize" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="ajustador.optimize.filtereddict">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">filtereddict</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#filtereddict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.filtereddict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.optimize.exe_map">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">exe_map</code><span class="sig-paren">(</span><em>single=False</em>, <em>async=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#exe_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.exe_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.optimize.iv_filename">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">iv_filename</code><span class="sig-paren">(</span><em>injection_current</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#iv_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.iv_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.optimize.iv_filename_to_current">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">iv_filename_to_current</code><span class="sig-paren">(</span><em>ivfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#iv_filename_to_current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.iv_filename_to_current" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.optimize.execute">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">execute</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.execute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajustador.optimize.load_simulation">
+<code class="descclassname">ajustador.optimize.</code><code class="descname">load_simulation</code><span class="sig-paren">(</span><em>ivfile</em>, <em>simtime</em>, <em>junction_potential</em>, <em>features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#load_simulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.load_simulation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.Simulation">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">Simulation</code><span class="sig-paren">(</span><em>dir</em>, <em>junction_potential=0</em>, <em>currents=None</em>, <em>simtime=None</em>, <em>baseline=None</em>, <em>morph_file=None</em>, <em>single=False</em>, <em>async=False</em>, <em>features=None</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Simulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Simulation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ajustador.optimize.Simulation.execute_for">
+<code class="descname">execute_for</code><span class="sig-paren">(</span><em>injection_currents</em>, <em>junction_potential</em>, <em>single</em>, <em>async</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Simulation.execute_for"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Simulation.execute_for" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Simulation.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Simulation.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Simulation.wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.SimulationResult">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">SimulationResult</code><span class="sig-paren">(</span><em>dirname</em>, <em>features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResult" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ajustador.optimize.SimulationResult.report">
+<code class="descname">report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResult.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResult.report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ajustador.optimize.SimulationResult.find_global">
+<em class="property">static </em><code class="descname">find_global</code><span class="sig-paren">(</span><em>param</em>, <em>p_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResult.find_global"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResult.find_global" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.SimulationResult.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResult.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResult.wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.SimulationResults">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">SimulationResults</code><span class="sig-paren">(</span><em>dirname</em>, <em>features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResults" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ajustador.optimize.SimulationResults.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>last=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResults.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResults.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.SimulationResults.ordered">
+<code class="descname">ordered</code><span class="sig-paren">(</span><em>measurement</em>, <em>*</em>, <em>fitness=&lt;function simple_combined_fitness&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#SimulationResults.ordered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.SimulationResults.ordered" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.Param">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">Param</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Param" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ajustador.optimize.Param.min">
+<code class="descname">min</code><em class="property"> = None</em><a class="headerlink" href="#ajustador.optimize.Param.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.optimize.Param.max">
+<code class="descname">max</code><em class="property"> = None</em><a class="headerlink" href="#ajustador.optimize.Param.max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.optimize.Param.fixed">
+<code class="descname">fixed</code><em class="property"> = True</em><a class="headerlink" href="#ajustador.optimize.Param.fixed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ajustador.optimize.Param.make">
+<em class="property">static </em><code class="descname">make</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Param.make"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Param.make" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Param.valid">
+<code class="descname">valid</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Param.valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Param.valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.AjuParam">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">AjuParam</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>min=None</em>, <em>max=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#AjuParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.AjuParam" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ajustador.optimize.AjuParam.fixed">
+<code class="descname">fixed</code><em class="property"> = False</em><a class="headerlink" href="#ajustador.optimize.AjuParam.fixed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.optimize.AjuParam.scaled">
+<code class="descname">scaled</code><a class="headerlink" href="#ajustador.optimize.AjuParam.scaled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.AjuParam.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#AjuParam.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.AjuParam.scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.AjuParam.unscale">
+<code class="descname">unscale</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#AjuParam.unscale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.AjuParam.unscale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.AjuParam.valid">
+<code class="descname">valid</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#AjuParam.valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.AjuParam.valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.ParamSet">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">ParamSet</code><span class="sig-paren">(</span><em>*params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ajustador.optimize.ParamSet.scaled">
+<code class="descname">scaled</code><a class="headerlink" href="#ajustador.optimize.ParamSet.scaled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.ParamSet.scale">
+<code class="descname">scale</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet.scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet.scale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.ParamSet.scale_dict">
+<code class="descname">scale_dict</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet.scale_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet.scale_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.ParamSet.unscale">
+<code class="descname">unscale</code><span class="sig-paren">(</span><em>scaled_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet.unscale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet.unscale" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.ParamSet.unscaled_dict">
+<code class="descname">unscaled_dict</code><span class="sig-paren">(</span><em>scaled_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet.unscaled_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet.unscaled_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.ParamSet.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#ParamSet.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.ParamSet.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.optimize.ParamSet.scaled_bounds">
+<code class="descname">scaled_bounds</code><a class="headerlink" href="#ajustador.optimize.ParamSet.scaled_bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ajustador.optimize.Fit">
+<em class="property">class </em><code class="descclassname">ajustador.optimize.</code><code class="descname">Fit</code><span class="sig-paren">(</span><em>dirname</em>, <em>measurement</em>, <em>model</em>, <em>neuron_type</em>, <em>fitness_func</em>, <em>params</em>, <em>feature_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="ajustador.optimize.Fit.fitness_max">
+<code class="descname">fitness_max</code><em class="property"> = 200</em><a class="headerlink" href="#ajustador.optimize.Fit.fitness_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>last=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.param_names">
+<code class="descname">param_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.param_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.param_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.sim">
+<code class="descname">sim</code><span class="sig-paren">(</span><em>scaled_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.sim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.sim_fitness">
+<code class="descname">sim_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>full=False</em>, <em>max_fitness=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.sim_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.sim_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.optimize.Fit.name">
+<code class="descname">name</code><a class="headerlink" href="#ajustador.optimize.Fit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.fitness">
+<code class="descname">fitness</code><span class="sig-paren">(</span><em>scaled_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.fitness_full">
+<code class="descname">fitness_full</code><span class="sig-paren">(</span><em>scaled_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.fitness_full"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.fitness_full" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.fitness_multi">
+<code class="descname">fitness_multi</code><span class="sig-paren">(</span><em>many_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.fitness_multi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.fitness_multi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.finished">
+<code class="descname">finished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.finished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.param_values">
+<code class="descname">param_values</code><span class="sig-paren">(</span><em>*what</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.param_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.param_values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.optimize.Fit.do_fit">
+<code class="descname">do_fit</code><span class="sig-paren">(</span><em>count</em>, <em>params=None</em>, <em>sigma=1</em>, <em>popsize=8</em>, <em>seed=123</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/optimize.html#Fit.do_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.optimize.Fit.do_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fitnesses.html" title="previous chapter">ajustador.fitnesses</a></li>
+      <li>Next: <a href="drawing.html" title="next chapter">ajustador.drawing</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/optimize.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/optimize.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

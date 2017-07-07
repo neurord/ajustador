@@ -18,7 +18,8 @@
         VERSION:     '0.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -27,7 +28,6 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ajustador 0.0.0 documentation" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -51,6 +51,7 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -63,606 +64,677 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.AHP">AHP (class in ajustador.features)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="features.html#ajustador.features.AHP">AHP (class in ajustador.features)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ahp_curve_centered">ahp_curve_centered() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ahp_curve_compare">ahp_curve_compare() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ahp_curve_fitness">ahp_curve_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam">AjuParam (class in ajustador.optimize)</a>
+</li>
+      <li><a href="index.html#module-ajustador.basic_simulation">ajustador.basic_simulation (module)</a>
+</li>
+      <li><a href="utilities.html#module-ajustador.compat">ajustador.compat (module)</a>
+</li>
+      <li><a href="detect.html#module-ajustador.detect">ajustador.detect (module)</a>
+</li>
+      <li><a href="drawing.html#module-ajustador.drawing">ajustador.drawing (module)</a>
+</li>
+      <li><a href="fitnesses.html#module-ajustador.fitnesses">ajustador.fitnesses (module)</a>
+</li>
+      <li><a href="loader.html#module-ajustador.loader">ajustador.loader (module)</a>
+</li>
+      <li><a href="optimize.html#module-ajustador.optimize">ajustador.optimize (module)</a>
+</li>
+      <li><a href="signal_smooth.html#module-ajustador.signal_smooth">ajustador.signal_smooth (module)</a>
+</li>
+      <li><a href="utilities.html#module-ajustador.utilities">ajustador.utilities (module)</a>
+</li>
+      <li><a href="vartype.html#module-ajustador.vartype">ajustador.vartype (module)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.utilities.arange_values">arange_values() (in module ajustador.utilities)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.vartype.array">array() (ajustador.vartype.vartype class method)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.array_attributes">array_attributes (ajustador.features.AHP attribute)</a>
 
-      
-  <dt><a href="index.html#module-ajustador.basic_simulation">ajustador.basic_simulation (module)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#module-ajustador.compat">ajustador.compat (module)</a>
-  </dt>
-
-      
-  <dt><a href="detect.html#module-ajustador.detect">ajustador.detect (module)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#module-ajustador.fitnesses">ajustador.fitnesses (module)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#module-ajustador.loader">ajustador.loader (module)</a>
-  </dt>
-
-      
-  <dt><a href="signal_smooth.html#module-ajustador.signal_smooth">ajustador.signal_smooth (module)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#module-ajustador.utilities">ajustador.utilities (module)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#module-ajustador.vartype">ajustador.vartype (module)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.utilities.arange_values">arange_values() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.vartype.array">array() (ajustador.vartype.vartype class method)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.array_diff">array_diff() (in module ajustador.vartype)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.array_mean">array_mean() (in module ajustador.vartype)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.array_rms">array_rms() (in module ajustador.vartype)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.array_sub">array_sub() (in module ajustador.vartype)</a>
-  </dt>
-
-      
-  <dt><a href="detect.html#ajustador.detect.arrayize">arrayize() (in module ajustador.detect)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#ajustador.loader.Attributable">Attributable (class in ajustador.loader)</a>
-  </dt>
-
-      
-  <dt><a href="vartype.html#ajustador.vartype.vartype.average">average() (ajustador.vartype.vartype class method)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="features.html#ajustador.features.ChargingCurve.array_attributes">(ajustador.features.ChargingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.FallingCurve.array_attributes">(ajustador.features.FallingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Rectification.array_attributes">(ajustador.features.Rectification attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Spikes.array_attributes">(ajustador.features.Spikes attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.SteadyState.array_attributes">(ajustador.features.SteadyState attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="vartype.html#ajustador.vartype.array_diff">array_diff() (in module ajustador.vartype)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.array_mean">array_mean() (in module ajustador.vartype)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.array_rms">array_rms() (in module ajustador.vartype)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.array_sub">array_sub() (in module ajustador.vartype)</a>
+</li>
+      <li><a href="detect.html#ajustador.detect.arrayize">arrayize() (in module ajustador.detect)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Attributable">Attributable (class in ajustador.loader)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.vartype.average">average() (ajustador.vartype.vartype class method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.SteadyState.baseline">baseline (ajustador.features.SteadyState attribute)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.baseline_fitness">baseline_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="features.html#ajustador.features.SteadyState.baseline">baseline (ajustador.features.SteadyState attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.baseline_fitness">baseline_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.SteadyState.baseline_post">baseline_post (ajustador.features.SteadyState attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.baseline_post_fitness">baseline_post_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.SteadyState.baseline_pre">baseline_pre (ajustador.features.SteadyState attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.baseline_pre_fitness">baseline_pre_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.bins">bins() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.utilities.cached">cached() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.charging_curve_fitness">charging_curve_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.ChargingCurve.charging_curve_halfheight">charging_curve_halfheight (ajustador.features.ChargingCurve attribute)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.ChargingCurve">ChargingCurve (class in ajustador.features)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#ajustador.utilities.chdir">chdir() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#ajustador.compat.TemporaryDirectory.cleanup">cleanup() (ajustador.compat.TemporaryDirectory method)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.combined_fitness">combined_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.utilities.cached">cached() (in module ajustador.utilities)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.cbdr">cbdr() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="features.html#ajustador.features.ChargingCurve.charging_curve">charging_curve (ajustador.features.ChargingCurve attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.charging_curve_fitness">charging_curve_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.ChargingCurve.charging_curve_halfheight">charging_curve_halfheight (ajustador.features.ChargingCurve attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.ChargingCurve">ChargingCurve (class in ajustador.features)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.utilities.chdir">chdir() (in module ajustador.utilities)</a>
+</li>
+      <li><a href="utilities.html#ajustador.compat.TemporaryDirectory.cleanup">cleanup() (ajustador.compat.TemporaryDirectory method)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.clutter">clutter() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.combined_fitness">combined_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="index.html#ajustador.basic_simulation.cond_setting">cond_setting() (in module ajustador.basic_simulation)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.CSVSeries">CSVSeries (class in ajustador.loader)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="detect.html#ajustador.detect.detect_peaks">detect_peaks() (in module ajustador.detect)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="detect.html#ajustador.detect.detect_peaks">detect_peaks() (in module ajustador.detect)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.diff">diff() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.do_fit">do_fit() (ajustador.optimize.Fit method)</a>
+</li>
+  </ul></td>
+</tr></table>
 
-  </dl></td>
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ErrorCalc">ErrorCalc (class in ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.exe_map">exe_map() (in module ajustador.optimize)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.execute">execute() (in module ajustador.optimize)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Simulation.execute_for">execute_for() (ajustador.optimize.Simulation method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.FallingCurve.falling_curve">falling_curve (ajustador.features.FallingCurve attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="features.html#ajustador.features.FallingCurve.falling_curve">falling_curve (ajustador.features.FallingCurve attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.FallingCurve.falling_curve_amp">falling_curve_amp (ajustador.features.FallingCurve attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.FallingCurve.falling_curve_fit">falling_curve_fit (ajustador.features.FallingCurve attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.FallingCurve.falling_curve_function">falling_curve_function (ajustador.features.FallingCurve attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.FallingCurve.falling_curve_tau">falling_curve_tau (ajustador.features.FallingCurve attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.falling_curve_time_fitness">falling_curve_time_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.FallingCurve">FallingCurve (class in ajustador.features)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Fileinfo">Fileinfo (in module ajustador.loader)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.filtereddict">filtereddict() (in module ajustador.optimize)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_best">find_best() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.SimulationResult.find_global">find_global() (ajustador.optimize.SimulationResult static method)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.find_min_values">find_min_values() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="utilities.html#ajustador.utilities.find_missing">find_missing() (in module ajustador.utilities)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_multi_best">find_multi_best() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar">find_nonsimilar() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result">find_nonsimilar_result (class in ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.finished">finished() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit">Fit (class in ajustador.optimize)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.fit_finished">fit_finished() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.fit_sort">fit_sort() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.fitness">fitness() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.fitness_full">fitness_full() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.fitness_max">fitness_max (ajustador.optimize.Fit attribute)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.fitness_multi">fitness_multi() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam.fixed">fixed (ajustador.optimize.AjuParam attribute)</a>
 
-      
-  <dt><a href="features.html#ajustador.features.FallingCurve.falling_curve_fit">falling_curve_fit (ajustador.features.FallingCurve attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.falling_curve_time_fitness">falling_curve_time_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.FallingCurve">FallingCurve (class in ajustador.features)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#ajustador.loader.Fileinfo">Fileinfo (in module ajustador.loader)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_best">find_best() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.utilities.find_missing">find_missing() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_multi_best">find_multi_best() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar">find_nonsimilar() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result">find_nonsimilar_result (class in ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.fit_finished">fit_finished() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.fit_sort">fit_sort() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.Param.fixed">(ajustador.optimize.Param attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="vartype.html#ajustador.vartype.vartype.format_array">format_array() (ajustador.vartype.vartype class method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.group">group (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.group">group (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.hyperpol_fitness">hyperpol_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.hist">hist() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.hyperpol_fitness">hyperpol_fitness() (in module ajustador.fitnesses)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Spikes.isi_spread">isi_spread (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.isi_spread_fitness">isi_spread_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#ajustador.loader.IVCurve">IVCurve (class in ajustador.loader)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.interpolate">interpolate() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.isi_spread">isi_spread (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.isi_spread_fitness">isi_spread_fitness() (in module ajustador.fitnesses)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.iv_filename">iv_filename() (in module ajustador.optimize)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.iv_filename_to_current">iv_filename_to_current() (in module ajustador.optimize)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.IVCurve">IVCurve (class in ajustador.loader)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.IVCurveSeries">IVCurveSeries (class in ajustador.loader)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="loader.html#ajustador.loader.IVCurve.load">load() (ajustador.loader.IVCurve class method)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="loader.html#ajustador.loader.IVCurve.load">load() (ajustador.loader.IVCurve class method)</a>
 
-  </dl></td>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.Fit.load">(ajustador.optimize.Fit method)</a>
+</li>
+        <li><a href="optimize.html#ajustador.optimize.SimulationResults.load">(ajustador.optimize.SimulationResults method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.load_simulation">load_simulation() (in module ajustador.optimize)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Spikes.mean_isi">mean_isi (ajustador.features.Spikes attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.Param.make">make() (ajustador.optimize.Param static method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Param.max">max (ajustador.optimize.Param attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.mean_attributes">mean_attributes (ajustador.features.AHP attribute)</a>
 
-      
-  <dt><a href="features.html#ajustador.features.Spikes.mean_isi_fallback_variance">mean_isi_fallback_variance (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.mean_isi_fitness">mean_isi_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Spikes.mean_spike_height">mean_spike_height (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#ajustador.loader.Measurement">Measurement (class in ajustador.loader)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.measurement_to_spikes">measurement_to_spikes() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#ajustador.utilities.mkdir_p">mkdir_p() (in module ajustador.utilities)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="features.html#ajustador.features.Rectification.mean_attributes">(ajustador.features.Rectification attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Spikes.mean_attributes">(ajustador.features.Spikes attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.SteadyState.mean_attributes">(ajustador.features.SteadyState attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="features.html#ajustador.features.Spikes.mean_isi">mean_isi (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.mean_isi_fallback_variance">mean_isi_fallback_variance (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.mean_isi_fitness">mean_isi_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.mean_spike_height">mean_spike_height (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Measurement">Measurement (class in ajustador.loader)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Param.min">min (ajustador.optimize.Param attribute)</a>
+</li>
+      <li><a href="utilities.html#ajustador.utilities.mkdir_p">mkdir_p() (in module ajustador.utilities)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.compat.TemporaryDirectory.name">name (ajustador.compat.TemporaryDirectory attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.compat.TemporaryDirectory.name">name (ajustador.compat.TemporaryDirectory attribute)</a>
 
-      
-  <dt><a href="vartype.html#ajustador.vartype.vartype.negative">negative (ajustador.vartype.vartype attribute)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.new_combined_fitness">new_combined_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.normalize_dimensions">normalize_dimensions() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.Fit.name">(ajustador.optimize.Fit attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="vartype.html#ajustador.vartype.vartype.nan">nan (ajustador.vartype.vartype attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="vartype.html#ajustador.vartype.vartype.negative">negative (ajustador.vartype.vartype attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.new_combined_fitness">new_combined_fitness (class in ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ErrorCalc.normal">normal (ajustador.fitnesses.ErrorCalc attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.normalize_dimensions">normalize_dimensions() (in module ajustador.fitnesses)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.utilities.once">once() (in module ajustador.utilities)</a>
-  </dt>
-
-  </dl></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.utilities.once">once() (in module ajustador.utilities)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.SimulationResults.ordered">ordered() (ajustador.optimize.SimulationResults method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.parametrized_fitness">parametrized_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.Param">Param (class in ajustador.optimize)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.param_names">param_names() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.param_values">param_values() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.parametrized_fitness">parametrized_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.params">params (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.ParamSet">ParamSet (class in ajustador.optimize)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.parse_current">parse_current() (in module ajustador.loader)</a>
+</li>
+      <li><a href="utilities.html#ajustador.utilities.permutations_to_achieve_order">permutations_to_achieve_order() (in module ajustador.utilities)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.plot">plot() (ajustador.features.AHP method)</a>
 
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.params">params (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
-  </dt>
+      <ul>
+        <li><a href="features.html#ajustador.features.ChargingCurve.plot">(ajustador.features.ChargingCurve method)</a>
+</li>
+        <li><a href="features.html#ajustador.features.FallingCurve.plot">(ajustador.features.FallingCurve method)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Rectification.plot">(ajustador.features.Rectification method)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Spikes.plot">(ajustador.features.Spikes method)</a>
+</li>
+        <li><a href="features.html#ajustador.features.SteadyState.plot">(ajustador.features.SteadyState method)</a>
+</li>
+        <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.plot">(ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+      </ul></li>
+      <li><a href="drawing.html#ajustador.drawing.plot_flat">plot_flat() (in module ajustador.drawing)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="drawing.html#ajustador.drawing.plot_history">plot_history() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_map">plot_map() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_param_section">plot_param_section() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_param_space">plot_param_space() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_param_view">plot_param_view() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_rectification">plot_rectification() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_shape">plot_shape() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_shape2">plot_shape2() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_together">plot_together() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="drawing.html#ajustador.drawing.plot_waves">plot_waves() (in module ajustador.drawing)</a>
+</li>
+      <li><a href="vartype.html#ajustador.vartype.vartype.positive">positive (ajustador.vartype.vartype attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.provides">provides (ajustador.features.AHP attribute)</a>
 
-      
-  <dt><a href="utilities.html#ajustador.utilities.permutations_to_achieve_order">permutations_to_achieve_order() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.ChargingCurve.plot">plot() (ajustador.features.ChargingCurve method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="features.html#ajustador.features.FallingCurve.plot">(ajustador.features.FallingCurve method)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Rectification.plot">(ajustador.features.Rectification method)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Spikes.plot">(ajustador.features.Spikes method)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.SteadyState.plot">(ajustador.features.SteadyState method)</a>
-  </dt>
-
-      </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="vartype.html#ajustador.vartype.vartype.positive">positive (ajustador.vartype.vartype attribute)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.AHP.provides">provides (ajustador.features.AHP attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="features.html#ajustador.features.ChargingCurve.provides">(ajustador.features.ChargingCurve attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.FallingCurve.provides">(ajustador.features.FallingCurve attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Rectification.provides">(ajustador.features.Rectification attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Spikes.provides">(ajustador.features.Spikes attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.SteadyState.provides">(ajustador.features.SteadyState attribute)</a>
-  </dt>
-
-      </dl></dd>
-  </dl></td>
+      <ul>
+        <li><a href="features.html#ajustador.features.ChargingCurve.provides">(ajustador.features.ChargingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.FallingCurve.provides">(ajustador.features.FallingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Rectification.provides">(ajustador.features.Rectification attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Spikes.provides">(ajustador.features.Spikes attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.SteadyState.provides">(ajustador.features.SteadyState attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Rectification.rectification">rectification (ajustador.features.Rectification attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="features.html#ajustador.features.Rectification.rectification">rectification (ajustador.features.Rectification attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Rectification">Rectification (class in ajustador.features)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.rectification_fitness">rectification_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Trace.register_feature">register_feature() (ajustador.loader.Trace method)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.ErrorCalc.relative">relative (ajustador.fitnesses.ErrorCalc attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.relative_diff">relative_diff() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.relative_diff_single">relative_diff_single() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="utilities.html#ajustador.utilities.reorder_array">reorder_array() (in module ajustador.utilities)</a>
+</li>
+      <li><a href="utilities.html#ajustador.utilities.reorder_list">reorder_list() (in module ajustador.utilities)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.new_combined_fitness.report">report() (ajustador.fitnesses.new_combined_fitness method)</a>
 
-      
-  <dt><a href="features.html#ajustador.features.Rectification">Rectification (class in ajustador.features)</a>
-  </dt>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.SimulationResult.report">(ajustador.optimize.SimulationResult method)</a>
+</li>
+      </ul></li>
+      <li><a href="features.html#ajustador.features.AHP.requires">requires (ajustador.features.AHP attribute)</a>
 
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.rectification_fitness">rectification_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="loader.html#ajustador.loader.IVCurve.register_feature">register_feature() (ajustador.loader.IVCurve method)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#ajustador.utilities.reorder_array">reorder_array() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="utilities.html#ajustador.utilities.reorder_list">reorder_list() (in module ajustador.utilities)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.AHP.requires">requires (ajustador.features.AHP attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="features.html#ajustador.features.ChargingCurve.requires">(ajustador.features.ChargingCurve attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.FallingCurve.requires">(ajustador.features.FallingCurve attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Rectification.requires">(ajustador.features.Rectification attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.Spikes.requires">(ajustador.features.Spikes attribute)</a>
-  </dt>
-
-        
-  <dt><a href="features.html#ajustador.features.SteadyState.requires">(ajustador.features.SteadyState attribute)</a>
-  </dt>
-
-      </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.SteadyState.response">response (ajustador.features.SteadyState attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.response_fitness">response_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="features.html#ajustador.features.ChargingCurve.requires">(ajustador.features.ChargingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.FallingCurve.requires">(ajustador.features.FallingCurve attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Rectification.requires">(ajustador.features.Rectification attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.Spikes.requires">(ajustador.features.Spikes attribute)</a>
+</li>
+        <li><a href="features.html#ajustador.features.SteadyState.requires">(ajustador.features.SteadyState attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="features.html#ajustador.features.SteadyState.response">response (ajustador.features.SteadyState attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.response_fitness">response_fitness() (in module ajustador.fitnesses)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.scores">scores (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam.scale">scale() (ajustador.optimize.AjuParam method)</a>
 
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.simple_combined_fitness">simple_combined_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.ParamSet.scale">(ajustador.optimize.ParamSet method)</a>
+</li>
+      </ul></li>
+      <li><a href="optimize.html#ajustador.optimize.ParamSet.scale_dict">scale_dict() (ajustador.optimize.ParamSet method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam.scaled">scaled (ajustador.optimize.AjuParam attribute)</a>
 
-      
-  <dt><a href="signal_smooth.html#ajustador.signal_smooth.smooth">smooth() (in module ajustador.signal_smooth)</a>
-  </dt>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.ParamSet.scaled">(ajustador.optimize.ParamSet attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="optimize.html#ajustador.optimize.ParamSet.scaled_bounds">scaled_bounds (ajustador.optimize.ParamSet attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.find_nonsimilar_result.scores">scores (ajustador.fitnesses.find_nonsimilar_result attribute)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.sim">sim() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Fit.sim_fitness">sim_fitness() (ajustador.optimize.Fit method)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.simple_combined_fitness">simple_combined_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.Simulation">Simulation (class in ajustador.optimize)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.SimulationResult">SimulationResult (class in ajustador.optimize)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.SimulationResults">SimulationResults (class in ajustador.optimize)</a>
+</li>
+      <li><a href="signal_smooth.html#ajustador.signal_smooth.smooth">smooth() (in module ajustador.signal_smooth)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.spike_ahp">spike_ahp (ajustador.features.AHP attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_ahp_fitness">spike_ahp_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.spike_ahp_position">spike_ahp_position (ajustador.features.AHP attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.spike_ahp_window">spike_ahp_window (ajustador.features.AHP attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_bounds">spike_bounds (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_count">spike_count (ajustador.features.Spikes attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_count_fitness">spike_count_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_fitness">spike_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_fitness_0">spike_fitness_0() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_height">spike_height (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_height_fitness">spike_height_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_i">spike_i (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_i_and_threshold">spike_i_and_threshold (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_latency">spike_latency (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_latency_fitness">spike_latency_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.AHP.spike_plot">spike_plot() (ajustador.features.AHP method)</a>
 
-      
-  <dt><a href="features.html#ajustador.features.AHP.spike_ahp">spike_ahp (ajustador.features.AHP attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_ahp_fitness">spike_ahp_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spike_bounds">spike_bounds (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spike_count">spike_count (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_count_fitness">spike_count_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_fitness">spike_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_fitness_0">spike_fitness_0() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_height_fitness">spike_height_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spike_i">spike_i (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spike_latency">spike_latency (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_latency_fitness">spike_latency_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_onset_fitness">spike_onset_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_time_fitness">spike_time_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spike_width">spike_width (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.spike_width_fitness">spike_width_fitness() (in module ajustador.fitnesses)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes.spikes">spikes (ajustador.features.Spikes attribute)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.Spikes">Spikes (class in ajustador.features)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.SteadyState.steady">steady (ajustador.features.SteadyState attribute)</a>
-  </dt>
-
-      
-  <dt><a href="features.html#ajustador.features.SteadyState">SteadyState (class in ajustador.features)</a>
-  </dt>
-
-      
-  <dt><a href="fitnesses.html#ajustador.fitnesses.sub_mes_dev">sub_mes_dev() (in module ajustador.fitnesses)</a>
-  </dt>
-
-  </dl></td>
+      <ul>
+        <li><a href="features.html#ajustador.features.Spikes.spike_plot">(ajustador.features.Spikes method)</a>
+</li>
+      </ul></li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_range_y_histogram_fitness">spike_range_y_histogram_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_threshold">spike_threshold (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_time_fitness">spike_time_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spike_width">spike_width (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.spike_width_fitness">spike_width_fitness() (in module ajustador.fitnesses)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes.spikes">spikes (ajustador.features.Spikes attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Spikes">Spikes (class in ajustador.features)</a>
+</li>
+      <li><a href="features.html#ajustador.features.SteadyState.steady">steady (ajustador.features.SteadyState attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.SteadyState">SteadyState (class in ajustador.features)</a>
+</li>
+      <li><a href="fitnesses.html#ajustador.fitnesses.sub_mes_dev">sub_mes_dev() (in module ajustador.fitnesses)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="utilities.html#ajustador.compat.TemporaryDirectory">TemporaryDirectory (class in ajustador.compat)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utilities.html#ajustador.compat.TemporaryDirectory">TemporaryDirectory (class in ajustador.compat)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="loader.html#ajustador.loader.Trace.time">time (ajustador.loader.Trace attribute)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Trace">Trace (class in ajustador.loader)</a>
+</li>
+  </ul></td>
+</tr></table>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="loader.html#ajustador.loader.IVCurve.time">time (ajustador.loader.IVCurve attribute)</a>
-  </dt>
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam.unscale">unscale() (ajustador.optimize.AjuParam method)</a>
 
-  </dl></td>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.ParamSet.unscale">(ajustador.optimize.ParamSet method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.ParamSet.unscaled_dict">unscaled_dict() (ajustador.optimize.ParamSet method)</a>
+</li>
+      <li><a href="optimize.html#ajustador.optimize.ParamSet.update">update() (ajustador.optimize.ParamSet method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="vartype.html#ajustador.vartype.vartype">vartype (class in ajustador.vartype)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.AjuParam.valid">valid() (ajustador.optimize.AjuParam method)</a>
 
-  </dl></td>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.Param.valid">(ajustador.optimize.Param method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="vartype.html#ajustador.vartype.vartype">vartype (class in ajustador.vartype)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="loader.html#ajustador.loader.Measurement.waves">waves (ajustador.loader.Measurement attribute)</a>
-  </dt>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="optimize.html#ajustador.optimize.Simulation.wait">wait() (ajustador.optimize.Simulation method)</a>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="features.html#ajustador.features.Rectification.window_len">window_len (ajustador.features.Rectification attribute)</a>
-  </dt>
+      <ul>
+        <li><a href="optimize.html#ajustador.optimize.SimulationResult.wait">(ajustador.optimize.SimulationResult method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram">WaveHistogram (class in ajustador.fitnesses)</a>
+</li>
+      <li><a href="loader.html#ajustador.loader.Measurement.waves">waves (ajustador.loader.Measurement attribute)</a>
+</li>
+      <li><a href="features.html#ajustador.features.Rectification.window_len">window_len (ajustador.features.Rectification attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
 
-  </dl></td>
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.x1">x1() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.x2">x2() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.y1">y1() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fitnesses.html#ajustador.fitnesses.WaveHistogram.y2">y2() (ajustador.fitnesses.WaveHistogram method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 
@@ -696,10 +768,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;.
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

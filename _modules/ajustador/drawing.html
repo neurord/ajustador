@@ -1,0 +1,625 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ajustador.drawing &#8212; ajustador 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ajustador.drawing</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span><span class="p">,</span> <span class="n">patches</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span><span class="p">,</span> <span class="n">interpolate</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">loader</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">,</span> <span class="n">utilities</span>
+
+<span class="k">def</span> <span class="nf">_on_close</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_GRAPHS</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="n">_GRAPHS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">def</span> <span class="nf">_get_graph</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">newplot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">newplot</span><span class="p">:</span>
+        <span class="n">_GRAPHS</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_GRAPHS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clear</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span> <span class="c1"># this is here to make it easier to see what changed</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">f</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_GRAPHS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;close_event&#39;</span><span class="p">,</span> <span class="n">_on_close</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+<div class="viewcode-block" id="plot_together"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_together">[docs]</a><span class="k">def</span> <span class="nf">plot_together</span><span class="p">(</span><span class="o">*</span><span class="n">groups</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">separate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; together&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">separate</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+                          <span class="n">wspace</span><span class="o">=</span><span class="mf">0.26</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.20</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">5</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">waves</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">groups</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ptp</span> <span class="o">=</span> <span class="n">waves</span><span class="o">.</span><span class="n">injection</span><span class="o">.</span><span class="n">ptp</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ptp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">off</span> <span class="o">=</span> <span class="n">waves</span><span class="o">.</span><span class="n">injection</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">ptp</span>
+            <span class="n">ptp</span> <span class="o">*=</span> <span class="mf">1.2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">off</span> <span class="o">=</span> <span class="n">waves</span><span class="o">.</span><span class="n">injection</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">100e-12</span>
+            <span class="n">ptp</span> <span class="o">=</span> <span class="mf">100e-12</span>
+
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">separate</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">columns</span><span class="p">)),</span> <span class="n">columns</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">c</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">curve</span><span class="o">.</span><span class="n">injection</span> <span class="o">-</span> <span class="n">off</span><span class="p">)</span><span class="o">/</span><span class="n">ptp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">waves</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">offset</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_waves"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_waves">[docs]</a><span class="k">def</span> <span class="nf">plot_waves</span><span class="p">(</span><span class="n">waves</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; baseline and steady state&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+                      <span class="n">wspace</span><span class="o">=</span><span class="mf">0.26</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.20</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">5</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">columns</span><span class="p">)),</span> <span class="n">columns</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> / </span><span class="si">{}</span><span class="s1">V&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">curve</span><span class="o">.</span><span class="n">injection</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">baseline</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">baseline</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">baseline</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">baseline</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">baseline</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span><span class="p">],</span>
+                  <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+        <span class="n">steady</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">steady</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">steady</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">steady</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">steady</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">steady</span><span class="o">.</span><span class="n">dev</span><span class="o">*</span><span class="mi">3</span><span class="p">],</span>
+                  <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
+
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">spikes</span>
+        <span class="k">if</span> <span class="n">spikes</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> spikes&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)),</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_rectification"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_rectification">[docs]</a><span class="k">def</span> <span class="nf">plot_rectification</span><span class="p">(</span><span class="n">waves</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; activation&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">else</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">16</span> <span class="k">else</span> <span class="mi">5</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">waves</span><span class="o">.</span><span class="n">waves</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">curve</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">12e-12</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">columns</span><span class="p">)),</span> <span class="n">columns</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">curve</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0.filename}</span><span class="s1"> / </span><span class="si">{0.injection}</span><span class="s1">V&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curve</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">ccut</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">falling_curve</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">baseline</span>
+        <span class="n">steady</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">steady</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">rectification</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">curve</span><span class="o">.</span><span class="n">baseline_before</span><span class="p">,</span> <span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="o">.</span><span class="mi">01</span><span class="p">)</span>
+
+        <span class="n">fit</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">falling_curve_fit</span>
+        <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">good</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">baseline</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">fit</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">ccut</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="p">),</span> <span class="s1">&#39;g--&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">steady</span><span class="o">.</span><span class="n">x</span><span class="o">-</span><span class="n">rect</span><span class="o">.</span><span class="n">x</span><span class="p">],</span> <span class="mf">0.20</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">)</span>
+
+        <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_shape"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_shape">[docs]</a><span class="k">def</span> <span class="nf">plot_shape</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="o">*</span><span class="n">group</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;shape&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;shape for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">what</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">what</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">waves</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+        <span class="n">inj</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">waves</span><span class="o">.</span><span class="n">injection</span><span class="p">,</span> <span class="n">op</span><span class="p">(</span><span class="n">waves</span><span class="p">)</span>
+        <span class="nb">ord</span> <span class="o">=</span> <span class="n">inj</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">inj</span><span class="p">[</span><span class="nb">ord</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="nb">ord</span><span class="p">],</span>
+                <span class="s1">&#39;-o&#39;</span> <span class="k">if</span> <span class="n">waves</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s1">&#39;ajustador.loader&#39;</span> <span class="k">else</span> <span class="s1">&#39;--+&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;(mixed)&#39;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_shape2"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_shape2">[docs]</a><span class="k">def</span> <span class="nf">plot_shape2</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="o">*</span><span class="n">group</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;activation&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">waves</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">wave</span><span class="o">.</span><span class="n">falling_curve</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="n">wave</span><span class="o">.</span><span class="n">falling_curve</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+             <span class="k">for</span> <span class="n">wave</span> <span class="ow">in</span> <span class="n">waves</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="n">what</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                <span class="s1">&#39;-o&#39;</span> <span class="k">if</span> <span class="n">waves</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s1">&#39;ajustador.loader&#39;</span> <span class="k">else</span> <span class="s1">&#39;--+&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">waves</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;(mixed)&#39;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_param_space"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_param_space">[docs]</a><span class="k">def</span> <span class="nf">plot_param_space</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">what</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">fitness_func</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fitness&#39;</span><span class="p">,</span> <span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_values</span><span class="p">(</span><span class="o">*</span><span class="n">what</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">age</span><span class="p">:</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness_func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;param space&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;3-param view for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fitness_func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">measurement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sca</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">fitness</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sca</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">what</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">history</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_history"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_history">[docs]</a><span class="k">def</span> <span class="nf">plot_history</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">measurement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">show_quit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">newplot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="p">,</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="n">fitness</span> <span class="ow">or</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fitness_func</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;fit history </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="n">clear</span><span class="p">,</span> <span class="n">newplot</span><span class="o">=</span><span class="n">newplot</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="n">colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s1">&#39;rgbkmc&#39;</span><span class="p">)</span>
+    <span class="n">markers</span> <span class="o">=</span> <span class="s1">&#39;x+12348&#39;</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span><span class="p">:]</span> <span class="o">+</span> <span class="n">colors</span><span class="p">[:</span><span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span><span class="p">]</span>
+    <span class="n">markers</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span><span class="p">:]</span> <span class="o">+</span> <span class="n">markers</span><span class="p">[:</span><span class="n">f</span><span class="o">.</span><span class="n">plot_counter</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">groups</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">fitness</span> <span class="ow">or</span> <span class="n">group</span><span class="o">.</span><span class="n">fitness_func</span>
+
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_quit</span><span class="p">:</span>
+            <span class="n">quit</span> <span class="o">=</span> <span class="n">fitnesses</span><span class="o">.</span><span class="n">fit_finished</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">)</span>
+
+        <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)]</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">markers</span><span class="p">)]</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span>
+                 <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">show_quit</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">[</span><span class="o">-</span><span class="n">quit</span><span class="p">],</span> <span class="n">color</span> <span class="o">+</span> <span class="n">marker</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">[</span><span class="n">quit</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.5&#39;</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">,</span> <span class="n">color</span> <span class="o">+</span> <span class="n">marker</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ymax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="n">ymax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;generation&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">onpick</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+        <span class="n">thisline</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">artist</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">thisline</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">()</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ind</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">xdata</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+
+        <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="s1">&#39;report&#39;</span><span class="p">):</span>
+            <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="s1">&#39;report&#39;</span><span class="p">):</span>
+            <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">measurement</span><span class="p">:</span>
+            <span class="c1"># FIXME: map from artist to group</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">plot_together</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span>
+                              <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">name</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;report&#39;</span><span class="p">):</span>
+                <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_together</span><span class="p">(</span><span class="n">sim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">texts</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">texts</span><span class="p">),</span>
+                           <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+                           <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                           <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;_pick_event_id&#39;</span><span class="p">):</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">_pick_event_id</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">_pick_event_id</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;pick_event&#39;</span><span class="p">,</span> <span class="n">onpick</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_param_view"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_param_view">[docs]</a><span class="k">def</span> <span class="nf">plot_param_view</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="n">what</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">fitness_func</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fitness&#39;</span><span class="p">,</span> <span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_values</span><span class="p">(</span><span class="o">*</span><span class="n">what</span><span class="p">)</span>
+    <span class="n">fitness</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness_func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;param space&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;2-param view for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fitness_func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+    <span class="n">sca</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">values</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">values</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">fitness</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sca</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">&quot;fitness&quot;</span><span class="p">)</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">history</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_param_section"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_param_section">[docs]</a><span class="k">def</span> <span class="nf">plot_param_section</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="n">what</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">fitness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitness_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">what</span><span class="p">:</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_names</span><span class="p">()</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">what</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6</span> <span class="k">else</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">fitness</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">fitness_func</span>
+    <span class="k">if</span> <span class="n">fitness_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fitness_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fitness</span><span class="p">))</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_values</span><span class="p">(</span><span class="o">*</span><span class="n">what</span><span class="p">)</span>
+    <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span> <span class="k">if</span> <span class="n">measurement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fitness</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">columns</span><span class="p">))</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;param section&#39;</span><span class="p">,</span>
+                             <span class="nb">getattr</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;(no name)&#39;</span><span class="p">),</span>
+                             <span class="n">fitness_name</span><span class="p">)))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+                      <span class="n">wspace</span><span class="o">=</span><span class="mf">0.17</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.24</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">what</span><span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="n">rows</span><span class="p">)</span><span class="o">*</span><span class="n">columns</span> <span class="o">+</span> <span class="n">n</span><span class="o">//</span><span class="n">rows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">fitnesses</span><span class="p">,</span>
+                         <span class="n">c</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">regression</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">fitnesses</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span> <span class="p">[</span><span class="n">a</span><span class="o">*</span><span class="n">x1</span><span class="o">+</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">*</span><span class="n">x2</span><span class="o">+</span><span class="n">b</span><span class="p">],</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;symlog&#39;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">log</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="p">(</span><span class="n">rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">fitness_name</span><span class="p">)</span>
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<span class="k">def</span> <span class="nf">_product</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="clutter"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.clutter">[docs]</a><span class="k">def</span> <span class="nf">clutter</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># we want horizontal layouts because they fit better in the window</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dd0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">dd1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dd0</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">dd1</span><span class="o">.</span><span class="n">flat</span><span class="p">)))</span><span class="o">**</span><span class="mf">0.5</span></div>
+
+<div class="viewcode-block" id="cbdr"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.cbdr">[docs]</a><span class="k">def</span> <span class="nf">cbdr</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">xnames</span><span class="p">,</span> <span class="n">yname</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;We have n dimensions, with a shape like (d0, d1, ..., d(n-1)).</span>
+<span class="sd">    Each variable has a range... but let&#39;s map them to (0,1).</span>
+<span class="sd">    Then final mapping is:</span>
+
+<span class="sd">    X = x&#39;(n-1) + x&#39;(n-3) * d(n-1) + ... + x&#39;(0 or 1) * d(2 or 3)</span>
+<span class="sd">    Y = x&#39;(n-2) + x&#39;(n-4) * d(n-2) + ... + x&#39;(1 or 0) * d(3 or 2)</span>
+
+<span class="sd">    where</span>
+
+<span class="sd">    x&#39;(i) = [x(i) - min x(i)] / [max x(i) - min x(i)]</span>
+
+<span class="sd">    So the multiplier for x&#39; is</span>
+
+<span class="sd">    (1, 1, d(2), d(3), d(4), ..., d(n-1))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dimsplit</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">orders</span> <span class="o">=</span> <span class="p">((</span><span class="n">order</span><span class="p">,)</span> <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+              <span class="k">else</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+
+    <span class="n">xorig</span><span class="p">,</span> <span class="n">yorig</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">arange_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">:</span>
+        <span class="n">_xs</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">reorder_list</span><span class="p">(</span><span class="n">xorig</span><span class="p">,</span> <span class="n">perm</span><span class="p">)</span>
+        <span class="n">_ys</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">reorder_array</span><span class="p">(</span><span class="n">yorig</span><span class="p">,</span> <span class="n">perm</span><span class="p">)</span>
+
+        <span class="n">_ys_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">_ys</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">_finalshape</span> <span class="o">=</span> <span class="p">(</span><span class="n">_product</span><span class="p">(</span><span class="n">_ys_shape</span><span class="p">[:</span><span class="n">dimsplit</span><span class="p">]),</span> <span class="n">_product</span><span class="p">(</span><span class="n">_ys_shape</span><span class="p">[</span><span class="n">dimsplit</span><span class="p">:]))</span>
+        <span class="n">_final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">_ys</span><span class="p">,</span> <span class="n">_finalshape</span><span class="p">)</span>
+
+        <span class="n">cl</span> <span class="o">=</span> <span class="n">clutter</span><span class="p">(</span><span class="n">_final</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> → rms(clutter)=</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span>
+                          <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">perm</span><span class="p">),</span> <span class="n">cl</span><span class="p">,</span>
+                          <span class="s1">&#39;*&#39;</span> <span class="k">if</span> <span class="n">cl</span> <span class="o">&lt;</span> <span class="n">best</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cl</span> <span class="o">&lt;</span> <span class="n">best</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">best</span><span class="p">):</span>
+            <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">_xs</span><span class="p">,</span> <span class="n">_ys</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="n">cl</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">perm</span>
+            <span class="n">finalshape</span><span class="p">,</span> <span class="n">final</span> <span class="o">=</span> <span class="n">_finalshape</span><span class="p">,</span> <span class="n">_final</span>
+            <span class="n">ys_shape</span> <span class="o">=</span> <span class="n">_ys_shape</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameters:&#39;</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">xnames</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">order</span><span class="p">)):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(axis </span><span class="si">{}</span><span class="s1">) </span><span class="si">{}</span><span class="s1">: {:</span><span class="si">{}</span><span class="s1">} </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;-|&#39;</span><span class="p">[</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">dimsplit</span><span class="p">],</span> <span class="n">xnames</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">m</span><span class="p">,</span> <span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;cbdr&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;cbdr </span><span class="si">{}</span><span class="s1"> × </span><span class="si">{}</span><span class="s1"> → </span><span class="si">{}</span><span class="s1">&#39;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order</span><span class="p">[:</span><span class="n">dimsplit</span><span class="p">]),</span>
+                                      <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order</span><span class="p">[</span><span class="n">dimsplit</span><span class="p">:]),</span>
+                                      <span class="n">yname</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">rms</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> rms(fitness)=</span><span class="si">{}</span><span class="s1"> rms(clutter)=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yname</span><span class="p">,</span> <span class="n">rms</span><span class="p">,</span> <span class="n">best</span><span class="p">))</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">f2</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;cbdr - clutter&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;final shape&#39;</span><span class="p">,</span> <span class="n">finalshape</span><span class="p">,</span> <span class="n">final</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                                            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+        <span class="n">f2</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                                            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+        <span class="n">f2</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">f2</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">f2</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ys_shape</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">dimsplit</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">_product</span><span class="p">(</span><span class="n">ys_shape</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">dimsplit</span><span class="p">])</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">dimsplit</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">0</span> <span class="o">-</span> <span class="o">.</span><span class="mi">5</span>
+            <span class="n">textpos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span>
+            <span class="n">textopt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">_product</span><span class="p">(</span><span class="n">ys_shape</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">size</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ys_shape</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">1.5</span>
+            <span class="n">textpos</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="o">.</span><span class="mi">5</span>
+            <span class="n">textopt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+        <span class="c1"># print(i, pos, w, h)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">clip_on</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">textpos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">textpos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">xnames</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="o">**</span><span class="n">textopt</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="plot_flat"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_flat">[docs]</a><span class="k">def</span> <span class="nf">plot_flat</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="n">what</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">what</span><span class="p">:</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_names</span><span class="p">()</span>
+
+    <span class="n">fitness_func</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fitness&#39;</span><span class="p">,</span> <span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_values</span><span class="p">(</span><span class="o">*</span><span class="n">what</span><span class="p">)</span>
+    <span class="n">fitness</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness_func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+    <span class="n">nontrivial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-10</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="n">nontrivial</span><span class="p">]</span>
+    <span class="n">what</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">what</span><span class="p">)[</span><span class="n">nontrivial</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">what</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cbdr</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">fitness_func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_make_grid</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="c1"># values is (measures × dimensions)</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">dim</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">dim</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">npoints</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">xi</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="find_min_values"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.find_min_values">[docs]</a><span class="k">def</span> <span class="nf">find_min_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fitness</span><span class="p">)[:,</span><span class="kc">None</span><span class="p">])))</span>
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">mins</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mins</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mins</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="plot_map"><a class="viewcode-back" href="../../drawing.html#ajustador.drawing.plot_map">[docs]</a><span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="n">what</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">fitness_func</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fitness&#39;</span><span class="p">,</span> <span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">dots</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dots&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">param_values</span><span class="p">(</span><span class="o">*</span><span class="n">what</span><span class="p">)</span>
+    <span class="n">fitness</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness_func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+
+    <span class="n">rms</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span>
+    <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+        <span class="n">fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span>
+
+    <span class="n">yname</span> <span class="o">=</span> <span class="n">fitness_func</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_get_graph</span><span class="p">(</span><span class="s1">&#39;param map&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;params </span><span class="si">{}</span><span class="s1"> × </span><span class="si">{}</span><span class="s1"> → </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">what</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">yname</span><span class="p">))</span>
+
+    <span class="n">values</span><span class="p">,</span> <span class="n">fitness</span> <span class="o">=</span> <span class="n">find_min_values</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">fitness</span><span class="p">)</span>
+    <span class="n">grid_x</span><span class="p">,</span> <span class="n">grid_y</span> <span class="o">=</span> <span class="n">_make_grid</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="p">(</span><span class="n">grid_x</span><span class="p">,</span> <span class="n">grid_y</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+    <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+              <span class="n">values</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">values</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> rms(fitness)=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yname</span><span class="p">,</span> <span class="n">rms</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">what</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">points</span><span class="p">,</span>
+                   <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
+                   <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dots</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">values</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k.&#39;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
