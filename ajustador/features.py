@@ -133,7 +133,7 @@ class SteadyState(Feature):
                   (wave.x > after if after is not None else False))
         what = wave.y[region]
         cutoffa, cutoffb = np.percentile(what, (40, 60))
-        cut = what[(what > cutoffa) & (what < cutoffb)]
+        cut = what[(what >= cutoffa) & (what <= cutoffb)]
         return vartype.array_mean(cut)
 
     @property
