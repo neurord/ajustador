@@ -57,7 +57,7 @@ def execute(p):
               ] + params
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     with utilities.chdir(dirname):
-        subprocess.call(cmdline)
+        subprocess.check_call(cmdline)
         iv = load_simulation(result,
                              simtime=simtime,
                              junction_potential=junction_potential,
