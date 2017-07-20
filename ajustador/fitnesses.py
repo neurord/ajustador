@@ -456,7 +456,7 @@ class new_combined_fitness:
         self.ahp_curve = ahp_curve
         self.spike_range_y_histogram = spike_range_y_histogram
 
-    def _parts(self, sim, measurement):
+    def _parts(self, sim, measurement, *, full=False):
         for w, func in ((self.response, response_fitness),
                         (self.baseline_pre, baseline_pre_fitness),
                         (self.baseline_post, baseline_post_fitness),
@@ -470,11 +470,11 @@ class new_combined_fitness:
                         (self.spike_ahp, spike_ahp_fitness),
                         (self.ahp_curve, ahp_curve_fitness),
                         (self.spike_range_y_histogram, spike_range_y_histogram_fitness)):
-            if w:
-                yield (func(sim, measurement, error=self.error), func.__name__)
+            if w or full:
+                yield (w, func(sim, measurement, error=self.error), func.__name__)
 
     def __call__(self, sim, measurement, full=False):
-        parts = [w for w, name in self._parts(sim, measurement)]
+        parts = [w*r for w, r, name in self._parts(sim, measurement)]
         arr = np.array(parts)
         if full:
             return arr
@@ -485,10 +485,10 @@ class new_combined_fitness:
     def __name__(self):
         return self.__class__.__name__
 
-    def report(self, sim, measurement):
-        parts = list(self._parts(sim, measurement))
-        desc = '\n'.join('{}={:.2g}'.format(name, w)
-                         for w, name in parts)
+    def report(self, sim, measurement, *, full=False):
+        parts = list(self._parts(sim, measurement, full=full))
+        desc = '\n'.join('{}={}*{:.2g}={:.2g}'.format(name, w, r, w*r)
+                         for w, r, name in parts)
         total = desc + '\n' + 'total: {:.02g}'.format(self.__call__(sim, measurement))
         return total
 
