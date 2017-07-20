@@ -286,7 +286,99 @@ fit12 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-12',
                          'd1d2', 'D1',
                          fitness, params12)
 fit12.load(last=200)
-fit12.do_fit(1, popsize=10)
+fit12.do_fit(150, popsize=10)
+
+# also allow Eleak to vary
+params13 = aju.optimize.ParamSet(
+    ('junction_potential', -0.012, 'fixed'),
+    ('RA',                 12.004,    0, 100),
+    ('RM',                 9.427,     0,  10),
+    ('CM',                 0.03604,   0, 0.10),
+    ('Eleak',              -0.056, -0.080, -0.030),
+    ('Cond_Kir',           14.502,    0, 100),
+    ('Kir_offset',         -.004,    -0.010, +0.005),
+    ('morph_file', 'MScell-tertDendlongRE.p'),
+    ('Cond_NaF_0',      150e3,      0, 600e3),
+    ('Cond_NaF_1',      1894,       0, 10000),
+    ('Cond_KaS_0',      372,        0, 2000),
+    ('Cond_KaF_0',      641,        0, 1000),
+    ('Cond_Krp_0',      177,        0, 600),
+    ('Cond_SKCa_0',     0.5,        0, 6),
+    ('Cond_BKCa_0',     10,         0, 100),
+    ('Cond_BKCa_1',     10,         0, 100))
+# redo with higher upper bound for KaS density
+# and ahp_curve_fitness updated to take rms of all AHPs
+params13 = params13.update(RA=5.294949868179399,
+                    RM=7.7809771401424435,
+                    CM=0.060402895206330624,
+                    Cond_Kir=17.040420667688142,
+                    Kir_offset=-0.005857481956356754,
+                    Cond_NaF_0=219356.6071179029,
+                    Cond_NaF_1=878.6938806162441,
+                    Cond_KaS_0=599.9317714317569,
+                    Cond_KaF_0=887.4082517102048,
+                    Cond_Krp_0=0.045796847567147546,
+                    Cond_SKCa_0=1.736719977809778,
+                    Cond_BKCa_0=5.634221337003896,
+                    Cond_BKCa_1=9.824714710660963)
+fitness = aju.fitnesses.new_combined_fitness()
+fit13 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-13',
+                         ms1.waves5[[0, 7, 17, 18, 21]],
+                         'd1d2', 'D1',
+                         fitness, params13)
+fit13.load(last=200)
+fit13.do_fit(150, popsize=10)
+
+
+
+# also mostly everything to vary
+params14 = aju.optimize.ParamSet(
+    ('junction_potential', -0.012, 'fixed'),
+    ('RA',                 12.004,    0, 100),
+    ('RM',                 9.427,     0,  10),
+    ('CM',                 0.03604,   0, 0.10),
+    ('Eleak',              -0.056, -0.080, -0.030),
+    ('Cond_Kir',           14.502,    0, 100),
+    ('Kir_offset',         -.004,    -0.010, +0.005),
+    ('morph_file', 'MScell-tertDendlongRE.p'),
+    ('Cond_NaF_0',      150e3,      0, 600e3),
+    ('Cond_NaF_1',      1894,       0, 10000),
+    ('Cond_NaF_2',      927,       0, 10000),
+    ('Cond_KaS_0',      372,        0, 2000),
+    ('Cond_KaS_1',      32.9,       0, 200),
+    ('Cond_KaF_0',      641,        0, 1000),
+    ('Cond_KaF_1',      641,        0, 1000),
+    ('Cond_KaF_2',      641,        0, 1000),
+    ('Cond_Krp_0',      177,        0, 600),
+    ('Cond_Krp_1',      70,        0, 600),
+    ('Cond_Krp_2',      77,        0, 600),
+    ('Cond_SKCa_0',     0.5,        0, 10),
+    ('Cond_SKCa_1',     0.5,        0, 10),
+    ('Cond_SKCa_2',     0.5,        0, 10),
+    ('Cond_BKCa_0',     10,         0, 100),
+    ('Cond_BKCa_1',     10,         0, 100),
+    ('Cond_BKCa_2',     10,         0, 100))
+params14 = params14.update(RA=5.294949868179399,
+                    RM=7.7809771401424435,
+                    CM=0.060402895206330624,
+                    Cond_Kir=17.040420667688142,
+                    Kir_offset=-0.005857481956356754,
+                    Cond_NaF_0=219356.6071179029,
+                    Cond_NaF_1=878.6938806162441,
+                    Cond_KaS_0=599.9317714317569,
+                    Cond_KaF_0=887.4082517102048,
+                    Cond_Krp_0=0.045796847567147546,
+                    Cond_SKCa_0=1.736719977809778,
+                    Cond_BKCa_0=5.634221337003896,
+                    Cond_BKCa_1=9.824714710660963)
+fitness = aju.fitnesses.new_combined_fitness()
+fit14 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14',
+                         ms1.waves5[[0, 7, 17, 18, 21]],
+                         'd1d2', 'D1',
+                         fitness, params14)
+fit14.load(last=200)
+fit14.do_fit(100, popsize=30)
+
 
 
 paramsgp1 = aju.optimize.ParamSet(
