@@ -381,6 +381,31 @@ fit14.do_fit(100, popsize=30)
 
 
 
+fit14_waves1 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves1',
+                                ms1.waves1[[0, 7, 23, 24]],
+                                'd1d2', 'D1',
+                                fitness, params14)
+fit14_waves1.load()
+fit14_waves1.do_fit(300, popsize=12)
+
+
+fit14_waves3 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves3',
+                                ms1.waves1[[0, 8, -4, -1]],
+                                'd1d2', 'D1',
+                                fitness, params14)
+fit14_waves2.load()
+fit14_waves2.do_fit(300, popsize=12)
+
+
+fit14_waves7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves7',
+                                ms1.waves1[[0, 8, -6, -1]],
+                                'd1d2', 'D1',
+                                fitness, params14)
+fit14_waves7.load()
+fit14_waves7.do_fit(300, popsize=12)
+
+
+
 paramsgp1 = aju.optimize.ParamSet(
     ('junction_potential', -0.012, -0.020, -0.005),
     ('RA',                 5 ,     0, 100),
