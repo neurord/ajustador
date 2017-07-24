@@ -151,7 +151,7 @@ class SteadyState(Feature):
 
         what = wave.y[(wave.x < before)]
         cutoffa, cutoffb = np.percentile(what, (40, 60))
-        cut = what[(what > cutoffa) & (what < cutoffb)]
+        cut = what[(what >= cutoffa) & (what <= cutoffb)]
         return vartype.array_mean(cut)
 
     @property
@@ -169,7 +169,7 @@ class SteadyState(Feature):
 
         what = wave.y[(wave.x > after)]
         cutoffa, cutoffb = np.percentile(what, (40, 60))
-        cut = what[(what > cutoffa) & (what < cutoffb)]
+        cut = what[(what >= cutoffa) & (what <= cutoffb)]
         return vartype.array_mean(cut)
 
     @property
@@ -187,7 +187,7 @@ class SteadyState(Feature):
 
         data = wave.y[(wave.x > after) & (wave.x < before)]
         cutoff = np.percentile(data, cutoff)
-        cut = data[data < cutoff]
+        cut = data[data <= cutoff]
         return vartype.array_mean(cut)
 
     @property
