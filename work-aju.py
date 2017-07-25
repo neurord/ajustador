@@ -404,14 +404,14 @@ fit14_waves7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves7_2',
 fit14_waves7.load()
 fit14_waves7.do_fit(300, popsize=12)
 
-
+# There are no hyperpolarizing injections, hence no falling curves
+fitness10 = aju.fitnesses.new_combined_fitness(falling_curve_time=0)
 fit14_waves10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves10',
                                  ms1.waves10[[0, 7, -3, -1]],
                                  'd1d2', 'D1',
-                                 fitness, params14)
+                                 fitness10, params14)
 fit14_waves10.load()
 fit14_waves10.do_fit(300, popsize=12)
-
 
 
 
