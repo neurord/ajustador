@@ -422,54 +422,85 @@ def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     else:
         return (arr**2).mean()**0.5
 
-class new_combined_fitness:
-    def __init__(self, *,
-                 response=1,
-                 baseline_pre=1,
-                 baseline_post=1,
-                 rectification=1,
-                 falling_curve_time=1,
-                 spike_time=1,
-                 spike_width=1,
-                 spike_height=1,
-                 spike_latency=1,
-                 spike_count=0,
-                 spike_ahp=1,
-                 ahp_curve=1,
-                 spike_range_y_histogram=1,
-                 error=ErrorCalc.relative):
+class combined_fitness:
+    """Basic weighted combinations of fitness functions
+    """
+    presets = {
+        'empty' : collections.OrderedDict(),
+
+        'new_combined_fitness' : collections.OrderedDict(
+            response=1,
+            baseline_pre=1,
+            baseline_post=1,
+            rectification=1,
+            falling_curve_time=1,
+            spike_time=1,
+            spike_width=1,
+            spike_height=1,
+            spike_latency=1,
+            spike_ahp=1,
+            ahp_curve=1,
+            spike_range_y_histogram=1),
+
+        'simple_combined_fitness' : collections.OrderedDict(
+            response=1,
+            baseline=1,
+            rectification=1,
+            falling_curve_time=1,
+            mean_isi=1,
+            spike_latency=1,
+            spike_height=1,
+            spike_width=1,
+            spike_ahp=1,
+            spike_count=1,
+            isi_spread=1),
+    }
+
+    @staticmethod
+    def fitness_by_name(name):
+        return globals()[name + '_fitness']
+
+    def __init__(self,
+                 preset='new_combined_fitness',
+                 *,
+                 error=ErrorCalc.relative,
+                 extra=None,
+                 **kwargs):
+        """Creates a weighted combination of features.
+
+        preset can be used to pick one of the starting sets of fitness
+        functions and their weights. To modify the weight for one of
+        the "known" functions from this module, the new weight can be
+        passed as a keyword argument:
+
+        >>> new_combined_fitness('new_combined_fitness', spike_latency=2.5)
+
+        Arbitrary fitness functions can be given as (weight, function) pairs
+        in extra:
+
+        >>> def fitness1(sim, measurement, full=False, error=ErrorCalc.relative):
+        ...   return 5
+        >>> f = combined_fitness('empty',
+        ...                      extra={fitness1 : 0.5})
+        >>> print(f.report('a', 'b'))
+        fitness1=0.5*5=2.5
+        total: 2.5
+        """
 
         self.error = error
 
-        # weights
-        self.response = response
-        self.baseline_pre = baseline_pre
-        self.baseline_post = baseline_post
-        self.rectification = rectification
-        self.falling_curve_time = falling_curve_time
-        self.spike_time = spike_time
-        self.spike_width = spike_width
-        self.spike_height = spike_height
-        self.spike_latency = spike_latency
-        self.spike_count = spike_count
-        self.spike_ahp = spike_ahp
-        self.ahp_curve = ahp_curve
-        self.spike_range_y_histogram = spike_range_y_histogram
+        weights = self.presets[preset].copy()
+        weights.update(kwargs)
+
+        pairs1 = [(w, self.fitness_by_name(k))
+                  for k, w in weights.items()]
+        pairs2 = [(w, k) for k, w in extra.items()] if extra else []
+        if set(f for w,f in pairs1).intersection(set(f for w,f in pairs2)):
+            raise ValueError('"known" function specified in extra')
+        self.pairs = pairs1 + pairs2
 
     def _parts(self, sim, measurement, *, full=False):
-        for w, func in ((self.response, response_fitness),
-                        (self.baseline_pre, baseline_pre_fitness),
-                        (self.baseline_post, baseline_post_fitness),
-                        (self.rectification, rectification_fitness),
-                        (self.falling_curve_time, falling_curve_time_fitness),
-                        (self.spike_time, spike_time_fitness),
-                        (self.spike_width, spike_width_fitness),
-                        (self.spike_height, spike_height_fitness),
-                        (self.spike_latency, spike_latency_fitness),
-                        (self.spike_count, spike_count_fitness),
-                        (self.spike_ahp, spike_ahp_fitness),
-                        (self.ahp_curve, ahp_curve_fitness),
-                        (self.spike_range_y_histogram, spike_range_y_histogram_fitness)):
+        for w, func in self.pairs:
             if w or full:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
@@ -491,26 +522,6 @@ class new_combined_fitness:
                          for w, r, name in parts)
         total = desc + '\n' + 'total: {:.02g}'.format(self.__call__(sim, measurement))
         return total
-
-def simple_combined_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
-    arr = np.fromiter((f(sim, measurement, error=error)**2 for f in
-                        [response_fitness,
-                         baseline_fitness,
-                         rectification_fitness,
-                         falling_curve_time_fitness,
-                         mean_isi_fitness,
-                         spike_latency_fitness,
-                         spike_height_fitness,
-                         spike_width_fitness,
-                         spike_ahp_fitness,
-                         spike_count_fitness,
-                         isi_spread_fitness]), dtype=float)
-    if full:
-        return arr
-    else:
-        return (np.nansum(arr**2) / arr.size)**0.5
-
-combined_fitness = simple_combined_fitness
 
 def fit_sort(group, measurement, fitness):
     w = np.array([fitness(sim, measurement) for sim in group])

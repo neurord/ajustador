@@ -87,7 +87,7 @@ params6 = aju.optimize.ParamSet(
     ('Cond_Krp_0',      177,        0, 600))
 fit6 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-2',
                         ms1.waves5[[0, 3, 7, 13, 17, 19, 21, 22, 23]],
-                        aju.fitnesses.new_combined_fitness, params6)
+                        aju.fitnesses.combined_fitness(), params6)
 fit6.load()
 fit6.do_fit(150, popsize=20)
 
@@ -104,11 +104,11 @@ params7 = params6.update(junction_potential=-0.01473080415412029,
                          Cond_Krp_0=204.35266201409314)
 fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-4',
                         ms1.waves5[[0, 7, 17, 21, 23]],
-                        aju.fitnesses.new_combined_fitness, params7)
+                        aju.fitnesses.combined_fitness(), params7)
 fit7.load()
 fit7.do_fit(150, popsize=8)
 
-drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.new_combined_fitness)
+drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.combined_fitness())
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_time_fitness, clear=False)
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_width_fitness, clear=False)
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_ahp_fitness, clear=False)
@@ -132,7 +132,7 @@ params8 = aju.optimize.ParamSet(
     ('Cond_BKCa_0',     10,         0, 100))
 fit8 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-8',
                         ms1.waves5[[0, 7, 17, 21, 23]],
-                        aju.fitnesses.new_combined_fitness, params8)
+                        aju.fitnesses.combined_fitness(), params8)
 fit8.load()
 fit8.do_fit(150, popsize=20)
 
@@ -150,7 +150,7 @@ params9 = params8.update(junction_potential=-0.01358622557992854,
                          Cond_Krp_0=4.446655927879732,
                          Cond_SKCa_0=0.12046639942362143,
                          Cond_BKCa_0=11.51439493711431)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit9 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-9',
                         ms1.waves5[[0, 7, 17, 21, 23]],
                         fitness, params9)
@@ -172,7 +172,7 @@ params10 = params8.update(junction_potential=-0.011962426960236439,
                           Cond_Krp_0=3.9188988122933415,
                           Cond_SKCa_0=0.8627234570253062,
                           Cond_BKCa_0=8.435723459115415)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 
 fit10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-10',
                          ms1.waves5[[0, 7, 17, 18, 21]],
@@ -182,7 +182,7 @@ drawing.plot_history(fit10, fit10.measurement)
 fit10.do_fit(400, popsize=20)
 
 # the same as before, but with spike_latency_fitness thrown into the mix
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit11 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          fitness, params10)
@@ -202,7 +202,7 @@ params11a = params8.update(junction_potential=-0.011962426960236439/2,
                            Cond_Krp_0=3.9188988122933415/2,
                            Cond_SKCa_0=0.8627234570253062/2,
                            Cond_BKCa_0=8.435723459115415/2)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit11a = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11a',
                           ms1.waves5[[0, 7, 17, 18, 21]],
                           fitness, params11a)
@@ -221,7 +221,7 @@ params11b = params8.update(junction_potential=-0.011962426960236439*2,
                            Cond_Krp_0=3.9188988122933415*2,
                            Cond_SKCa_0=0.8627234570253062*2,
                            Cond_BKCa_0=8.435723459115415*2)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit11b = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11b',
                           ms1.waves5[[0, 7, 17, 18, 21]],
                           fitness, params11b)
@@ -241,7 +241,7 @@ params11c = params8.update(junction_potential=-0.011962426960236439/2,
                            Cond_Krp_0=3.9188988122933415*1.5,
                            Cond_SKCa_0=0.8627234570253062*3,
                            Cond_BKCa_0=8.435723459115415*3)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit11c = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11c',
                           ms1.waves5[[0, 7, 17, 18, 21]],
                           fitness, params11c)
@@ -280,7 +280,7 @@ params12 = params12.update(RA=5.294949868179399,
                     Cond_SKCa_0=1.736719977809778,
                     Cond_BKCa_0=5.634221337003896,
                     Cond_BKCa_1=9.824714710660963)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit12 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-12',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          'd1d2', 'D1',
@@ -321,7 +321,7 @@ params13 = params13.update(RA=5.294949868179399,
                     Cond_SKCa_0=1.736719977809778,
                     Cond_BKCa_0=5.634221337003896,
                     Cond_BKCa_1=9.824714710660963)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit13 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-13',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          'd1d2', 'D1',
@@ -371,7 +371,7 @@ params14 = params14.update(RA=5.294949868179399,
                     Cond_SKCa_0=1.736719977809778,
                     Cond_BKCa_0=5.634221337003896,
                     Cond_BKCa_1=9.824714710660963)
-fitness = aju.fitnesses.new_combined_fitness()
+fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit14 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14',
                          ms1.waves5[[0, 7, 17, 18, 21]],
                          'd1d2', 'D1',
@@ -401,11 +401,12 @@ fit14_waves7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves7_2',
                                 ms1.waves7[[0, 8, -6, -1]],
                                 'd1d2', 'D1',
                                 fitness, params14)
-fit14_waves7.load()
+fit14_waves7.load(last=30)
 fit14_waves7.do_fit(300, popsize=12)
 
 # There are no hyperpolarizing injections, hence no falling curves
-fitness10 = aju.fitnesses.new_combined_fitness(falling_curve_time=0)
+fitness10 = aju.fitnesses.combined_fitness('new_combined_fitness',
+                                           falling_curve_time=0)
 fit14_waves10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves10',
                                  ms1.waves10[[0, 7, -3, -1]],
                                  'd1d2', 'D1',
@@ -486,19 +487,20 @@ paramsgp1 = paramsgp1.update(
     Cond_SKCa_0=13.4,
     Cond_BKCa_0=782)
 
-fitness = aju.fitnesses.new_combined_fitness(response=1,
-                                             baseline_pre=0,
-                                             baseline_post=1,
-                                             rectification=1,
-                                             falling_curve_time=1,
-                                             spike_time=1,
-                                             spike_width=1,
-                                             spike_height=1,
-                                             spike_latency=0,
-                                             spike_count=1,
-                                             spike_ahp=1,
-                                             ahp_curve=1,
-                                             spike_range_y_histogram=1)
+fitness = aju.fitnesses.combined_fitness('empty',
+                                         response=1,
+                                         baseline_pre=0,
+                                         baseline_post=1,
+                                         rectification=1,
+                                         falling_curve_time=1,
+                                         spike_time=1,
+                                         spike_width=1,
+                                         spike_height=1,
+                                         spike_latency=0,
+                                         spike_count=1,
+                                         spike_ahp=1,
+                                         ahp_curve=1,
+                                         spike_range_y_histogram=1)
 fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-5.5', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1)
 fitgp1.load()
 fitgp1.do_fit(150, popsize=12)
@@ -552,19 +554,20 @@ paramsgp2 = aju.optimize.ParamSet(
     # BKCa={prox: 200, dist: 200, axon: 0},
     ('Cond_BKCa_0', 200, 0, 800),
 )
-fitness = aju.fitnesses.new_combined_fitness(response=1,
-                                             baseline_pre=0,
-                                             baseline_post=1,
-                                             rectification=1,
-                                             falling_curve_time=1,
-                                             spike_time=1,
-                                             spike_width=1,
-                                             spike_height=1,
-                                             spike_latency=0,
-                                             spike_count=1,
-                                             spike_ahp=1,
-                                             ahp_curve=1,
-                                             spike_range_y_histogram=1)
+fitness = aju.fitnesses.combined_fitness('empty',
+                                         response=1,
+                                         baseline_pre=0,
+                                         baseline_post=1,
+                                         rectification=1,
+                                         falling_curve_time=1,
+                                         spike_time=1,
+                                         spike_width=1,
+                                         spike_height=1,
+                                         spike_latency=0,
+                                         spike_count=1,
+                                         spike_ahp=1,
+                                         ahp_curve=1,
+                                         spike_range_y_histogram=1)
 fitgp2 = aju.optimize.Fit('../fit-2017-gp-nr144-2', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp2)
 fitgp2.load()
 fitgp2.do_fit(150, popsize=10)
@@ -593,19 +596,20 @@ paramsgp3 = paramsgp2.update(
     Cond_NaS_0=1.74,
     Cond_SKCa_0=64.9,
     Cond_BKCa_0=189)
-fitness = aju.fitnesses.new_combined_fitness(response=1,
-                                             baseline_pre=0,
-                                             baseline_post=1,
-                                             rectification=1,
-                                             falling_curve_time=0,
-                                             spike_time=1,
-                                             spike_width=1,
-                                             spike_height=1,
-                                             spike_latency=0,
-                                             spike_count=1,
-                                             spike_ahp=0,
-                                             ahp_curve=0,
-                                             spike_range_y_histogram=1)
+fitness = aju.fitnesses.combined_fitness('empty',
+                                         response=1,
+                                         baseline_pre=0,
+                                         baseline_post=1,
+                                         rectification=1,
+                                         falling_curve_time=0,
+                                         spike_time=1,
+                                         spike_width=1,
+                                         spike_height=1,
+                                         spike_latency=0,
+                                         spike_count=1,
+                                         spike_ahp=0,
+                                         ahp_curve=0,
+                                         spike_range_y_histogram=1)
 
 fitgp3 = aju.optimize.Fit('../fit-2017-gp-nr144-3', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp3)
 fitgp3.load()
