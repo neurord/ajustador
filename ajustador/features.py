@@ -598,7 +598,9 @@ class AHP(Feature):
             right = windows[i].x[windows[i].y.argmin()] + w/2
             cut = windows[i].wave[(windows[i].x >= left) & (windows[i].x <= right)]
             bottom = vartype.array_mean(cut.y)
-            weights = 1/(cut.y - bottom.x)**2
+            relative = cut.y - bottom.x
+            weights = (relative / relative.ptp())**-2
+            weights = np.fmin(weights, 100)
             avg = (cut.x * weights).sum() / weights.sum()
             assert not np.isnan(avg)
             dev = ((cut.x-avg)**2 * weights).sum()**0.5 / weights.sum()**0.5
