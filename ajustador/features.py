@@ -39,7 +39,11 @@ class Feature:
     def __init__(self, obj):
         self._obj = obj
 
-    def plot(self, figure):
+    def plot(self, figure=None):
+        if figure is None:
+            from matplotlib import pyplot
+            figure = pyplot.figure()
+
         wave = self._obj.wave
 
         ax = figure.add_subplot(111)
@@ -48,9 +52,14 @@ class Feature:
         ax.set_ylabel('membrane potential / V')
         return ax
 
-    def spike_plot(self, figure, max_spikes=20,
+    def spike_plot(self, figure=None, max_spikes=20,
                    bottom=None, spike_bounds=None,
                    lmargin=0.0010, rmargin=0.0015, rowsize=None):
+
+        if figure is None:
+            from matplotlib import pyplot
+            figure = pyplot.figure()
+
         wave = self._obj.wave
         spikes = self._obj.spikes
 
@@ -195,7 +204,7 @@ class SteadyState(Feature):
     def response(self):
         return self.steady - self.baseline
 
-    def plot(self, figure, pre_post=False):
+    def plot(self, figure=None, pre_post=False):
         wave = self._obj.wave
         before = self._obj.baseline_before
         after = self._obj.baseline_after
@@ -233,7 +242,7 @@ class SteadyState(Feature):
                     horizontalalignment='center', verticalalignment='bottom')
 
         ax.legend(loc='upper right')
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
 
 peak_and_threshold = namedtuple('peak_and_threshold', 'peaks thresholds')
@@ -440,7 +449,7 @@ class Spikes(Feature):
         # TODO: is the variance too big?
         return vartype.array_mean(self.spikes.y)
 
-    def plot(self, figure):
+    def plot(self, figure=None):
         from . import drawing_util
 
         wave = self._obj.wave
@@ -460,17 +469,17 @@ class Spikes(Feature):
                    'spike_height', 'y', zorder=0)
         ax.legend(loc='upper left',
                   handler_map={vline1: drawing_util.HandlerVLineCollection()})
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
         if self.spike_count > 0:
-            ax2 = figure.add_axes([.7, .45, .25, .4])
+            ax2 = ax.figure.add_axes([.7, .45, .25, .4])
             ax2.tick_params(labelbottom='off', labelleft='off')
             ax2.set_title('first spike', fontsize='smaller')
 
             _plot_spike(ax2, wave, self.spikes, i=0,
                         bottom=-0.06, spike_bounds=self.spike_bounds)
 
-    def spike_plot(self, figure, **kwargs):
+    def spike_plot(self, figure=None, **kwargs):
         x = self._obj.spikes.x.mean()
         spike_bounds = self.spike_bounds
         thresholds = self.spike_threshold
@@ -479,7 +488,7 @@ class Spikes(Feature):
         lmargin = self.spike_width.max()
         rmargin = self.spike_width.max() * 2
 
-        axes = super().spike_plot(figure,
+        axes = super().spike_plot(figure=None,
                                   spike_bounds=spike_bounds,
                                   lmargin=lmargin, rmargin=rmargin,
                                   **kwargs)
@@ -648,7 +657,7 @@ class AHP(Feature):
 
             axes[i].set_ylim(low, high)
 
-    def plot(self, figure):
+    def plot(self, figure=None):
         ax = super().plot(figure)
         if self._obj.spike_count == 0:
             ax.text(0.5, 0.5, 'no spikes',
@@ -658,9 +667,9 @@ class AHP(Feature):
             ax.set_xlim(self._obj.spikes[0].x - self._obj.injection_interval*0.05,
                         self._obj.spikes[-1].x + self._obj.injection_interval*0.05)
             self._do_plots([ax] * self._obj.spike_count)
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
-    def spike_plot(self, figure, **kwargs):
+    def spike_plot(self, figure=None, **kwargs):
         spike_bounds = self._obj.spike_bounds
 
         axes = super().spike_plot(figure, **kwargs)
@@ -753,7 +762,7 @@ class FallingCurve(Feature):
         fit = self.falling_curve_fit
         return fit.function if fit.good else None
 
-    def plot(self, figure):
+    def plot(self, figure=None):
         ax = super().plot(figure)
 
         ccut = self.falling_curve
@@ -773,7 +782,7 @@ class FallingCurve(Feature):
                     color='red')
 
         ax.legend(loc='upper right')
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
 
 class Rectification(Feature):
@@ -799,7 +808,7 @@ class Rectification(Feature):
         bottom = vartype.array_mean(ccut[end-self.window_len : end+self.window_len+1].y)
         return steady - bottom
 
-    def plot(self, figure):
+    def plot(self, figure=None):
         ax = super().plot(figure)
 
         ccut = self._obj.falling_curve
@@ -833,7 +842,7 @@ class Rectification(Feature):
                         horizontalalignment='center', verticalalignment='top')
 
         ax.legend(loc='upper right')
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
 
 class ChargingCurve(Feature):
@@ -870,7 +879,7 @@ class ChargingCurve(Feature):
         what = what[what.y < threshold]
         return what
 
-    def plot(self, figure):
+    def plot(self, figure=None):
         ax = super().plot(figure)
         baseline = self._obj.baseline
 
@@ -895,7 +904,7 @@ class ChargingCurve(Feature):
                    'baseline', 'k')
 
         ax.legend(loc='upper left')
-        figure.tight_layout()
+        ax.figure.tight_layout()
 
 
 standard_features = (
