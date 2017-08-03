@@ -10,6 +10,9 @@ ajustador.features
    features_rectification_more
    features_charging_curve_more
 
+SteadyState
+```````````
+
 .. autoclass:: ajustador.features.SteadyState
     :members:
     :undoc-members:
@@ -38,6 +41,9 @@ ajustador.features
         print(feat.report())
 
     :doc:`features_steady_state_more`
+
+Spikes
+``````
 
 .. autoclass:: ajustador.features.Spikes
     :members:
@@ -68,6 +74,9 @@ ajustador.features
 
     :doc:`features_spikes_more`
 
+AHP
+```
+
 .. autoclass:: ajustador.features.AHP
     :members:
     :undoc-members:
@@ -83,6 +92,9 @@ ajustador.features
         rec = measurements1.waves042811[-1]
         feat = ajustador.features.AHP(rec)
         print(feat.report())
+
+FallingCurve
+````````````
 
 .. autoclass:: ajustador.features.FallingCurve
     :members:
@@ -102,6 +114,9 @@ ajustador.features
 
     :doc:`features_falling_curve_more`
 
+Rectification
+`````````````
+
 .. autoclass:: ajustador.features.Rectification
     :members:
     :undoc-members:
@@ -119,6 +134,9 @@ ajustador.features
         print(feat.report())
 
     :doc:`features_rectification_more`
+
+ChargingCurve
+`````````````
 
 .. autoclass:: ajustador.features.ChargingCurve
     :members:

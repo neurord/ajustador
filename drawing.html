@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.drawing &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ajustador.utilities" href="utilities.html" />
@@ -36,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -99,15 +96,15 @@
 <dl class="function">
 <dt id="ajustador.drawing.cbdr">
 <code class="descclassname">ajustador.drawing.</code><code class="descname">cbdr</code><span class="sig-paren">(</span><em>values</em>, <em>func</em>, <em>xnames</em>, <em>yname</em>, <em>order=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/drawing.html#cbdr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.drawing.cbdr" title="Permalink to this definition">¶</a></dt>
-<dd><p>We have n dimensions, with a shape like (d0, d1, ..., d(n-1)).
-Each variable has a range... but let&#8217;s map them to (0,1).
+<dd><p>We have n dimensions, with a shape like (d0, d1, …, d(n-1)).
+Each variable has a range… but let’s map them to (0,1).
 Then final mapping is:</p>
-<p>X = x&#8217;(n-1) + x&#8217;(n-3) * d(n-1) + ... + x&#8217;(0 or 1) * d(2 or 3)
-Y = x&#8217;(n-2) + x&#8217;(n-4) * d(n-2) + ... + x&#8217;(1 or 0) * d(3 or 2)</p>
+<p>X = x’(n-1) + x’(n-3) * d(n-1) + … + x’(0 or 1) * d(2 or 3)
+Y = x’(n-2) + x’(n-4) * d(n-2) + … + x’(1 or 0) * d(3 or 2)</p>
 <p>where</p>
-<p>x&#8217;(i) = [x(i) - min x(i)] / [max x(i) - min x(i)]</p>
-<p>So the multiplier for x&#8217; is</p>
-<p>(1, 1, d(2), d(3), d(4), ..., d(n-1))</p>
+<p>x’(i) = [x(i) - min x(i)] / [max x(i) - min x(i)]</p>
+<p>So the multiplier for x’ is</p>
+<p>(1, 1, d(2), d(3), d(4), …, d(n-1))</p>
 </dd></dl>
 
 <dl class="function">
@@ -207,7 +204,7 @@ Y = x&#8217;(n-2) + x&#8217;(n-4) * d(n-2) + ... + x&#8217;(1 or 0) * d(3 or 2)<
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |

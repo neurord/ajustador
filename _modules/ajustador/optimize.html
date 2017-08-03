@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.optimize &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -34,7 +31,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -102,7 +99,7 @@
               <span class="p">]</span> <span class="o">+</span> <span class="n">params</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">cmdline</span><span class="p">),</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">utilities</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmdline</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">cmdline</span><span class="p">)</span>
         <span class="n">iv</span> <span class="o">=</span> <span class="n">load_simulation</span><span class="p">(</span><span class="n">result</span><span class="p">,</span>
                              <span class="n">simtime</span><span class="o">=</span><span class="n">simtime</span><span class="p">,</span>
                              <span class="n">junction_potential</span><span class="o">=</span><span class="n">junction_potential</span><span class="p">,</span>
@@ -228,8 +225,8 @@
                                      <span class="bp">self</span><span class="o">.</span><span class="n">_param_str</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span></div>
 
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="SimulationResult.find_global"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.SimulationResult.find_global">[docs]</a>    <span class="k">def</span> <span class="nf">find_global</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">p_file</span><span class="p">):</span>
+<div class="viewcode-block" id="SimulationResult.find_global"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.SimulationResult.find_global">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">find_global</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">p_file</span><span class="p">):</span>
         <span class="n">pat</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\*set_global </span><span class="si">{}</span><span class="s1"> (.*)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
         <span class="n">t</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">p_file</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pat</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
@@ -281,8 +278,8 @@
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;Param </span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Param.make"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Param.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="Param.make"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Param.make">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">Param</span><span class="p">):</span>
             <span class="c1"># pass-through</span>
             <span class="k">return</span> <span class="n">args</span>
@@ -424,8 +421,8 @@
 <div class="viewcode-block" id="Fit.param_names"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.param_names">[docs]</a>    <span class="k">def</span> <span class="nf">param_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ajuparams</span><span class="p">]</span></div>
 
-    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
-<div class="viewcode-block" id="Fit.sim"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.sim">[docs]</a>    <span class="k">def</span> <span class="nf">sim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
+<div class="viewcode-block" id="Fit.sim"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.sim">[docs]</a>    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
+    <span class="k">def</span> <span class="nf">sim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
         <span class="n">unscaled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unscaled_dict</span><span class="p">(</span><span class="n">scaled_params</span><span class="p">)</span>
         <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement</span><span class="o">.</span><span class="n">mean_baseline</span><span class="o">.</span><span class="n">x</span>
         <span class="n">simtime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
@@ -454,13 +451,13 @@
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">)</span>
 
-    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
-<div class="viewcode-block" id="Fit.fitness"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.fitness">[docs]</a>    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
+<div class="viewcode-block" id="Fit.fitness"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.fitness">[docs]</a>    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
+    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
         <span class="n">sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">(</span><span class="n">scaled_params</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_fitness</span><span class="p">(</span><span class="n">sim</span><span class="p">)</span></div>
 
-    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
-<div class="viewcode-block" id="Fit.fitness_full"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.fitness_full">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
+<div class="viewcode-block" id="Fit.fitness_full"><a class="viewcode-back" href="../../optimize.html#ajustador.optimize.Fit.fitness_full">[docs]</a>    <span class="nd">@utilities</span><span class="o">.</span><span class="n">cached</span>
+    <span class="k">def</span> <span class="nf">fitness_full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaled_params</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitness_worst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pen</span> <span class="o">=</span> <span class="n">penalty</span><span class="p">(</span><span class="n">scaled_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">max_fitness</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">worst</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fitness_worst</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -551,7 +548,7 @@
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

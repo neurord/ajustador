@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.fitnesses &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -34,7 +31,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -467,59 +464,90 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">arr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span></div>
 
-<div class="viewcode-block" id="new_combined_fitness"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.new_combined_fitness">[docs]</a><span class="k">class</span> <span class="nc">new_combined_fitness</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                 <span class="n">response</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">baseline_pre</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">baseline_post</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">rectification</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">falling_curve_time</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_time</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_latency</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                 <span class="n">spike_ahp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">ahp_curve</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">spike_range_y_histogram</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">error</span><span class="o">=</span><span class="n">ErrorCalc</span><span class="o">.</span><span class="n">relative</span><span class="p">):</span>
+<div class="viewcode-block" id="combined_fitness"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.combined_fitness">[docs]</a><span class="k">class</span> <span class="nc">combined_fitness</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Basic weighted combinations of fitness functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">presets</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;empty&#39;</span> <span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(),</span>
+
+        <span class="s1">&#39;new_combined_fitness&#39;</span> <span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">baseline_pre</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">baseline_post</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">rectification</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">falling_curve_time</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_time</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_latency</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_ahp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">ahp_curve</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_range_y_histogram</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+
+        <span class="s1">&#39;simple_combined_fitness&#39;</span> <span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">baseline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">rectification</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">falling_curve_time</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">mean_isi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_latency</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_ahp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">spike_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">isi_spread</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="combined_fitness.fitness_by_name"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.combined_fitness.fitness_by_name">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fitness_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_fitness&#39;</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">preset</span><span class="o">=</span><span class="s1">&#39;new_combined_fitness&#39;</span><span class="p">,</span>
+                 <span class="o">*</span><span class="p">,</span>
+                 <span class="n">error</span><span class="o">=</span><span class="n">ErrorCalc</span><span class="o">.</span><span class="n">relative</span><span class="p">,</span>
+                 <span class="n">extra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a weighted combination of features.</span>
+
+<span class="sd">        preset can be used to pick one of the starting sets of fitness</span>
+<span class="sd">        functions and their weights. To modify the weight for one of</span>
+<span class="sd">        the &quot;known&quot; functions from this module, the new weight can be</span>
+<span class="sd">        passed as a keyword argument:</span>
+
+<span class="sd">        &gt;&gt;&gt; new_combined_fitness(&#39;new_combined_fitness&#39;, spike_latency=2.5)</span>
+
+<span class="sd">        Arbitrary fitness functions can be given as (weight, function) pairs</span>
+<span class="sd">        in extra:</span>
+
+<span class="sd">        &gt;&gt;&gt; def fitness1(sim, measurement, full=False, error=ErrorCalc.relative):</span>
+<span class="sd">        ...   return 5</span>
+<span class="sd">        &gt;&gt;&gt; f = combined_fitness(&#39;empty&#39;,</span>
+<span class="sd">        ...                      extra={fitness1 : 0.5})</span>
+<span class="sd">        &gt;&gt;&gt; print(f.report(&#39;a&#39;, &#39;b&#39;))</span>
+<span class="sd">        fitness1=0.5*5=2.5</span>
+<span class="sd">        total: 2.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
 
-        <span class="c1"># weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">response</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">baseline_pre</span> <span class="o">=</span> <span class="n">baseline_pre</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">baseline_post</span> <span class="o">=</span> <span class="n">baseline_post</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rectification</span> <span class="o">=</span> <span class="n">rectification</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_time</span> <span class="o">=</span> <span class="n">falling_curve_time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_time</span> <span class="o">=</span> <span class="n">spike_time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span> <span class="o">=</span> <span class="n">spike_width</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_height</span> <span class="o">=</span> <span class="n">spike_height</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_latency</span> <span class="o">=</span> <span class="n">spike_latency</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">=</span> <span class="n">spike_count</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp</span> <span class="o">=</span> <span class="n">spike_ahp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ahp_curve</span> <span class="o">=</span> <span class="n">ahp_curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spike_range_y_histogram</span> <span class="o">=</span> <span class="n">spike_range_y_histogram</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">presets</span><span class="p">[</span><span class="n">preset</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">weights</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">,</span> <span class="n">response_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_pre</span><span class="p">,</span> <span class="n">baseline_pre_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseline_post</span><span class="p">,</span> <span class="n">baseline_post_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rectification</span><span class="p">,</span> <span class="n">rectification_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_time</span><span class="p">,</span> <span class="n">falling_curve_time_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_time</span><span class="p">,</span> <span class="n">spike_time_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span><span class="p">,</span> <span class="n">spike_width_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_height</span><span class="p">,</span> <span class="n">spike_height_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_latency</span><span class="p">,</span> <span class="n">spike_latency_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span><span class="p">,</span> <span class="n">spike_count_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_ahp</span><span class="p">,</span> <span class="n">spike_ahp_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ahp_curve</span><span class="p">,</span> <span class="n">ahp_curve_fitness</span><span class="p">),</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_range_y_histogram</span><span class="p">,</span> <span class="n">spike_range_y_histogram_fitness</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">w</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">),</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">pairs1</span> <span class="o">=</span> <span class="p">[(</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness_by_name</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                  <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">pairs2</span> <span class="o">=</span> <span class="p">[(</span><span class="n">w</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="k">if</span> <span class="n">extra</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="n">pairs1</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="n">pairs2</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;&quot;known&quot; function specified in extra&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pairs</span> <span class="o">=</span> <span class="n">pairs1</span> <span class="o">+</span> <span class="n">pairs2</span>
+
+    <span class="k">def</span> <span class="nf">_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pairs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">or</span> <span class="n">full</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">),</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)]</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">*</span><span class="n">r</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)]</span>
         <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">full</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">arr</span>
@@ -530,32 +558,12 @@
     <span class="k">def</span> <span class="nf">__name__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-<div class="viewcode-block" id="new_combined_fitness.report"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.new_combined_fitness.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">))</span>
-        <span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=</span><span class="si">{:.2g}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-                         <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">)</span>
+<div class="viewcode-block" id="combined_fitness.report"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.combined_fitness.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="n">full</span><span class="p">))</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=</span><span class="si">{}</span><span class="s1">*</span><span class="si">{:.2g}</span><span class="s1">=</span><span class="si">{:.2g}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">w</span><span class="o">*</span><span class="n">r</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">)</span>
         <span class="n">total</span> <span class="o">=</span> <span class="n">desc</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;total: </span><span class="si">{:.02g}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">total</span></div></div>
-
-<div class="viewcode-block" id="simple_combined_fitness"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.simple_combined_fitness">[docs]</a><span class="k">def</span> <span class="nf">simple_combined_fitness</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">ErrorCalc</span><span class="o">.</span><span class="n">relative</span><span class="p">):</span>
-    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="n">f</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span>
-                        <span class="p">[</span><span class="n">response_fitness</span><span class="p">,</span>
-                         <span class="n">baseline_fitness</span><span class="p">,</span>
-                         <span class="n">rectification_fitness</span><span class="p">,</span>
-                         <span class="n">falling_curve_time_fitness</span><span class="p">,</span>
-                         <span class="n">mean_isi_fitness</span><span class="p">,</span>
-                         <span class="n">spike_latency_fitness</span><span class="p">,</span>
-                         <span class="n">spike_height_fitness</span><span class="p">,</span>
-                         <span class="n">spike_width_fitness</span><span class="p">,</span>
-                         <span class="n">spike_ahp_fitness</span><span class="p">,</span>
-                         <span class="n">spike_count_fitness</span><span class="p">,</span>
-                         <span class="n">isi_spread_fitness</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">full</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">arr</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">arr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span></div>
-
-<span class="n">combined_fitness</span> <span class="o">=</span> <span class="n">simple_combined_fitness</span>
 
 <div class="viewcode-block" id="fit_sort"><a class="viewcode-back" href="../../fitnesses.html#ajustador.fitnesses.fit_sort">[docs]</a><span class="k">def</span> <span class="nf">fit_sort</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fitness</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span> <span class="k">for</span> <span class="n">sim</span> <span class="ow">in</span> <span class="n">group</span><span class="p">])</span>
@@ -698,7 +706,7 @@
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

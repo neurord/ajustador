@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.fitnesses &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ajustador.optimize" href="optimize.html" />
@@ -36,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -151,10 +148,26 @@ abstracts away the number of points in either plot.</p>
 <code class="descclassname">ajustador.fitnesses.</code><code class="descname">charging_curve_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#charging_curve_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.charging_curve_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="class">
 <dt id="ajustador.fitnesses.combined_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#ajustador.fitnesses.combined_fitness" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">combined_fitness</code><span class="sig-paren">(</span><em>preset='new_combined_fitness'</em>, <em>*</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em>, <em>extra=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.combined_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic weighted combinations of fitness functions</p>
+<dl class="staticmethod">
+<dt id="ajustador.fitnesses.combined_fitness.fitness_by_name">
+<em class="property">static </em><code class="descname">fitness_by_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#combined_fitness.fitness_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.combined_fitness.fitness_by_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajustador.fitnesses.combined_fitness.presets">
+<code class="descname">presets</code><em class="property"> = {'empty': OrderedDict(), 'new_combined_fitness': OrderedDict([('response', 1), ('baseline_pre', 1), ('baseline_post', 1), ('rectification', 1), ('falling_curve_time', 1), ('spike_time', 1), ('spike_width', 1), ('spike_height', 1), ('spike_latency', 1), ('spike_ahp', 1), ('ahp_curve', 1), ('spike_range_y_histogram', 1)]), 'simple_combined_fitness': OrderedDict([('response', 1), ('baseline', 1), ('rectification', 1), ('falling_curve_time', 1), ('mean_isi', 1), ('spike_latency', 1), ('spike_height', 1), ('spike_width', 1), ('spike_ahp', 1), ('spike_count', 1), ('isi_spread', 1)])}</em><a class="headerlink" href="#ajustador.fitnesses.combined_fitness.presets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajustador.fitnesses.combined_fitness.report">
+<code class="descname">report</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>*</em>, <em>full=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#combined_fitness.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.combined_fitness.report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.falling_curve_time_fitness">
@@ -230,16 +243,6 @@ abstracts away the number of points in either plot.</p>
 <code class="descclassname">ajustador.fitnesses.</code><code class="descname">mean_isi_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#mean_isi_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.mean_isi_fitness" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
-<dt id="ajustador.fitnesses.new_combined_fitness">
-<em class="property">class </em><code class="descclassname">ajustador.fitnesses.</code><code class="descname">new_combined_fitness</code><span class="sig-paren">(</span><em>*</em>, <em>response=1</em>, <em>baseline_pre=1</em>, <em>baseline_post=1</em>, <em>rectification=1</em>, <em>falling_curve_time=1</em>, <em>spike_time=1</em>, <em>spike_width=1</em>, <em>spike_height=1</em>, <em>spike_latency=1</em>, <em>spike_count=0</em>, <em>spike_ahp=1</em>, <em>ahp_curve=1</em>, <em>spike_range_y_histogram=1</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="ajustador.fitnesses.new_combined_fitness.report">
-<code class="descname">report</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#new_combined_fitness.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.new_combined_fitness.report" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="function">
 <dt id="ajustador.fitnesses.normalize_dimensions">
 <code class="descclassname">ajustador.fitnesses.</code><code class="descname">normalize_dimensions</code><span class="sig-paren">(</span><em>vect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#normalize_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.normalize_dimensions" title="Permalink to this definition">¶</a></dt>
@@ -274,11 +277,6 @@ w = rms(W)\]</div>
 <code class="descclassname">ajustador.fitnesses.</code><code class="descname">response_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#response_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.response_fitness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similarity of response to hyperpolarizing injection</p>
 </dd></dl>
-
-<dl class="function">
-<dt id="ajustador.fitnesses.simple_combined_fitness">
-<code class="descclassname">ajustador.fitnesses.</code><code class="descname">simple_combined_fitness</code><span class="sig-paren">(</span><em>sim</em>, <em>measurement</em>, <em>full=False</em>, <em>error=&lt;ErrorCalc.relative: 2&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/fitnesses.html#simple_combined_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.fitnesses.simple_combined_fitness" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="ajustador.fitnesses.spike_ahp_fitness">
@@ -379,7 +377,7 @@ to detect mismatches in other regions.</p>
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |

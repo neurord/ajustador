@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.features &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Additional plots for SteadyState" href="features_steady_state_more.html" />
@@ -36,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -48,6 +45,8 @@
 <h1>ajustador.features<a class="headerlink" href="#ajustador-features" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<div class="section" id="steadystate">
+<h2>SteadyState<a class="headerlink" href="#steadystate" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.SteadyState">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">SteadyState</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState" title="Permalink to this definition">¶</a></dt>
@@ -66,21 +65,11 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">SteadyState</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
-<span class="go">/tmp/nebish/home/zbyszek/neuro/ajustador/ajustador/vartype.py:166: RuntimeWarning: Mean of empty slice.</span>
-<span class="go">  return vartype(data.mean(), data.var(ddof=1)**0.5)</span>
-<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in true_divide</span>
-<span class="go">  ret = ret.dtype.type(ret / rcount)</span>
-<span class="go">/tmp/nebish/home/zbyszek/neuro/ajustador/ajustador/vartype.py:166: RuntimeWarning: Degrees of freedom &lt;= 0 for slice</span>
-<span class="go">  return vartype(data.mean(), data.var(ddof=1)**0.5)</span>
-<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:105: RuntimeWarning: invalid value encountered in true_divide</span>
-<span class="go">  arrmean, rcount, out=arrmean, casting=&#39;unsafe&#39;, subok=False)</span>
-<span class="go">/usr/lib64/python3.6/site-packages/numpy/core/_methods.py:127: RuntimeWarning: invalid value encountered in true_divide</span>
-<span class="go">  ret = ret.dtype.type(ret / rcount)</span>
-<span class="go">baseline = nan±nan</span>
-<span class="go">steady = -0.08322±0.00008</span>
-<span class="go">response = nan±nan</span>
-<span class="go">baseline_pre = -0.080156259±0.000000007</span>
-<span class="go">baseline_post = -0.08011±0.00002</span>
+<span class="go">baseline = -0.08014±0.00002</span>
+<span class="go">steady = -0.08320±0.00009</span>
+<span class="go">response = -0.00306±0.00009</span>
+<span class="go">baseline_pre = -0.08015±0.00003</span>
+<span class="go">baseline_post = -0.08011±0.00004</span>
 </pre></div>
 </div>
 <p>(<a class="reference external" href=".//features_steady_state2.py">Source code</a>, <a class="reference external" href=".//features_steady_state2.png">png</a>, <a class="reference external" href=".//features_steady_state2.hires.png">hires.png</a>, <a class="reference external" href=".//features_steady_state2.pdf">pdf</a>)</p>
@@ -122,7 +111,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dt id="ajustador.features.SteadyState.baseline">
 <code class="descname">baseline</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mean voltage of the area outside of injection interval</p>
-<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+<p>Returns mean value of wave after excluding “outliers”, values
 &gt; 95th or &lt; 5th percentile.</p>
 </dd></dl>
 
@@ -130,7 +119,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dt id="ajustador.features.SteadyState.baseline_pre">
 <code class="descname">baseline_pre</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline_pre" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mean voltage of the area before the injection interval</p>
-<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+<p>Returns mean value of wave after excluding “outliers”, values
 &gt; 95th or &lt; 5th percentile.</p>
 </dd></dl>
 
@@ -138,7 +127,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dt id="ajustador.features.SteadyState.baseline_post">
 <code class="descname">baseline_post</code><a class="headerlink" href="#ajustador.features.SteadyState.baseline_post" title="Permalink to this definition">¶</a></dt>
 <dd><p>The mean voltage of the area after the injection interval</p>
-<p>Returns mean value of wave after excluding &#8220;outliers&#8221;, values
+<p>Returns mean value of wave after excluding “outliers”, values
 &gt; 95th or &lt; 5th percentile.</p>
 </dd></dl>
 
@@ -146,7 +135,7 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <dt id="ajustador.features.SteadyState.steady">
 <code class="descname">steady</code><a class="headerlink" href="#ajustador.features.SteadyState.steady" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns mean value of wave between <code class="xref any docutils literal"><span class="pre">steady_after</span></code> and <code class="xref any docutils literal"><span class="pre">steady_before</span></code>.</p>
-<p>&#8220;Outliers&#8221;, values &gt; 80th percentile (which is a parameter), are excluded.
+<p>“Outliers”, values &gt; 80th percentile (which is a parameter), are excluded.
 80th percentile excludes the spikes.</p>
 </dd></dl>
 
@@ -157,11 +146,14 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 
 <dl class="method">
 <dt id="ajustador.features.SteadyState.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em>, <em>pre_post=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em>, <em>pre_post=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#SteadyState.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.SteadyState.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="spikes">
+<h2>Spikes<a class="headerlink" href="#spikes" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.Spikes">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">Spikes</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes" title="Permalink to this definition">¶</a></dt>
@@ -373,20 +365,23 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 
 <dl class="method">
 <dt id="ajustador.features.Spikes.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ajustador.features.Spikes.spike_plot">
-<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.spike_plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Spikes.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Spikes.spike_plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="ahp">
+<h2>AHP<a class="headerlink" href="#ahp" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.AHP">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">AHP</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the depth of &#8220;after hyperpolarization&#8221;</p>
+<dd><p>Find the depth of “after hyperpolarization”</p>
 <p>(<a class="reference external" href=".//features_ahp.py">Source code</a>, <a class="reference external" href=".//features_ahp.png">png</a>, <a class="reference external" href=".//features_ahp.hires.png">hires.png</a>, <a class="reference external" href=".//features_ahp.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/features_ahp.png" src="_images/features_ahp.png" />
@@ -405,11 +400,11 @@ for <a class="reference internal" href="#ajustador.features.SteadyState.steady" 
 <span class="go">            -0.05487±0.00013</span>
 <span class="go">            -0.05452±0.00010</span>
 <span class="go">          = -0.05533±0.00005</span>
-<span class="go">spike_ahp_position = 0.28625±0.00020</span>
-<span class="go">                     0.35594±0.00019</span>
-<span class="go">                     0.42259±0.00005</span>
-<span class="go">                     0.49091±0.00021</span>
-<span class="go">                     0.56793±0.00034</span>
+<span class="go">spike_ahp_position = 0.2864±0.0002</span>
+<span class="go">                     0.3561±0.0002</span>
+<span class="go">                     0.4224±0.0002</span>
+<span class="go">                     0.4910±0.0002</span>
+<span class="go">                     0.5680±0.0003</span>
 </pre></div>
 </div>
 <dl class="attribute">
@@ -458,16 +453,19 @@ spike is used.</p>
 
 <dl class="method">
 <dt id="ajustador.features.AHP.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ajustador.features.AHP.spike_plot">
-<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.spike_plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">spike_plot</code><span class="sig-paren">(</span><em>figure=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#AHP.spike_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.AHP.spike_plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="fallingcurve">
+<h2>FallingCurve<a class="headerlink" href="#fallingcurve" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.FallingCurve">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">FallingCurve</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#FallingCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.FallingCurve" title="Permalink to this definition">¶</a></dt>
@@ -564,12 +562,12 @@ spike is used.</p>
 <span class="go">                (0.2084, -0.09265624731779099)</span>
 <span class="go">                (0.20850000000000002, -0.09259375184774399)</span>
 <span class="go">                (0.2086, -0.0925312489271164)</span>
-<span class="go">falling_curve_fit = &lt;function negative_exp at 0x7fea28316510&gt;</span>
-<span class="go">                    falling_param(amp=vartype(-0.01329, 0.00011), tau=vartype(0.002526, 0.000058))</span>
+<span class="go">falling_curve_fit = &lt;function negative_exp at 0x7f79d20816a8&gt;</span>
+<span class="go">                    falling_param(amp=vartype(-0.01329, 0.00011), tau=vartype(0.002524, 0.000058))</span>
 <span class="go">                    True</span>
 <span class="go">falling_curve_amp = -0.0133±0.0001</span>
-<span class="go">falling_curve_tau = 0.00253±0.00006</span>
-<span class="go">falling_curve_function = &lt;function negative_exp at 0x7fea28316510&gt;</span>
+<span class="go">falling_curve_tau = 0.00252±0.00006</span>
+<span class="go">falling_curve_function = &lt;function negative_exp at 0x7f79d20816a8&gt;</span>
 </pre></div>
 </div>
 <p><a class="reference internal" href="features_falling_curve_more.html"><span class="doc">Additional plots for FallingCurve</span></a></p>
@@ -615,11 +613,14 @@ spike is used.</p>
 
 <dl class="method">
 <dt id="ajustador.features.FallingCurve.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#FallingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.FallingCurve.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#FallingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.FallingCurve.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="rectification">
+<h2>Rectification<a class="headerlink" href="#rectification" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.Rectification">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">Rectification</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Rectification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Rectification" title="Permalink to this definition">¶</a></dt>
@@ -666,11 +667,14 @@ spike is used.</p>
 
 <dl class="method">
 <dt id="ajustador.features.Rectification.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Rectification.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Rectification.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#Rectification.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.Rectification.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="chargingcurve">
+<h2>ChargingCurve<a class="headerlink" href="#chargingcurve" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ajustador.features.ChargingCurve">
 <em class="property">class </em><code class="descclassname">ajustador.features.</code><code class="descname">ChargingCurve</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#ChargingCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.ChargingCurve" title="Permalink to this definition">¶</a></dt>
@@ -681,7 +685,7 @@ spike is used.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">feat</span> <span class="o">=</span> <span class="n">ajustador</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">ChargingCurve</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
-<span class="go">charging_curve_halfheight = 0.014867±0.000008</span>
+<span class="go">charging_curve_halfheight = 0.01487±0.00002</span>
 </pre></div>
 </div>
 <p><a class="reference internal" href="features_charging_curve_more.html"><span class="doc">Additional plots for ChargingCurve</span></a></p>
@@ -713,11 +717,12 @@ spike is used.</p>
 
 <dl class="method">
 <dt id="ajustador.features.ChargingCurve.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#ChargingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.ChargingCurve.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/features.html#ChargingCurve.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.features.ChargingCurve.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
+</div>
 </div>
 
 
@@ -725,7 +730,20 @@ spike is used.</p>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ajustador.features</a><ul>
+<li><a class="reference internal" href="#steadystate">SteadyState</a></li>
+<li><a class="reference internal" href="#spikes">Spikes</a></li>
+<li><a class="reference internal" href="#ahp">AHP</a></li>
+<li><a class="reference internal" href="#fallingcurve">FallingCurve</a></li>
+<li><a class="reference internal" href="#rectification">Rectification</a></li>
+<li><a class="reference internal" href="#chargingcurve">ChargingCurve</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
@@ -759,7 +777,7 @@ spike is used.</p>
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |

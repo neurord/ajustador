@@ -1,0 +1,440 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>How to use ajustador to fit a moose_nerp model &#8212; ajustador 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ajustador.vartype" href="vartype.html" />
+    <link rel="prev" title="ajustador" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="how-to-use-ajustador-to-fit-a-moose-nerp-model">
+<h1>How to use <span class="xref std std-doc">ajustador</span> to fit a <span class="xref std std-doc">moose_nerp</span> model<a class="headerlink" href="#how-to-use-ajustador-to-fit-a-moose-nerp-model" title="Permalink to this headline">¶</a></h1>
+<p>An optimization procedure consists of the following “components”:</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#experimental-recording" id="id9">Experimental recording</a></li>
+<li><a class="reference internal" href="#simulated-model" id="id10">Simulated model</a></li>
+<li><a class="reference internal" href="#feature-functions" id="id11">Feature functions</a></li>
+<li><a class="reference internal" href="#fitness-functions" id="id12">Fitness functions</a></li>
+<li><a class="reference internal" href="#simulation-and-optimization-loop" id="id13">Simulation and optimization loop</a></li>
+</ul>
+</div>
+<p>The short version is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">measurements1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ajustador</span> <span class="k">as</span> <span class="nn">aju</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp_to_fit</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">23</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">ParamSet</span><span class="p">(</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;RA&#39;</span><span class="p">,</span>           <span class="mf">4.309</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>   <span class="mi">100</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;RM&#39;</span><span class="p">,</span>           <span class="mf">0.722</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;CM&#39;</span><span class="p">,</span>           <span class="mf">0.015</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span> <span class="mf">0.100</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fitness</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">Fit</span><span class="p">(</span><span class="s1">&#39;quick-start-d1.fit&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">exp_to_fit</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="s1">&#39;d1d2&#39;</span><span class="p">,</span> <span class="s1">&#39;D1&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">fitness</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">params</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">do_fit</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">popsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>                          <span class="c1"># DOCTEST: +SKIP</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">param_names</span><span class="p">()</span>
+<span class="go">[&#39;RA&#39;, &#39;RM&#39;, &#39;CM&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unscale</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">result</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># parameters</span>
+<span class="go">[1.6781569599861799, 4.4270115380320281, 0.02983857703183539]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unscale</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">result</span><span class="p">()[</span><span class="mi">6</span><span class="p">])</span>  <span class="c1"># stddevs</span>
+<span class="go">[0.7099180820095562, 0.73484996358979826, 0.0033816805879411456]</span>
+</pre></div>
+</div>
+<p>The long version is below.</p>
+<div class="section" id="experimental-recording">
+<h2><a class="toc-backref" href="#id9">Experimental recording</a><a class="headerlink" href="#experimental-recording" title="Permalink to this headline">¶</a></h2>
+<p>An “experiment” is described by a <a class="reference internal" href="loader.html#ajustador.loader.Measurement" title="ajustador.loader.Measurement"><code class="xref py py-class docutils literal"><span class="pre">ajustador.loader.Measurement</span></code></a> object.
+As an example, let’s use <code class="xref any docutils literal"><span class="pre">measurements1.042811</span></code>, a current-clamp
+recording from a striatal D1 neuron:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">measurements1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves042811</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;042811-6ivifcurves_Waves&#39;</span>
+</pre></div>
+</div>
+<p>The data is stored in the <code class="xref any docutils literal"><span class="pre">.waves</span></code> attribute:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">)</span>
+<span class="go">(&lt;class &#39;numpy.ndarray&#39;&gt;, 24)</span>
+</pre></div>
+</div>
+<p>Each “wave” is a single measurement, a subclass of <a class="reference internal" href="loader.html#ajustador.loader.Trace" title="ajustador.loader.Trace"><code class="xref py py-class docutils literal"><span class="pre">ajustador.loader.Trace</span></code></a>.
+It has a bunch of attributes like injection voltage:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;ajustador.loader.IVCurve object at 0x7f691bd63198&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">-5e-10</span>
+</pre></div>
+</div>
+<p>The actual data is in <code class="xref any docutils literal"><span class="pre">.wave</span></code> attribute:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span>
+<span class="go">array([  0.00000000e+00,   1.00000000e-04,   2.00000000e-04, ...,</span>
+<span class="go">         8.99700000e-01,   8.99800000e-01,   8.99900000e-01])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span><span class="o">.</span><span class="n">wave</span><span class="o">.</span><span class="n">y</span>
+<span class="go">array([-0.0798125 , -0.07953125, -0.0795    , ..., -0.07959375,</span>
+<span class="go">       -0.079625  , -0.07953125], dtype=float32)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//quick_start-1.py">Source code</a>, <a class="reference external" href=".//quick_start-1.png">png</a>, <a class="reference external" href=".//quick_start-1.hires.png">hires.png</a>, <a class="reference external" href=".//quick_start-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/quick_start-1.png" src="_images/quick_start-1.png" />
+</div>
+</div>
+<div class="section" id="simulated-model">
+<h2><a class="toc-backref" href="#id10">Simulated model</a><a class="headerlink" href="#simulated-model" title="Permalink to this headline">¶</a></h2>
+<p>The model that matches our experimental data is the <span class="xref std std-doc">d1d2</span> model
+of D1 and D2 striatal neurons using MOOSE:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">moose_nerp</span> <span class="k">import</span> <span class="n">d1d2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d1d2</span><span class="o">.</span><span class="n">param_cond</span><span class="o">.</span><span class="n">Condset</span><span class="o">.</span><span class="n">D1</span>
+<span class="go">D1(Krp={(0, 2.61e-05): 150.963, (2.61e-05, 5e-05): 70.25, (5e-05, 0.001): 77.25},</span>
+<span class="go">   KaF={(0, 2.61e-05): 600, (2.61e-05, 5e-05): 500, (5e-05, 0.001): 100},</span>
+<span class="go">   KaS={(0, 2.61e-05): 404.7, (2.61e-05, 5e-05): 35.2, (5e-05, 0.001): 0},</span>
+<span class="go">   Kir={(0, 2.61e-05): 9.4644, (2.61e-05, 5e-05): 9.4644, (5e-05, 0.001): 9.4644},</span>
+<span class="go">   CaL13={(0, 2.61e-05): 12, (2.61e-05, 5e-05): 5.6, (5e-05, 0.001): 5.6},</span>
+<span class="go">   CaL12={(0, 2.61e-05): 8, (2.61e-05, 5e-05): 4, (5e-05, 0.001): 4},</span>
+<span class="go">   CaR={(0, 2.61e-05): 20, (2.61e-05, 5e-05): 45, (5e-05, 0.001): 44},</span>
+<span class="go">   CaN={(0, 2.61e-05): 4.0, (2.61e-05, 5e-05): 0.0, (5e-05, 0.001): 0.0},</span>
+<span class="go">   CaT={(0, 2.61e-05): 0.0, (2.61e-05, 5e-05): 1.9, (5e-05, 0.001): 1.9},</span>
+<span class="go">   NaF={(0, 2.61e-05): 130000.0, (2.61e-05, 5e-05): 1894, (5e-05, 0.001): 927},</span>
+<span class="go">   SKCa={(0, 2.61e-05): 0.5, (2.61e-05, 5e-05): 0.5, (5e-05, 0.001): 0.5},</span>
+<span class="go">   BKCa={(0, 2.61e-05): 10.32, (2.61e-05, 5e-05): 10, (5e-05, 0.001): 10})</span>
+</pre></div>
+</div>
+<p>The most convenient way to run the simulation is through the
+optimization object, so we’ll do that in on of the later subsections.</p>
+</div>
+<div class="section" id="feature-functions">
+<h2><a class="toc-backref" href="#id11">Feature functions</a><a class="headerlink" href="#feature-functions" title="Permalink to this headline">¶</a></h2>
+<p>The <a href="#id1"><span class="problematic" id="id2">:module:`ajustador.features`</span></a> module contains a bunch of “feature
+functions” which attempt to extract interesting characteristics from
+the experimental and simulated traces.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ajustador</span> <span class="k">as</span> <span class="nn">aju</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">aju</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Spikes</span><span class="o">.</span><span class="n">provides</span><span class="p">)</span>
+<span class="go">(&#39;spike_i&#39;,</span>
+<span class="go"> &#39;spikes&#39;,</span>
+<span class="go"> &#39;spike_count&#39;,</span>
+<span class="go"> &#39;spike_threshold&#39;,</span>
+<span class="go"> &#39;mean_isi&#39;,</span>
+<span class="go"> &#39;isi_spread&#39;,</span>
+<span class="go"> &#39;spike_latency&#39;,</span>
+<span class="go"> &#39;spike_bounds&#39;,</span>
+<span class="go"> &#39;spike_height&#39;,</span>
+<span class="go"> &#39;spike_width&#39;,</span>
+<span class="go"> &#39;mean_spike_height&#39;)</span>
+</pre></div>
+</div>
+<p>Before using those autodetected functions it is prudent to check that
+they work as expected for the data in question. Oftentimes this is not
+the case, and it is necessary to adjust the functions or some
+parameters to achieve proper behaviour.</p>
+<p>Each <code class="xref py py-class docutils literal"><span class="pre">ajustador.features.Feature</span></code> object has a way to present
+the extracted values in both graphical and textual modes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aju</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Spikes</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">22</span><span class="p">])</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//quick_start-2.py">Source code</a>, <a class="reference external" href=".//quick_start-2.png">png</a>, <a class="reference external" href=".//quick_start-2.hires.png">hires.png</a>, <a class="reference external" href=".//quick_start-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/quick_start-2.png" src="_images/quick_start-2.png" />
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">aju</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">Spikes</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">waves</span><span class="p">[</span><span class="mi">22</span><span class="p">])</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<span class="go">spike_i = 7243</span>
+<span class="go">          9755</span>
+<span class="go">spikes = (0.36215, 0.04331250116229057)</span>
+<span class="go">         (0.48775, 0.04184374958276749)</span>
+<span class="go">spike_count = 2</span>
+<span class="go">spike_threshold = -0.047031249851</span>
+<span class="go">                  -0.0484062507749</span>
+<span class="go">                = -0.0477±0.0010</span>
+<span class="go">mean_isi = 0.126±0.001</span>
+<span class="go">isi_spread = nan</span>
+<span class="go">spike_latency = 0.16215</span>
+<span class="go">spike_bounds = WaveRegion[16 points, x=0.3619-0.3627, y=0.002-0.043]</span>
+<span class="go">               WaveRegion[17 points, x=0.4875-0.4883, y=-0.000-0.042]</span>
+<span class="go">spike_height = 0.0903437510133</span>
+<span class="go">               0.0902500003576</span>
+<span class="go">             = 0.09030±0.00007</span>
+<span class="go">spike_width = 0.0008</span>
+<span class="go">              0.00085</span>
+<span class="go">            = 0.00082±0.00004</span>
+<span class="go">mean_spike_height = 0.043±0.001</span>
+</pre></div>
+</div>
+<p>For a list of the provided feature functions, refer to the
+<a class="reference internal" href="features.html"><span class="doc">ajustador.features</span></a> module docs.</p>
+</div>
+<div class="section" id="fitness-functions">
+<h2><a class="toc-backref" href="#id12">Fitness functions</a><a class="headerlink" href="#fitness-functions" title="Permalink to this headline">¶</a></h2>
+<p>In a normal fit, we wan to combine multiple fitness functions to
+achieve fit that optimizes multiple characteristics. The
+<a class="reference internal" href="fitnesses.html#ajustador.fitnesses.combined_fitness" title="ajustador.fitnesses.combined_fitness"><code class="xref py py-class docutils literal"><span class="pre">ajustador.fitnesses.combined_fitness</span></code></a> class does that.
+Since we don’t have any experimental data yet, we’ll just
+“test” how close are two experimental measurements (for different
+cells of the same type):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp2</span> <span class="o">=</span> <span class="n">measurements1</span><span class="o">.</span><span class="n">waves050511</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fitness</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">fitnesses</span><span class="o">.</span><span class="n">combined_fitness</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fitness</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">exp2</span><span class="p">)</span>
+<span class="go">0.49338569891028333</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">fitness</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">exp2</span><span class="p">))</span>
+<span class="go">response_fitness=1*0.7=0.7</span>
+<span class="go">baseline_pre_fitness=1*0.0039=0.0039</span>
+<span class="go">baseline_post_fitness=1*0.0029=0.0029</span>
+<span class="go">rectification_fitness=1*0.64=0.64</span>
+<span class="go">falling_curve_time_fitness=1*0.12=0.12</span>
+<span class="go">spike_time_fitness=1*0.17=0.17</span>
+<span class="go">spike_width_fitness=1*0.3=0.3</span>
+<span class="go">spike_height_fitness=1*0.031=0.031</span>
+<span class="go">spike_latency_fitness=1*0.75=0.75</span>
+<span class="go">spike_ahp_fitness=1*0.072=0.072</span>
+<span class="go">ahp_curve_fitness=1*0.96=0.96</span>
+<span class="go">spike_range_y_histogram_fitness=1*0.63=0.63</span>
+<span class="go">total: 0.49</span>
+</pre></div>
+</div>
+<p>As we can see, some measures like baseline are very close, spike
+timing and AHPs depth are quite similar, but AHP shape and the
+passive parameters (“rectification”) are futher apart.</p>
+<p>If one of those is replaced with a model, the optimization will
+try to decrease the total value which is a weighted average of the
+fitness functions. It is possible to override the weights of
+component fitness functions, as well as to add new fitness functions
+to the mix. Refer to the <a class="reference internal" href="fitnesses.html#ajustador.fitnesses.combined_fitness" title="ajustador.fitnesses.combined_fitness"><code class="xref py py-class docutils literal"><span class="pre">ajustador.fitnesses.combined_fitness</span></code></a>
+class documentation for more details.</p>
+</div>
+<div class="section" id="simulation-and-optimization-loop">
+<h2><a class="toc-backref" href="#id13">Simulation and optimization loop</a><a class="headerlink" href="#simulation-and-optimization-loop" title="Permalink to this headline">¶</a></h2>
+<p>When fitting the model to experimental data, we recreate the
+experimental procedure during simulation. Currently only a rectangular
+injection is supported. It is described by the
+<a class="reference internal" href="loader.html#ajustador.loader.Trace" title="ajustador.loader.Trace"><code class="xref py py-class docutils literal"><span class="pre">ajustador.loader.Trace</span></code></a> objects:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">injection_start</span>
+<span class="go">0.2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">injection_end</span>
+<span class="go">0.6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">injection</span>
+<span class="go">-5e-10</span>
+</pre></div>
+</div>
+<p>We <em>could</em> simulate for all <code class="docutils literal"><span class="pre">injection</span></code> values, but the results
+wouldn’t be significantly better then if we just fit for a few
+“representative” values. We can pick the highest hyperpolarizing
+injection, a small hyperpolarizing injection, and one where
+spiking occurs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp</span><span class="o">.</span><span class="n">injection</span> <span class="o">*</span> <span class="mf">1e12</span>      <span class="c1"># convert from A to pA</span>
+<span class="go">array([-500., -450., -400., -350., -300., -250., -200., -150., -100.,</span>
+<span class="go">        -50.,    0.,   50.,  100.,  150.,  200.,  200.,  220.,  240.,</span>
+<span class="go">        260.,  280.,  300.,  320.,  340.,  360.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="p">))[</span><span class="n">exp</span><span class="o">.</span><span class="n">injection</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+<span class="go">array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="p">))[</span><span class="n">exp</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+<span class="go">array([22, 23])</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="loader.html#ajustador.loader.Measurement" title="ajustador.loader.Measurement"><code class="xref py py-class docutils literal"><span class="pre">ajustador.loader.Measurement</span></code></a> class is designed
+to behave a bit like a <code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code>, and operations
+like simple and fancy indexing are supported. We make use of this
+to pick out traces 0, 6, and 23 by indexing with a list:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">exp_to_fit</span> <span class="o">=</span> <span class="n">exp</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">23</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>In the optimization loop, the <code class="xref py py-class docutils literal"><span class="pre">ajustador.optimize.Optimizer</span></code>
+class is used as a wrapper for the actual fitting algorithm. We
+need to specify <strong>which</strong> parameters are allowed to vary, and
+within what ranges <a class="footnote-reference" href="#id7" id="id3">[1]</a>.</p>
+<p>To make things simple, we’ll fit the passive electrical
+characteristics of the membrane <span class="math">\(R_\text{m}\)</span>, <span class="math">\(C_\text{m}\)</span>,
+and <span class="math">\(R_\text{a}\)</span>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">ParamSet</span><span class="p">(</span>
+<span class="gp">... </span><span class="c1"># (name,starting value, lower bound, upper bound)</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;RA&#39;</span><span class="p">,</span>           <span class="mf">4.309</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>   <span class="mi">100</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;RM&#39;</span><span class="p">,</span>           <span class="mf">0.722</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">(</span><span class="s1">&#39;CM&#39;</span><span class="p">,</span>           <span class="mf">0.015</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span> <span class="mf">0.100</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The precise values of the bounds are not important — ideally
+the optimum parameters will be clustered away from either of
+the bounds.</p>
+<p>The optimization object uses the experimental traces,
+fitness function, and parameter set created above. We also
+need to specify that we’ll be using the d1d2 model and its
+D1 neuron. Simulation results (voltage traces from the soma)
+are stored in the directory specified as the first argument:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">aju</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">Fit</span><span class="p">(</span><span class="s1">&#39;quick-start-d1.fit&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">exp_to_fit</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="s1">&#39;d1d2&#39;</span><span class="p">,</span> <span class="s1">&#39;D1&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">fitness</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After this lengthy preparation, we are now ready to perform some
+actual fitting:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">do_fit</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">popsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>            <span class="c1"># DOCTEST: +SKIP</span>
+</pre></div>
+</div>
+<p>This will perform <span class="math">\(15 \times 5 \times 3 = 225\)</span> simulations, hopefully
+moving in the direction of better parameters <a class="footnote-reference" href="#id8" id="id4">[2]</a>. Individual
+simulations are executed in parallel, so it’s best to run this
+on a multi-core machine.</p>
+<p>We can visualize the convergence of the fit by plotting
+the fitness score of each of the simulation points. (That’s
+<span class="math">\(15 \times 5 = 75\)</span> points, because we get a single score
+for each of the three simulations recreating our “experiment”
+<code class="docutils literal"><span class="pre">exp_to_fit</span></code>.)</p>
+<p>We need to import <a href="#id5"><span class="problematic" id="id6">:module:`ajustador.drawing`</span></a> separately.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ajustador.drawing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aju</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">plot_history</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">fit</span><span class="o">.</span><span class="n">measurement</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//quick_start-3.py">Source code</a>, <a class="reference external" href=".//quick_start-3.png">png</a>, <a class="reference external" href=".//quick_start-3.hires.png">hires.png</a>, <a class="reference external" href=".//quick_start-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/quick_start-3.png" src="_images/quick_start-3.png" />
+</div>
+<p>When clicking on the points on this graph, a new window will
+be opened showing the experimental and simulated traces. We
+can always plot some set traces explicitly:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aju</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">plot_together</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">measurement</span><span class="p">,</span> <span class="n">fit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fit</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>   <span class="c1"># DOCTEST: +SKIP</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//quick_start-4.py">Source code</a>, <a class="reference external" href=".//quick_start-4.png">png</a>, <a class="reference external" href=".//quick_start-4.hires.png">hires.png</a>, <a class="reference external" href=".//quick_start-4.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/quick_start-4.png" src="_images/quick_start-4.png" />
+</div>
+<p>Usually we care about the numerical result. The result of CMA are
+are a “center” value and the estimate of standard deviations of
+each parameter:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">param_names</span><span class="p">()</span>
+<span class="go">[&#39;RA&#39;, &#39;RM&#39;, &#39;CM&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unscale</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">result</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">[1.6781569599861799, 4.4270115380320281, 0.02983857703183539]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">unscale</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">result</span><span class="p">()[</span><span class="mi">6</span><span class="p">])</span>
+<span class="go">[0.7099180820095562, 0.73484996358979826, 0.0033816805879411456]</span>
+</pre></div>
+</div>
+<p>This does not correspond to any specific simulation, but is the best
+estimate based on the history of optimization. The simulations in the
+tail of the optimization are drawn from this distribution.</p>
+<p>If we let the optimization run for a longer time, we would hope
+for a better fit. We can expect the optimization to stop making
+noticable progress after about 1000 points.</p>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[1]</a></td><td>The algorithm does not know what are the
+physiologically sensible ranges of parameters. If
+e.g. a negative resistivity is selected, most likely
+the resulting simulation will not resemble a the
+experimental recording and will be rejected, but this
+is a very inefficient way to reject infeasible parameter
+values.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>Notionally, the optimization loop has a stop condition, but
+it’s very very unlikely that we’ll hit it within a couple
+hundred steps.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">How to use <code class="docutils literal"><span class="pre">ajustador</span></code> to fit a <code class="docutils literal"><span class="pre">moose_nerp</span></code> model</a><ul>
+<li><a class="reference internal" href="#experimental-recording">Experimental recording</a></li>
+<li><a class="reference internal" href="#simulated-model">Simulated model</a></li>
+<li><a class="reference internal" href="#feature-functions">Feature functions</a></li>
+<li><a class="reference internal" href="#fitness-functions">Fitness functions</a></li>
+<li><a class="reference internal" href="#simulation-and-optimization-loop">Simulation and optimization loop</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">ajustador</a></li>
+      <li>Next: <a href="vartype.html" title="next chapter">ajustador.vartype</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quick_start.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Zbigniew Jędrzejewski-Szmek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/quick_start.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

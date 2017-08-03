@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.features &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -34,7 +31,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -84,7 +81,11 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
 
-    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">figure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
@@ -93,9 +94,14 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;membrane potential / V&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span>
 
-    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_spikes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
                    <span class="n">bottom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">lmargin</span><span class="o">=</span><span class="mf">0.0010</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span> <span class="n">rowsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">figure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">spikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span>
 
@@ -178,7 +184,7 @@
                   <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span> <span class="k">if</span> <span class="n">after</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">))</span>
         <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">region</span><span class="p">]</span>
         <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
-        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;=</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;=</span> <span class="n">cutoffb</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -196,7 +202,7 @@
 
         <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)]</span>
         <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
-        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;=</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;=</span> <span class="n">cutoffb</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -214,7 +220,7 @@
 
         <span class="n">what</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)]</span>
         <span class="n">cutoffa</span><span class="p">,</span> <span class="n">cutoffb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
-        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;</span> <span class="n">cutoffb</span><span class="p">)]</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">what</span><span class="p">[(</span><span class="n">what</span> <span class="o">&gt;=</span> <span class="n">cutoffa</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">what</span> <span class="o">&lt;=</span> <span class="n">cutoffb</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -232,7 +238,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">y</span><span class="p">[(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">)]</span>
         <span class="n">cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
-        <span class="n">cut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">cutoff</span><span class="p">]</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="n">cutoff</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -240,7 +246,7 @@
     <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">steady</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseline</span>
 
-<div class="viewcode-block" id="SteadyState.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.SteadyState.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">pre_post</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="SteadyState.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.SteadyState.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pre_post</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
         <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_before</span>
         <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline_after</span>
@@ -278,7 +284,7 @@
                     <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <span class="n">peak_and_threshold</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;peak_and_threshold&#39;</span><span class="p">,</span> <span class="s1">&#39;peaks thresholds&#39;</span><span class="p">)</span>
@@ -485,7 +491,7 @@
         <span class="c1"># TODO: is the variance too big?</span>
         <span class="k">return</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Spikes.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="Spikes.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">drawing_util</span>
 
         <span class="n">wave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">wave</span>
@@ -505,17 +511,17 @@
                    <span class="s1">&#39;spike_height&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span>
                   <span class="n">handler_map</span><span class="o">=</span><span class="p">{</span><span class="n">vline1</span><span class="p">:</span> <span class="n">drawing_util</span><span class="o">.</span><span class="n">HandlerVLineCollection</span><span class="p">()})</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ax2</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="o">.</span><span class="mi">45</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="o">.</span><span class="mi">45</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">])</span>
             <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
             <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;first spike&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;smaller&#39;</span><span class="p">)</span>
 
             <span class="n">_plot_spike</span><span class="p">(</span><span class="n">ax2</span><span class="p">,</span> <span class="n">wave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">bottom</span><span class="o">=-</span><span class="mf">0.06</span><span class="p">,</span> <span class="n">spike_bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Spikes.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Spikes.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Spikes.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_bounds</span>
         <span class="n">thresholds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_threshold</span>
@@ -524,7 +530,7 @@
         <span class="n">lmargin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="n">rmargin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_width</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span>
 
-        <span class="n">axes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spike_plot</span><span class="p">(</span><span class="n">figure</span><span class="p">,</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spike_plot</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                   <span class="n">spike_bounds</span><span class="o">=</span><span class="n">spike_bounds</span><span class="p">,</span>
                                   <span class="n">lmargin</span><span class="o">=</span><span class="n">lmargin</span><span class="p">,</span> <span class="n">rmargin</span><span class="o">=</span><span class="n">rmargin</span><span class="p">,</span>
                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -643,7 +649,9 @@
             <span class="n">right</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">argmin</span><span class="p">()]</span> <span class="o">+</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span>
             <span class="n">cut</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">wave</span><span class="p">[(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">left</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">windows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">)]</span>
             <span class="n">bottom</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-            <span class="n">weights</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">bottom</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">relative</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">bottom</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">relative</span> <span class="o">/</span> <span class="n">relative</span><span class="o">.</span><span class="n">ptp</span><span class="p">())</span><span class="o">**-</span><span class="mi">2</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
             <span class="n">avg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">avg</span><span class="p">)</span>
             <span class="n">dev</span> <span class="o">=</span> <span class="p">((</span><span class="n">cut</span><span class="o">.</span><span class="n">x</span><span class="o">-</span><span class="n">avg</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span>
@@ -691,7 +699,7 @@
 
             <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AHP.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="AHP.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;no spikes&#39;</span><span class="p">,</span>
@@ -701,9 +709,9 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_interval</span><span class="o">*</span><span class="mf">0.05</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spikes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">injection_interval</span><span class="o">*</span><span class="mf">0.05</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_do_plots</span><span class="p">([</span><span class="n">ax</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_count</span><span class="p">)</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="AHP.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AHP.spike_plot"><a class="viewcode-back" href="../../features.html#ajustador.features.AHP.spike_plot">[docs]</a>    <span class="k">def</span> <span class="nf">spike_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">spike_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">spike_bounds</span>
 
         <span class="n">axes</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spike_plot</span><span class="p">(</span><span class="n">figure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -796,7 +804,7 @@
         <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve_fit</span>
         <span class="k">return</span> <span class="n">fit</span><span class="o">.</span><span class="n">function</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">good</span> <span class="k">else</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="FallingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.FallingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="FallingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.FallingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
 
         <span class="n">ccut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">falling_curve</span>
@@ -816,7 +824,7 @@
                     <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="Rectification"><a class="viewcode-back" href="../../features.html#ajustador.features.Rectification">[docs]</a><span class="k">class</span> <span class="nc">Rectification</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
@@ -842,7 +850,7 @@
         <span class="n">bottom</span> <span class="o">=</span> <span class="n">vartype</span><span class="o">.</span><span class="n">array_mean</span><span class="p">(</span><span class="n">ccut</span><span class="p">[</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">window_len</span> <span class="p">:</span> <span class="n">end</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">window_len</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">steady</span> <span class="o">-</span> <span class="n">bottom</span>
 
-<div class="viewcode-block" id="Rectification.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Rectification.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="Rectification.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.Rectification.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
 
         <span class="n">ccut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">falling_curve</span>
@@ -876,7 +884,7 @@
                         <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="ChargingCurve"><a class="viewcode-back" href="../../features.html#ajustador.features.ChargingCurve">[docs]</a><span class="k">class</span> <span class="nc">ChargingCurve</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
@@ -913,7 +921,7 @@
         <span class="n">what</span> <span class="o">=</span> <span class="n">what</span><span class="p">[</span><span class="n">what</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">what</span>
 
-<div class="viewcode-block" id="ChargingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.ChargingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">):</span>
+<div class="viewcode-block" id="ChargingCurve.plot"><a class="viewcode-back" href="../../features.html#ajustador.features.ChargingCurve.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
         <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">baseline</span>
 
@@ -938,7 +946,7 @@
                    <span class="s1">&#39;baseline&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
-        <span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div></div>
 
 
 <span class="n">standard_features</span> <span class="o">=</span> <span class="p">(</span>
@@ -982,7 +990,7 @@
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

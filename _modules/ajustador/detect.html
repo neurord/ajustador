@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador.detect &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -34,7 +31,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -53,8 +50,8 @@
         <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="n">wrapper</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">decorator</span></div>
 
-<span class="nd">@arrayize</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-<div class="viewcode-block" id="detect_peaks"><a class="viewcode-back" href="../../detect.html#ajustador.detect.detect_peaks">[docs]</a><span class="k">def</span> <span class="nf">detect_peaks</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">min_high_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">P_low</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">P_high</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">both</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="detect_peaks"><a class="viewcode-back" href="../../detect.html#ajustador.detect.detect_peaks">[docs]</a><span class="nd">@arrayize</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">detect_peaks</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">min_high_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">P_low</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">P_high</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">both</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">low_i</span><span class="p">,</span> <span class="n">low</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">high_i</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -121,7 +118,7 @@
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

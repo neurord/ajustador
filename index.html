@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>ajustador &#8212; ajustador 0.0.0 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,10 +21,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ajustador.vartype" href="vartype.html" />
+    <link rel="next" title="How to use ajustador to fit a moose_nerp model" href="quick_start.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -35,7 +32,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -47,9 +44,25 @@
 <h1>ajustador<a class="headerlink" href="#ajustador" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">How to use <code class="docutils literal"><span class="pre">ajustador</span></code> to fit a <code class="docutils literal"><span class="pre">moose_nerp</span></code> model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#experimental-recording">Experimental recording</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#simulated-model">Simulated model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#feature-functions">Feature functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#fitness-functions">Fitness functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#simulation-and-optimization-loop">Simulation and optimization loop</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="vartype.html">ajustador.vartype</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loader.html">ajustador.loader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">ajustador.features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">ajustador.features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.html#steadystate">SteadyState</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#spikes">Spikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#ahp">AHP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#fallingcurve">FallingCurve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#rectification">Rectification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#chargingcurve">ChargingCurve</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="fitnesses.html">ajustador.fitnesses</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimize.html">ajustador.optimize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drawing.html">ajustador.drawing</a><ul>
@@ -88,7 +101,7 @@ An explicit import is needed:
 <dl class="function">
 <dt id="ajustador.basic_simulation.cond_setting">
 <code class="descclassname">ajustador.basic_simulation.</code><code class="descname">cond_setting</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ajustador/basic_simulation.html#cond_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ajustador.basic_simulation.cond_setting" title="Permalink to this definition">¶</a></dt>
-<dd><p>Splits &#8216;NaF,0=123.4&#8217; → (&#8216;NaF&#8217;, 0, 123.4)</p>
+<dd><p>Splits ‘NaF,0=123.4’ → (‘NaF’, 0, 123.4)</p>
 </dd></dl>
 
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">basic_simulation</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">simtime</span> <span class="n">SIMTIME</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">simdt</span> <span class="n">SIMDT</span><span class="p">]</span>
@@ -120,33 +133,33 @@ An explicit import is needed:
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--simtime=0.9</span>, <span class="option">-t=0.9</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Simulation time</td></tr>
+<tr><td>&#160;</td><td>Simulation time</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--simdt=1e-05</span></kbd></td>
 <td>Simulation step</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plotdt=0.0002</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Plot point distance</td></tr>
+<tr><td>&#160;</td><td>Plot point distance</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--hsolve=True</span></kbd></td>
 <td>Use the HSOLVE solver</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--injection-current=[-1.5e-10, 1.5e-10, 3.5e-10]</span>, <span class="option">-i=[-1.5e-10, 1.5e-10, 3.5e-10]</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>One or more injection currents (V)</td></tr>
+<tr><td>&#160;</td><td>One or more injection currents (V)</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--injection-delay=0.2</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Start current injection at this time</td></tr>
+<tr><td>&#160;</td><td>Start current injection at this time</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--injection-width=0.4</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Inject current for this much time</td></tr>
+<tr><td>&#160;</td><td>Inject current for this much time</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--stimtimes=[0.04, 0.19, 0.46]</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td>&#160;</td><td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--syncomp=4</span></kbd></td>
 <td>Synapse compartment number</td></tr>
@@ -162,30 +175,30 @@ An explicit import is needed:
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-current-message=getGk</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>The moose message to use</td></tr>
+<tr><td>&#160;</td><td>The moose message to use</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-current-label=Cond, S</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Current plot label</td></tr>
+<tr><td>&#160;</td><td>Current plot label</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--plot-synapse</span></kbd></td>
 <td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-synapse-message=getGk</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td>&#160;</td><td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-synapse-label=Cond, nS</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td>&#160;</td><td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-channels</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td>&#160;</td><td>Undocumented</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--plot-activation</span></kbd></td>
 </tr>
-<tr><td>&nbsp;</td><td>Undocumented</td></tr>
+<tr><td>&#160;</td><td>Undocumented</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--plot-network</span></kbd></td>
 <td>Undocumented</td></tr>
@@ -269,7 +282,7 @@ An explicit import is needed:
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="vartype.html" title="next chapter">ajustador.vartype</a></li>
+      <li>Next: <a href="quick_start.html" title="next chapter">How to use <code class="docutils literal"><span class="pre">ajustador</span></code> to fit a <code class="docutils literal"><span class="pre">moose_nerp</span></code> model</a></li>
   </ul></li>
 </ul>
 </div>
@@ -298,7 +311,7 @@ An explicit import is needed:
       &copy;2017, Zbigniew Jędrzejewski-Szmek.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
