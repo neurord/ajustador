@@ -6,6 +6,30 @@ An optimization procedure consists of the following "components":
 .. contents::
    :local:
 
+The short version is:
+
+>>> import measurements1
+>>> import ajustador as aju
+>>> exp_to_fit = measurements1.waves042811[[0, 6, 23]]
+>>> params = aju.optimize.ParamSet(
+... ('RA',           4.309,  0,   100),
+... ('RM',           0.722,  0,    10),
+... ('CM',           0.015,  0, 0.100))
+>>> fitness = aju.fitnesses.combined_fitness()
+>>> fit = aju.optimize.Fit('quick-start-d1.fit',
+...                        exp_to_fit,
+...                        'd1d2', 'D1',
+...                        fitness,
+...                        params)
+>>> fit.do_fit(15, popsize=5)                          # DOCTEST: +SKIP
+>>> fit.param_names()
+['RA', 'RM', 'CM']
+>>> fit.params.unscale(fit.optimizer.result()[0])  # parameters
+[1.6781569599861799, 4.4270115380320281, 0.02983857703183539]
+>>> fit.params.unscale(fit.optimizer.result()[6])  # stddevs
+[0.7099180820095562, 0.73484996358979826, 0.0033816805879411456]
+
+The long version is below.
 
 Experimental recording
 ``````````````````````
