@@ -8,6 +8,14 @@ An optimization procedure consists of the following "components":
 
 The short version is:
 
+#clone ajustador, waves, moose_nerp
+
+#install MOOSE
+
+#get into python using:
+
+>PYTHONPATH=$PYTHONPATH:/full/path/to/ajustador/:/full/path/to/waves/:/full/path/to/moose_nerp/: python3
+
 >>> import measurements1
 >>> import ajustador as aju
 >>> exp_to_fit = measurements1.waves042811[[0, 6, 23]]
