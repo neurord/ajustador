@@ -19,16 +19,19 @@ The short version is:
 >>> import measurements1
 >>> import ajustador as aju
 >>> exp_to_fit = measurements1.D1waves042811[[0, 6, 23]]
+>>> P = aju.optimize.AjuParam
 >>> params = aju.optimize.ParamSet(
-... ('RA',           4.309,  0,   100),
-... ('RM',           0.722,  0,    10),
-... ('CM',           0.015,  0, 0.100))
+... P('RA',           4.309,  0,   100),
+... P('RM',           0.722,  0,    10),
+... P('CM',           0.015,  0, 0.100))
 >>> fitness = aju.fitnesses.combined_fitness()
->>> fit = aju.optimize.Fit('quick-start-d1.fit',
+>>> fit = aju.optimize.Fit('/tmp',
 ...                        exp_to_fit,
 ...                        'd1d2', 'D1',
 ...                        fitness,
-...                        params)
+...                        params,
+...                        _make_simulation=aju.optimize.MooseSimulation.make,
+...                        _result_constructor=aju.optimize.MooseSimulationResult)
 >>> fit.do_fit(15, popsize=5)                          # DOCTEST: +SKIP
 >>> fit.param_names()
 ['RA', 'RM', 'CM']
