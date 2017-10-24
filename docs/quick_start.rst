@@ -18,7 +18,7 @@ The short version is:
 
 >>> import measurements1
 >>> import ajustador as aju
->>> exp_to_fit = measurements1.waves042811[[0, 6, 23]]
+>>> exp_to_fit = measurements1.D1waves042811[[0, 6, 23]]
 >>> params = aju.optimize.ParamSet(
 ... ('RA',           4.309,  0,   100),
 ... ('RM',           0.722,  0,    10),
