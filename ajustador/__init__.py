@@ -5,4 +5,4 @@ from . import (compat,
                loader,
                optimize,
                utilities,
-               vartype)
+               vartype, xml)
