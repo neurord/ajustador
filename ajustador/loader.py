@@ -124,7 +124,7 @@ class Attributable(object):
             # fully initialized. Just say no to all special names.
             raise AttributeError(attr)
 
-        if attr in self._array_attributes:
+        if not attr.startswith('_') and attr in self._array_attributes:
             arr = [getattr(wave, attr) for wave in self.waves]
             if not arr:
                 return np.empty(0)

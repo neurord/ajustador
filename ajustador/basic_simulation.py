@@ -15,7 +15,7 @@ in parallel, where each one should be run out-of-process::
       --morph-file=MScell-tertDendlongRE.p \\
       --simtime=0.9 \\
       -i=-5.0000000000000034e-11 \\
-      --save=ivdata--5.0000000000000034e-11.npy
+      --save-vm=ivdata--5.0000000000000034e-11.npy
 
 This module is not automatically imported as a child of ajustador.
 An explicit import is needed:
@@ -76,7 +76,7 @@ def option_parser():
 
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
 
-    p.add_argument('--save')
+    p.add_argument('--save-vm')
     return p
 
 @util.listize
@@ -88,13 +88,14 @@ def serialize_options(opts):
             continue
         if val is not None:
             parts = key.split('_')
+            num = getattr(val, 'value', val)
             if parts[0] == 'Cond' and len(parts) == 3: # e.g. Cond_NaF_0
-                conds.append('{},{}={}'.format(parts[1], parts[2], val))
+                conds.append('{},{}={}'.format(parts[1], parts[2], num))
             elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir
-                conds.append('{},:={}'.format(parts[1], val))
+                conds.append('{},:={}'.format(parts[1], num))
             else:
                 key = key.replace('_', '-')
-                yield '--{}={}'.format(key, val)
+                yield '--{}={}'.format(key, num)
     if conds:
         yield '--cond'
         yield from conds
@@ -139,11 +140,16 @@ def setup_conductance(condset, name, index, value):
         attr[keys[index]] = value
 
 def setup(param_sim, model):
+    if param_sim.calcium is not None:
+        model.calYN = param_sim.calcium
+    if param_sim.spines is not None:
+        model.spineYN = param_sim.spines
+
     condset = getattr(model.Condset, param_sim.neuron_type)
 
     if param_sim.Kir_offset is not None:
-        model.Channels.Kir.X.Avhalf += param_sim.Kir_offset
-        model.Channels.Kir.X.Bvhalf += param_sim.Kir_offset
+        model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
+        model.Channels.Kir.X.B_vhalf += param_sim.Kir_offset
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
@@ -161,9 +167,11 @@ def setup(param_sim, model):
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    vmtab,catab,plastab,currtab = tables.graphtables(model, neurons,
-                                                     param_sim.plot_current,
-                                                     param_sim.plot_current_message)
+    tables.graphtables(model, neurons,
+                       param_sim.plot_current,
+                       param_sim.plot_current_message)
+    writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
+
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
@@ -171,7 +179,7 @@ def setup(param_sim, model):
     if param_sim.hsolve and model.calYN:
         calcium.fix_calcium(model.neurontypes(), model)
 
-    return pg
+    return pg, writer
 
 def reset_baseline(neuron, baseline, Cond_Kir):
     for n, w in enumerate(moose.wildcardFind('/{}/#[TYPE=Compartment]'.format(neuron))):
@@ -206,15 +214,16 @@ def main(args):
     param_sim = option_parser().parse_args(args)
     model = importlib.import_module('moose_nerp.' + param_sim.model)
     model.neurontypes([param_sim.neuron_type])
-    pulse_gen = setup(param_sim, model)
+    pulse_gen, hdf5writer = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
+    hdf5writer.close()
 
     if param_sim.plot_vm:
         neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
-    if param_sim.save:
+    if param_sim.save_vm:
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
-        np.save(param_sim.save, moose.element(elemname).vector)
+        np.save(param_sim.save_vm, moose.element(elemname).vector)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
