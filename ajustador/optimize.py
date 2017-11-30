@@ -45,7 +45,7 @@ def iv_filename_to_current(ivfile):
 
 def execute(p):
     from . import basic_simulation
-
+    #NOTE: --model=d1d2 and --neuron-type=D1 should not be hard coded
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
     params = basic_simulation.serialize_options(params)
@@ -56,7 +56,7 @@ def execute(p):
                '--save-vm={}'.format(result),
                '--model=d1d2',
                '--neuron-type=D1',
-              ] + params
+    ] + params
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     with utilities.chdir(dirname):
         subprocess.check_call(cmdline)
@@ -79,6 +79,8 @@ def load_simulation(ivfile, simtime, junction_potential, features):
 
 class Simulation(loader.Attributable):
     def __init__(self, dir, *, params, features):
+        super().__init__(features=features)
+
         self.params = params
         self.features = features
 
@@ -151,7 +153,7 @@ class MooseSimulation(Simulation):
         return cls(dir=dir,
                    # FIXME!
                    # model=model,
-                   # neuron_type=neuron_type,
+                   # neuron_type=,
                    # injection_delay=measurement[0].injection_start,
                    # injection_width=measurement[0].injection_interval,
                    currents=measurement.injection,

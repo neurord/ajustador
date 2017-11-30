@@ -119,12 +119,13 @@ class Attributable(object):
                                  for p in getattr(feature, 'mean_attributes', ())}
 
     def __getattr__(self, attr):
+        print('getting', self.__class__.__name__, attr)
         if attr.startswith('__'):
             # we get asked for __setstate__ by copy.copy before we're
             # fully initialized. Just say no to all special names.
             raise AttributeError(attr)
 
-        if not attr.startswith('_') and attr in self._array_attributes:
+        if not attr.startswith('_') and attr in getattr(self, '_array_attributes', {}):
             arr = [getattr(wave, attr) for wave in self.waves]
             if not arr:
                 return np.empty(0)
@@ -136,7 +137,7 @@ class Attributable(object):
                 return np.hstack(arr)
             return np.array(arr)
 
-        if attr.startswith('mean_') and attr[5:] in self._mean_attributes:
+        if attr.startswith('mean_') and attr[5:] in getattr(self, '_mean_attributes', {}):
             values = self.__getattr__(attr[5:])
             return vartype.average(values)
 
