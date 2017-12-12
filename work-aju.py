@@ -1,97 +1,97 @@
-import ajustador as aju, measurements1 as ms1, numpy as np
+import ajustador as aju
+import measurements1 as ms1
+import numpy as np
 from ajustador import drawing
 from matplotlib import pyplot
 import gpedata_experimental as gpe
 
-# waves1h = ms1.waves1[ms1.waves1.injection <= 0][::3]
-# waves2h = ms1.waves2[ms1.waves2.injection <= 0][::3]
-# waves3h = ms1.waves3[ms1.waves3.injection <= 0][::3]
-# waves4h = ms1.waves4[ms1.waves4.injection <= 0][::3]
-# waves5h = ms1.waves5[ms1.waves5.injection <= 0][::3]
-# waves6h = ms1.waves6[ms1.waves6.injection <= 0][::3]
-# waves7h = ms1.waves7[ms1.waves7.injection <= 0][::3]
-# waves8h = ms1.waves8[ms1.waves8.injection <= 0][::3]
-waves9h = ms1.waves9[ms1.waves9.injection <= 0][::3]
+#####################################################################################
+# example using hyperpol_fitness() - which uses only hyperpolarizing currents
+#####################################################################################
+exp_to_fit = ms1.D1waves042811[[0, 6, 9]]
+P = aju.optimize.AjuParam
+params5 = aju.optimize.ParamSet(
+    P('junction_potential', 0,       min=-0.030, max=+0.030),
+    P('RA',                 12.004,  min=0,      max=100),
+    P('RM',                 9.427,   min=0,      max=10),
+    P('CM',                 0.03604, min=0,      max=0.10),
+    P('Cond_Kir',           14.502,  min=0,      max=100),
+    P('Kir_offset',         -.004,   min=-0.005, max=+0.005),
+    P('morph_file', 'MScell-tertDendlongRE.p', fixed=1),
+    P('neuron_type', 'D1',                     fixed=1),
+    P('model',           'd1d2',     fixed=1))
 
-params = aju.optimize.ParamSet(
-    ('RA',                 4.309,    0, 100),
-    ('RM',                 0.722,    0,  10),
-    ('CM',                 0.015,    0, 0.10),
-    ('Cond_Kir',           9.4644,   0, 100),
-    ('Kir_offset',         0,        -0.005, +0.005),
-    ('morph_file', 'MScell-tertDendlongRE.p'),
-    ('neuron_type', 'D1'))
+fit5 = aju.optimize.Fit('/tmp/out3',
+                        exp_to_fit,
+                        'd1d2', 'D1',
+                        aju.fitnesses.hyperpol_fitness, params5,
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
+#NOTE, if fit directory has stuff in it, then you get an error:
+#  File "/home/avrama/moose/ajustador/ajustador/optimize.py", line 341, in <genexpr>
+#    self.fixedparams = tuple(p for p in self.params if p.fixed)
+#AttributeError: 'str' object has no attribute 'fixed'
 
-fit = aju.optimize.Fit('../fit-2017-aju-cma-wave9h-1',
-                       waves9h, aju.fitnesses.hyperpol_fitness, params)
-fit.load()
-fit.do_fit(100)
-
-
-params2 = params.update(RA=3.309,
-                        RM=1.722,
-                        CM=0.025,
-                        Cond_Kir=1.4644,
-                        Kir_offset=0)
-fit2 = aju.optimize.Fit('../fit-2017-aju-cma-wave9h-2',
-                       waves9h, aju.fitnesses.hyperpol_fitness, params2)
-fit2.load()
-fit2.do_fit(100)
-
-
-params3 = aju.optimize.ParamSet(
-    ('junction_potential', 0,       -0.030, +0.030),
-    ('RA',                 12.004,    0, 100),
-    ('RM',                 9.427,     0,  10),
-    ('CM',                 0.03604,   0, 0.10),
-    ('Cond_Kir',           14.502,    0, 100),
-    ('Kir_offset',         -.004,    -0.005, +0.005),
-    ('morph_file', 'MScell-tertDendlongRE.p'),
-    ('neuron_type', 'D1'))
-fit3 = aju.optimize.Fit('../fit-2017-aju-cma-wave9h-3',
-                        waves9h, aju.fitnesses.hyperpol_fitness, params3)
-fit3.load()
-fit3.do_fit(100)
-
-
-params4 = params3
-fit4 = aju.optimize.Fit('../fit-2017-aju-cma-wave5h-1',
-                        ms1.waves5[0:10:2], aju.fitnesses.hyperpol_fitness, params4)
-fit4.load()
-fit4.do_fit(100)
-
-
-params5 = params3
-fit5 = aju.optimize.Fit('../fit-2017-aju-cma-wave5h-2',
-                        ms1.waves5[0:10:2], aju.fitnesses.hyperpol_fitness, params5)
 fit5.load()
+#Default population size is 8
 fit5.do_fit(100)
 
 for i in range(len(fit5)):
     print(i, fit5.fitness_func(fit5[i], fit5.measurement, full=1),
           '→', fit5.fitness_func(fit5[i], fit5.measurement, full=0))
+    #to print param values for all simulations
+    print(fit5[i].params)
+#print best estimate of parameters
+for i in len(fit5.param_names()):
+    print(fit5.param_names()[i], ':', fit5.params.unscale(fit5.optimizer.result()[0])[i])
+      
+drawing.plot_history(fit5, fit5.measurement)
 
-
+#####################################################################################
+# example using combined_fitness() - which uses both hyperpolarizing and depolarizing currents
+#####################################################################################
+exp_to_fit = ms1.D1waves042811[[0, 6, 9]]
+P = aju.optimize.AjuParam
 params6 = aju.optimize.ParamSet(
-    ('junction_potential', 0,       -0.030, +0.030),
-    ('RA',                 12.004,    0, 100),
-    ('RM',                 9.427,     0,  10),
-    ('CM',                 0.03604,   0, 0.10),
-    ('Cond_Kir',           14.502,    0, 100),
-    ('Kir_offset',         -.004,    -0.005, +0.005),
-    ('morph_file', 'MScell-tertDendlongRE.p'),
-    ('neuron_type', 'D1'),
-    ('Cond_NaF_0',      150e3,      0, 600e3),
-    ('Cond_KaS_0',      372,        0, 600),
-    ('Cond_KaF_0',      641,        0, 1000),
-    ('Cond_Krp_0',      177,        0, 600))
-fit6 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-2',
-                        ms1.waves5[[0, 3, 7, 13, 17, 19, 21, 22, 23]],
-                        aju.fitnesses.combined_fitness(), params6)
-fit6.load()
-fit6.do_fit(150, popsize=20)
+    P('junction_potential', 0,       min=-0.015, max=+0.015),
+    P('RA',                 12.004,  min=0,      max=100),
+    P('RM',                 9.427,   min=0,      max=10),
+    P('CM',                 0.03604, min=0,      max=0.10),
+    P('Cond_Kir',           14.502,  min=0,      max=100),
+    P('Kir_offset',         -.004,   min=-0.005, max=+0.005),
+    P('morph_file', 'MScell-tertDendlongRE.p', fixed=1),
+    P('neuron_type', 'D1',                     fixed=1),
+    P('Cond_NaF_0',      150e3,      min=0, max=600e3),
+    P('Cond_KaS_0',      372,        min=0, max=600),
+    P('Cond_KaF_0',      641,        min=0, max=1000),
+    P('Cond_Krp_0',      177,        min=0, max=600),
+    P('model',           'd1d2',     fixed=1))
 
+fit6 = aju.optimize.Fit('/tmp/out2',
+                        ms1.waves5[[0, 3, 7, 13, 17, 19, 21, 22, 23]],
+                        'd1d2', 'D1',
+                        aju.fitnesses.combined_fitness(), params6,
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
+fit6.load()
+iterations=1
+fit6.do_fit(iterations, popsize=2)
+
+#full=1 will print fitness of each feature, full=0 prints only overall fitness
+for i in range(len(fit6)):
+    print(i, fit6.fitness_func(fit6[i], fit6.measurement, full=1),
+          '→', fit6.fitness_func(fit6[i], fit6.measurement, full=0))
+    #to print param values, either of these two will work
+    print(fit6[0].params)
+    print(fit6.params.unscale(fit6.optimizer.result()[i]))
+drawing.plot_history(fit6, fit6.measurement)
+
+#####################################################################################
+#example showing how to update parameters with results of previous optimization, and then start again
+#This still needs testing
+#####################################################################################
 # fit6.params.update(**fit6[5650].params)
+P = aju.optimize.AjuParam
 params7 = params6.update(junction_potential=-0.01473080415412029,
                          RA=10.65928280866225,
                          RM=9.084575725069685,
@@ -102,11 +102,18 @@ params7 = params6.update(junction_potential=-0.01473080415412029,
                          Cond_KaS_0=178.8056033265561,
                          Cond_KaF_0=611.1236043484937,
                          Cond_Krp_0=204.35266201409314)
-fit7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-4',
+fit7 = aju.optimize.Fit('./tmp/out2',
                         ms1.waves5[[0, 7, 17, 21, 23]],
-                        aju.fitnesses.combined_fitness(), params7)
+                        'd1d2', 'D1',
+                        aju.fitnesses.combined_fitness(), params7,
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
 fit7.load()
 fit7.do_fit(150, popsize=8)
+
+#####################################################################################
+#How to plot the fitness history of various features
+#####################################################################################
 
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.combined_fitness())
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_time_fitness, clear=False)
@@ -114,52 +121,12 @@ drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_width_f
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.spike_ahp_fitness, clear=False)
 drawing.plot_history(fit7, fit7.measurement, fitness=aju.fitnesses.ahp_curve_fitness, clear=False)
 
-
-params8 = aju.optimize.ParamSet(
-    ('junction_potential', 0,       -0.030, +0.030),
-    ('RA',                 12.004,    0, 100),
-    ('RM',                 9.427,     0,  10),
-    ('CM',                 0.03604,   0, 0.10),
-    ('Cond_Kir',           14.502,    0, 100),
-    ('Kir_offset',         -.004,    -0.005, +0.005),
-    ('morph_file', 'MScell-tertDendlongRE.p'),
-    ('neuron_type', 'D1'),
-    ('Cond_NaF_0',      150e3,      0, 600e3),
-    ('Cond_KaS_0',      372,        0, 600),
-    ('Cond_KaF_0',      641,        0, 1000),
-    ('Cond_Krp_0',      177,        0, 600),
-    ('Cond_SKCa_0',     0.5,        0, 6),
-    ('Cond_BKCa_0',     10,         0, 100))
-fit8 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-8',
-                        ms1.waves5[[0, 7, 17, 21, 23]],
-                        aju.fitnesses.combined_fitness(), params8)
-fit8.load()
-fit8.do_fit(150, popsize=20)
-
-# baseline → baseline_pre, baseline_post
-# fit8.params.update(**fit8[2536].params)
-params9 = params8.update(junction_potential=-0.01358622557992854,
-                         RA=7.5097716484728485,
-                         RM=9.865608455066301,
-                         CM=0.05695624758868263,
-                         Cond_Kir=15.175645393785455,
-                         Kir_offset=-0.004965981023001747,
-                         Cond_NaF_0=165710.14383336686,
-                         Cond_KaS_0=529.1622011113959,
-                         Cond_KaF_0=670.775894939824,
-                         Cond_Krp_0=4.446655927879732,
-                         Cond_SKCa_0=0.12046639942362143,
-                         Cond_BKCa_0=11.51439493711431)
-fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
-fit9 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-9',
-                        ms1.waves5[[0, 7, 17, 21, 23]],
-                        fitness, params9)
-fit9.load()
-fit9.do_fit(400, popsize=20)
-
-
+#####################################################################################
+#another example showing how to update parameters with results of previous optimization, and then start again
+#
 # updated fitness functions, use wave with late spikes to fit latency
 # fit9.params.update(**fit9["194"].params)
+#####################################################################################
 params10 = params8.update(junction_potential=-0.011962426960236439,
                           RA=7.461321794316308,
                           RM=7.430291533499045,
@@ -176,8 +143,15 @@ fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 
 fit10 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-10',
                          ms1.waves5[[0, 7, 17, 18, 21]],
-                         fitness, params10)
+                        'd1d2', 'D1',
+                         fitness, params10, 
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
 fit10.load()
+
+#####################################################################################
+#How to plot the overall fitness history
+#####################################################################################
 drawing.plot_history(fit10, fit10.measurement)
 fit10.do_fit(400, popsize=20)
 
@@ -185,7 +159,10 @@ fit10.do_fit(400, popsize=20)
 fitness = aju.fitnesses.combined_fitness('new_combined_fitness')
 fit11 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-11',
                          ms1.waves5[[0, 7, 17, 18, 21]],
-                         fitness, params10)
+                        'd1d2', 'D1',
+                         fitness, params10, 
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
 fit11.load(last=200)
 fit11.do_fit(800, popsize=20)
 
@@ -396,14 +373,6 @@ fit14_waves3 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves3_2',
 fit14_waves3.load()
 fit14_waves3.do_fit(400, popsize=12)
 
-# '../fit-2017-aju-cma-wave5-14-waves7' was on nebish with old moose, best to ignore
-fit14_waves7 = aju.optimize.Fit('../fit-2017-aju-cma-wave5-14-waves7_2',
-                                ms1.waves7[[0, 8, -6, -1]],
-                                'd1d2', 'D1',
-                                fitness, params14)
-fit14_waves7.load(last=30)
-fit14_waves7.do_fit(300, popsize=12)
-
 # There are no hyperpolarizing injections, hence no falling curves
 fitness10 = aju.fitnesses.combined_fitness('new_combined_fitness',
                                            falling_curve_time=0)
@@ -415,77 +384,9 @@ fit14_waves10.load()
 fit14_waves10.do_fit(300, popsize=12)
 
 
-
-paramsgp1 = aju.optimize.ParamSet(
-    ('junction_potential', -0.012, -0.020, -0.005),
-    ('RA',                 5 ,     0, 100),
-    ('RM',                 5,      0,  10),
-    ('CM',                 0.07,   0, 0.10),
-    # ('morph_file', 'GP_arky_41comp.p'),
-    # ('neuron_type',     'arky'),
-    ('Eleak', -0.056, -0.080, -0.030),
-
-    ('Cond_KDr_0', 300, 0, 1000),
-    ('Cond_KDr_1', 58.2, 0, 300),
-    ('Cond_KDr_2', 58.2, 0, 1000),
-
-    # Kv3={prox: 266, dist: 46.6, axon: 466},
-    ('Cond_Kv3_0', 266, 0, 1000),
-    ('Cond_Kv3_1', 46.6, 0, 1000),
-    ('Cond_Kv3_2', 266, 0, 1000),
-
-    # KvF={prox: 2.5, dist: 2.5, axon: 25},
-    ('Cond_KvF_0',  2.5, 0, 10),
-    ('Cond_KvF_1',  2.5, 0, 10),
-    ('Cond_KvF_2',  25, 0, 100),
-
-    # KvS={prox: 0.75, dist: 0.75, axon: 7.5},
-    ('Cond_KvS_0', 0.75, 0, 10),
-
-    # NaF={prox: 40000, dist: 400, axon: 40000},
-    ('Cond_NaF_0', 40e3, 0, 100e3),
-    ('Cond_NaF_1', 400, 0, 2000),
-    ('Cond_NaF_2', 40000, 0, 100000),
-
-    # HCN1={prox: 0.2, dist: 0.2, axon: 0},
-    # HCN2={prox: 0.25, dist: 0.25, axon: 0},
-    # KCNQ={prox: 0.04, dist: 0.04, axon: 0.04},
-    ('Cond_KCNQ_0', 0.04, 0, 10),
-
-    # NaS={prox: 0.15, dist: 0.15, axon: 0.5},
-    ('Cond_NaS_0', 0.15, 0, 10),
-
-    # Ca={prox: 0.1, dist: 0.06, axon: 0},
-
-    # SKCa={prox: 35, dist: 3.5, axon: 0},
-    ('Cond_SKCa_0', 35, 0, 100),
-
-    # BKCa={prox: 200, dist: 200, axon: 0},
-    ('Cond_BKCa_0', 200, 0, 800),
-)
-paramsgp1 = paramsgp1.update(
-    junction_potential=-0.019,
-    RA=7.37,
-    RM=3.95,
-    CM=0.0234,
-    Eleak=-0.043,
-    Cond_KDr_0=52.2,
-    Cond_KDr_1=70.6,
-    Cond_KDr_2=0.264,
-    Cond_Kv3_0=167,
-    Cond_Kv3_1=84.6,
-    Cond_Kv3_2=801,
-    Cond_KvF_0=0.742,
-    Cond_KvF_1=6.37,
-    Cond_KvF_2=0.633,
-    Cond_KvS_0=5.67,
-    Cond_NaF_0=257,
-    Cond_NaF_1=187,
-    Cond_NaF_2=1.81e+03,
-    Cond_KCNQ_0=0.0408,
-    Cond_NaS_0=0.197,
-    Cond_SKCa_0=13.4,
-    Cond_BKCa_0=782)
+#####################################################################################
+# example using GP data.  Note elimination of basline and spike_latency in fitness
+#####################################################################################
 
 fitness = aju.fitnesses.combined_fitness('empty',
                                          response=1,
@@ -501,79 +402,15 @@ fitness = aju.fitnesses.combined_fitness('empty',
                                          spike_ahp=1,
                                          ahp_curve=1,
                                          spike_range_y_histogram=1)
-fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-5.5', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1)
+fitgp1 = aju.optimize.Fit('../fit-2017-gp-nr140-5.5', gpe.data['nr140'], 'gp', 'arky', fitness, paramsgp1, 
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
 fitgp1.load()
 fitgp1.do_fit(150, popsize=12)
 
+############### Update example.  Need to test if this works
 
-
-paramsgp2 = aju.optimize.ParamSet(
-    ('junction_potential', -0.012, -0.020, -0.005),
-    ('RA',                 5 ,     0, 100),
-    ('RM',                 5,      0,  10),
-    ('CM',                 0.07,   0, 0.10),
-    # ('morph_file', 'GP_arky_41comp.p'),
-    # ('neuron_type',     'arky'),
-    ('Eleak', -0.056, -0.080, -0.030),
-
-    ('Cond_KDr_0', 300, 0, 1000),
-    ('Cond_KDr_1', 58.2, 0, 300),
-    ('Cond_KDr_2', 58.2, 0, 1000),
-
-    # Kv3={prox: 266, dist: 46.6, axon: 466},
-    ('Cond_Kv3_0', 266, 0, 1000),
-    ('Cond_Kv3_1', 46.6, 0, 1000),
-    ('Cond_Kv3_2', 266, 0, 1000),
-
-    # KvF={prox: 2.5, dist: 2.5, axon: 25},
-    ('Cond_KvF_0',  2.5, 0, 10),
-    ('Cond_KvF_1',  2.5, 0, 10),
-    ('Cond_KvF_2',  25, 0, 100),
-
-    # KvS={prox: 0.75, dist: 0.75, axon: 7.5},
-    ('Cond_KvS_0', 0.75, 0, 10),
-
-    # NaF={prox: 40000, dist: 400, axon: 40000},
-    ('Cond_NaF_0', 40e3, 0, 100e3),
-    ('Cond_NaF_1', 400, 0, 2000),
-    ('Cond_NaF_2', 40000, 0, 100000),
-
-    # HCN1={prox: 0.2, dist: 0.2, axon: 0},
-    # HCN2={prox: 0.25, dist: 0.25, axon: 0},
-    # KCNQ={prox: 0.04, dist: 0.04, axon: 0.04},
-    ('Cond_KCNQ_0', 0.04, 0, 10),
-
-    # NaS={prox: 0.15, dist: 0.15, axon: 0.5},
-    ('Cond_NaS_0', 0.15, 0, 10),
-
-    # Ca={prox: 0.1, dist: 0.06, axon: 0},
-
-    # SKCa={prox: 35, dist: 3.5, axon: 0},
-    ('Cond_SKCa_0', 35, 0, 100),
-
-    # BKCa={prox: 200, dist: 200, axon: 0},
-    ('Cond_BKCa_0', 200, 0, 800),
-)
-fitness = aju.fitnesses.combined_fitness('empty',
-                                         response=1,
-                                         baseline_pre=0,
-                                         baseline_post=1,
-                                         rectification=1,
-                                         falling_curve_time=1,
-                                         spike_time=1,
-                                         spike_width=1,
-                                         spike_height=1,
-                                         spike_latency=0,
-                                         spike_count=1,
-                                         spike_ahp=1,
-                                         ahp_curve=1,
-                                         spike_range_y_histogram=1)
-fitgp2 = aju.optimize.Fit('../fit-2017-gp-nr144-2', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp2)
-fitgp2.load()
-fitgp2.do_fit(150, popsize=10)
-
-
-paramsgp3 = paramsgp2.update(
+paramsgp2 = paramsgp1.update(
     junction_potential=-0.0183,
     RA=1.84,
     RM=2.34,
@@ -611,6 +448,8 @@ fitness = aju.fitnesses.combined_fitness('empty',
                                          ahp_curve=0,
                                          spike_range_y_histogram=1)
 
-fitgp3 = aju.optimize.Fit('../fit-2017-gp-nr144-3', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp3)
-fitgp3.load()
-fitgp3.do_fit(150, popsize=10)
+fitgp2 = aju.optimize.Fit('../fit-2017-gp-nr144-3', gpe.data['nr144'], 'gp', 'proto', fitness, paramsgp2, 
+                        _make_simulation=aju.optimize.MooseSimulation.make,
+                        _result_constructor=aju.optimize.MooseSimulationResult)
+fitgp2.load()
+fitgp2.do_fit(150, popsize=10)
