@@ -45,7 +45,6 @@ def iv_filename_to_current(ivfile):
 
 def execute(p):
     from . import basic_simulation
-    #NOTE: --model=d1d2 and --neuron-type=D1 should not be hard coded
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
     params = basic_simulation.serialize_options(params)
@@ -54,8 +53,6 @@ def execute(p):
                basic_simulation.__file__,
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
-               '--model=d1d2',
-               '--neuron-type=D1',
     ] + params
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     with utilities.chdir(dirname):

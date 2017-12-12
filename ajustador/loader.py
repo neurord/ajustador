@@ -119,7 +119,7 @@ class Attributable(object):
                                  for p in getattr(feature, 'mean_attributes', ())}
 
     def __getattr__(self, attr):
-        print('getting', self.__class__.__name__, attr)
+        #print('getting', self.__class__.__name__, attr)
         if attr.startswith('__'):
             # we get asked for __setstate__ by copy.copy before we're
             # fully initialized. Just say no to all special names.
