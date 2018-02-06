@@ -110,6 +110,7 @@ class IVCurve(Trace):
 class Attributable(object):
     def __init__(self, features=None):
         # TODO: check duplicates, check dependencies between mean_attrs and array_attrs
+        """ Acquires 'array_attributes' and 'mean_attributes' of all features into instance object """
         self._array_attributes = {p
                                   for feature in features
                                   for p in getattr(feature, 'array_attributes', ())} | \
