@@ -257,6 +257,9 @@ class ParamMechanism:
 ParamMechanism.unspecified = ParamMechanism()
 
 class Param:
+    """ Base class for AjuParam class encapsulated set of values (name, value, fixed, mech).
+    used for simulation.
+    """
     min = max = None
 
     def __init__(self, name, value, fixed=True, mech=ParamMechanism.unspecified):
@@ -274,6 +277,10 @@ class Param:
 
     @staticmethod
     def make(args):
+        """ Returns Param object based on type and number of args.
+            type of args is string then the string should of form:
+            	"name value [fixed=<Bool>]"
+        """
         if isinstance(args, Param):
             # pass-through
             return args
@@ -289,6 +296,9 @@ class Param:
         return True
 
 class AjuParam(Param):
+    """ Class AjuParam is a custom data structure to hold parameters (name, value, min=<Interger>, max=<integer>, fixed=<Bool>, [mech]).
+    used for simulation.
+    """
     def __init__(self, name, value, *, min=None, max=None,
                  fixed=False,
                  mech=ParamMechanism.unspecified):
@@ -301,6 +311,7 @@ class AjuParam(Param):
             self._scaling = None
         else:
             # if starting value is less than 0.1 or more than 10, scale to that region
+            # self._scaling property is set by logically assesing value input parameter along with inputs min, max.
             val = value if value != 0 else (
                 max if max is not None and max != 0 else
                 (min if min is not None else 0))
