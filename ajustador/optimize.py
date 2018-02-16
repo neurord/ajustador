@@ -18,6 +18,11 @@ import cma
 
 from . import loader, features as _features, fitnesses, utilities
 
+import logging #SRIRAM 02152018
+from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
+logger = getlogger(__name__) #SRIRAM 02152018
+logger.setLevel(logging.INFO) #SRIRAM 02152018
+
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
 
@@ -54,7 +59,8 @@ def execute(p):
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
-    print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
+    #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
+    logger.info("Logger in execute function!!!")
     with utilities.chdir(dirname):
         subprocess.check_call(cmdline)
         iv = load_simulation(result,
@@ -64,6 +70,7 @@ def execute(p):
     return iv
 
 def load_simulation(ivfile, simtime, junction_potential, features):
+    logger.info("Logger in load simulation function!!!")
     injection_current = iv_filename_to_current(ivfile)
     voltage = np.load(ivfile)
     x = np.linspace(0, float(simtime), voltage.size)
@@ -83,6 +90,8 @@ class Simulation(loader.Attributable):
 
         self.name = (', '.join('{}={}'.format(k,v) for k,v in self.params.items())
                      if self.params else 'unmodified')
+        logger.info("Logger in Simulation!!!") #SRIRAM
+        logger.debug("Params of simulation\n {}".format(self.name)) #SRIRAM
 
         self.tmpdir = utilities.TemporaryDirectory(dir=dir)
         # print("Directory {} created".format(self.tmpdir.name))
@@ -108,6 +117,8 @@ class MooseSimulation(Simulation):
                  currents=None,
                  *,
                  simtime,
+                 injection_delay,    #SRIRAM add injection_width and delay here.
+                 injection_width,  #SRIRMA add injection_end
                  morph_file=None,
                  single=False,
                  async=False,
@@ -116,6 +127,8 @@ class MooseSimulation(Simulation):
 
         junction_potential = params['junction_potential'].value # FIXME: nicer syntax?
         params = filtereddict(simtime=simtime,
+                              injection_delay=injection_delay,   #SRIRAM
+                              injection_width=injection_width,   #SRIRAM
                               **dict(params.items()))
         super().__init__(dir, params=params, features=features)
 
@@ -129,9 +142,13 @@ class MooseSimulation(Simulation):
         params = ((self.tmpdir.name, inj, junction_potential, self.params, self.features)
                   for inj in injection_currents)
         if async:
+            logger.info("Logger in MooseSimulation.execute_for async!!!") #SRIRAM
+            logger.debug("Parmas in execute_for \n {}".format(params)) #SRIRAM
             self._result = exe_map(single=False, async=True)(execute, params, callback=self._set_result)
         else:
             self._result = None
+            logger.info("Logger in MooseSimulation.execute_for sync!!!") #SRIRAM
+            logger.debug("Parmas in execute_for \n {} {}".format(self.params, self.features)) #SRIRAM
             result = exe_map(single=single, async=False)(execute, params)
             self._set_result(result)
 
@@ -145,14 +162,18 @@ class MooseSimulation(Simulation):
     def make(cls, *, dir, model, measurement, params):
         # A hack wrapper to push moose-specific stuff out from Fit
         simtime = measurement.waves[0].time
+        injection_delay=measurement.injection_start,    #SRIRAM add injection_width and delay here.
+        injection_width=measurement.injection_end,  #SRIRMA add injection_end
         baseline = measurement.mean_baseline.x
+        logger.info("Logger in MooseSimulation.make!!!") #SRIRAM
+        logger.debug("Params \n {}".format(params))
 
         return cls(dir=dir,
                    # FIXME!
                    # model=model,
                    # neuron_type=,
-                   # injection_delay=measurement[0].injection_start,
-                   # injection_width=measurement[0].injection_interval,
+                   injection_delay=measurement.injection_start,    #SRIRAM add injection_width and delay here.
+                   injection_width=measurement.injection_end,  #SRIRMA add injection_end
                    currents=measurement.injection,
                    simtime=simtime,
                    features=measurement.features,
@@ -468,7 +489,7 @@ class Fit:
         sim = self._make_simulation(dir=self.dirname,
                                     model=self.model,
                                     measurement=self.measurement,
-                                    params=self.params.updated(**unscaled))
+                                    params=self.params.updated(**unscaled)) #define params here SRIRAM
         return sim
 
     def sim_fitness(self, sim, full=False, max_fitness=None):
