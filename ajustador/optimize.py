@@ -52,6 +52,9 @@ def execute(p):
     from . import basic_simulation
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
+    logger.debug("Unseralized params:\n {}".format(params)) #SRIRAM 02192018
+    params['injection_delay'] = params['injection_delay'][0] #SRIRAM 02192018
+    params['injection_width'] = params['injection_width'][0] #SRIRAM 02192018
     params = basic_simulation.serialize_options(params)
     result = iv_filename(injection)
     cmdline = [sys.executable,
@@ -61,6 +64,8 @@ def execute(p):
     ] + params
     #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     logger.info("Logger in execute function!!!")
+    logger.debug("Seralized params:\n {}".format(params)) #SRIRAM 02192018
+    logger.debug("Basic_simulation command:\n {}".format(cmdline)) #SRIRAM 02192018
     with utilities.chdir(dirname):
         subprocess.check_call(cmdline)
         iv = load_simulation(result,
@@ -90,8 +95,8 @@ class Simulation(loader.Attributable):
 
         self.name = (', '.join('{}={}'.format(k,v) for k,v in self.params.items())
                      if self.params else 'unmodified')
-        logger.info("Logger in Simulation!!!") #SRIRAM
-        logger.debug("Params of simulation\n {}".format(self.name)) #SRIRAM
+        logger.info("Logger in Simulation!!!") #SRIRAM 02192018
+        logger.debug("Params of simulation\n {}".format(self.name)) #SRIRAM 02192018
 
         self.tmpdir = utilities.TemporaryDirectory(dir=dir)
         # print("Directory {} created".format(self.tmpdir.name))
@@ -117,8 +122,8 @@ class MooseSimulation(Simulation):
                  currents=None,
                  *,
                  simtime,
-                 injection_delay,    #SRIRAM add injection_width and delay here.
-                 injection_width,  #SRIRMA add injection_end
+                 injection_delay,    #SRIRAM add injection width and delay here.
+                 injection_width,  #SRIRMA add injection_interval
                  morph_file=None,
                  single=False,
                  async=False,
@@ -127,8 +132,8 @@ class MooseSimulation(Simulation):
 
         junction_potential = params['junction_potential'].value # FIXME: nicer syntax?
         params = filtereddict(simtime=simtime,
-                              injection_delay=injection_delay,   #SRIRAM
-                              injection_width=injection_width,   #SRIRAM
+                              injection_delay=injection_delay,   #SRIRAM 02192018
+                              injection_width=injection_width,   #SRIRAM 02192018
                               **dict(params.items()))
         super().__init__(dir, params=params, features=features)
 
@@ -162,8 +167,8 @@ class MooseSimulation(Simulation):
     def make(cls, *, dir, model, measurement, params):
         # A hack wrapper to push moose-specific stuff out from Fit
         simtime = measurement.waves[0].time
-        injection_delay=measurement.injection_start,    #SRIRAM add injection_width and delay here.
-        injection_width=measurement.injection_end,  #SRIRMA add injection_end
+        injection_delay=measurement.features[0].injection_start,    #SRIRAM 02192018
+        injection_width=measurement.features[0].injection_interval,  #SRIRAM 02192018
         baseline = measurement.mean_baseline.x
         logger.info("Logger in MooseSimulation.make!!!") #SRIRAM
         logger.debug("Params \n {}".format(params))
@@ -172,8 +177,8 @@ class MooseSimulation(Simulation):
                    # FIXME!
                    # model=model,
                    # neuron_type=,
-                   injection_delay=measurement.injection_start,    #SRIRAM add injection_width and delay here.
-                   injection_width=measurement.injection_end,  #SRIRMA add injection_end
+                   injection_delay=injection_delay,    #SRIRAM 02192018
+                   injection_width=injection_width,  #SRIRAM 02192018
                    currents=measurement.injection,
                    simtime=simtime,
                    features=measurement.features,
