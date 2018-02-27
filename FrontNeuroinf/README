@@ -1,0 +1,26 @@
+python scripts used to run simulations reported in Jedrzejewski-Szmek et al. Frontiers in Neuroinformatics, 2018, submitted
+
+1. python scripts to optimize 6 different spiny projection neurons
+spnD1_010612.py
+spnD1_042811.py
+spnD1_051811.py
+spnD2_010612.py
+spnD2_051311.py
+spnD2_081011.py
+
+2. python scripts to optimize 7 different globus pallidus neurons
+gp1opt.py
+gp2opt.py
+gp3opt.py
+
+3. additional python scripts for saving and analyzing data
+save_params.py - has functions for two different functions
+a. save parameters, feature values, and fitness value for each individual
+b. save all information about the optimization, to allow continuing the optimization after existing from python
+
+analysis.py - read in a set of files produced by save_params and
+a. combine for analysis, e.g. correlation
+b. output features and fitness for the best individuals in format for SAS for statistical analysis
+
+anal_util.py - functions used by analysis.py
+
