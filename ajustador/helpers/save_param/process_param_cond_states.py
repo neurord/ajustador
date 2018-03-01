@@ -2,7 +2,7 @@ import logging
 import sys
 from collections import defaultdict
 from ajustador.helpers.loggingsystem import getlogger
-from ajustador.helpers.save.save_param.process_param_cond import ReObjects
+from ajustador.helpers.save_param.process_param_cond import ReObjects
 
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)

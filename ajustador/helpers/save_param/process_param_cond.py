@@ -27,7 +27,7 @@ class ReObjects(object):
     re_obj_re_strips = {key: re.compile(pattern) for key, pattern in CondRegexPatterns.RE_STRIPS.items()}
 
 def get_state_machine(neuron_type, conds):
-    from ajustador.helpers.save.save_param.process_param_cond_states import build_state_machine
+    from ajustador.helpers.save_param.process_param_cond_states import build_state_machine
     logger.debug(" neuron_type: {} conds: {}".format(neuron_type, conds))
     machine = build_state_machine(neuron_type, conds, ReObjects.re_obj_re_strips, CondPlaceHolders.replace_holders)
     return machine
