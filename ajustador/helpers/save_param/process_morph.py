@@ -35,7 +35,7 @@ def get_morph_file_name(line, neuron_type):
         return dict(re_obj.findall(line)).get(neuron_type, None)
     return None
 
-def process_morph_line(line, non_conds):
+def process_morph_line(line, non_conds): # Mark for deletion
     "Modifies morph file values on line using the pattern in re_obj and input non_conds dictionary."
     re_obj = ReObjects.re_obj_set_compt_param
     if re_obj.match(line):

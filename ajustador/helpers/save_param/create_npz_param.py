@@ -14,7 +14,7 @@ from ajustador.helpers.save_param.process_param_cond import get_state_machine
 from ajustador.helpers.save_param.process_param_cond import process_cond_line
 
 logger = getlogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 def create_path(path,*args):
     "Creates sub-directories recursively if they are not available"
@@ -36,13 +36,13 @@ def get_conds_non_conds(param_data_list):
     logger.debug("{}".format(param_data_list))
     conds = [(ele[1].split('_')[-2], ele[1].split('_')[-1], ele[0]) for item in param_data_list[-1] for ele in item if '_' in ele[1]]
     logger.debug("{}".format(conds))
-    non_conds = [(ele[1].split('_')[-1].upper(), ele[0]) for item in param_data_list[-1] for ele in item if '_' not in ele[1]]
+    non_conds = [(ele[1].split('_')[-1], ele[0]) for item in param_data_list[-1] for ele in item if '_' not in ele[1]]
     non_conds = dict(non_conds)
     logger.debug("{}".format(non_conds))
     return(conds, non_conds)
 
 
-def save_param_npz(npz_file, model, neuron_type, store_param_path, cond_file='param_cond.py'):
+def create_npz_param(npz_file, model, neuron_type, store_param_path, cond_file='param_cond.py'):
     import moose_nerp
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file.")
@@ -77,11 +77,17 @@ def save_param_npz(npz_file, model, neuron_type, store_param_path, cond_file='pa
     logger.info("END STEP 4!!! Extract the respective param_cond.py file in the holding folder")
 
     logger.info("START STEP 5!!! Modify the respective *.p file in the holding folder")
-    shutil.copy(str(model_path/morph_file), str(new_param_path))
-    with fileinput.input(files=(str(new_param_path/morph_file)), inplace=True) as f_obj:
-       for line in f_obj:
-           new_line = process_morph_line(line, non_conds)
-           sys.stdout.write(new_line)
+    Object = lambda **kwargs: type("Object", (), kwargs)
+    model_obj = Object(__file__ = str(model_path), value = model)
+
+    from ajustador.basic_simulation import morph_morph_file
+    morph_morph_file(model_obj, neuron_type, str(morph_file), new_file = open(str(new_param_path/morph_file),'w'),
+                 **non_conds)
+   # shutil.copy(str(model_path/morph_file), str(new_param_path)) # Mark for deletion.
+   # with fileinput.input(files=(str(new_param_path/morph_file)), inplace=True) as f_obj:
+   ##    for line in f_obj:
+    ##       new_line = process_morph_line(line, non_conds)
+     #      sys.stdout.write(new_line)
     logger.info("END STEP 5!!! Modify the respective *.p file in the holding folder")
 
     logger.info("START STEP 6!!! Modify the param_cond.py file in the holding folder")
