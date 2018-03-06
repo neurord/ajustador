@@ -34,8 +34,9 @@ def do_replacements(model, paramset):
         mech = param.mech
         if isinstance(mech, XMLParamMechanism):
             elems = model.xpath(mech.xpath)
+            print(elems)
             if len(elems) != 1:
-                raise ValueError('xpath matched {} elements'.format(len(elemes)))
+                raise ValueError('xpath matched {} elements'.format(len(elems)))
             elems[0].text = str(param.value)
         else:
             raise ValueError('Unknown mechanism {}'.format(mech))
@@ -74,7 +75,7 @@ class NeurordSimulation(optimize.Simulation):
 
         super().__init__(dir,
                          params=params,
-                         features=features)
+                         features=[])#features)  without '=[]' doesn't work.
 
         model2 = update_model(model, params)
         modelfile = self.tmpdir.name + '/model.xml'
