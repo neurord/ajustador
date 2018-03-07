@@ -12,14 +12,14 @@ logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
 
 class MorphRegexPatterns(object):
-    	SET_COMPT_PARAM = r"^\*set_compt_param\s*(?P<feature>[A-Z]+)\s+(?P<value>[\-.0-9]+)"
+    	#SET_COMPT_PARAM = r"^\*set_compt_param\s*(?P<feature>[A-Z]+)\s+(?P<value>[\-.0-9]+)"
     	MORPH_FILE = r"morph_file\s+=\s+\{" #checks in param_cond
     	NEURON_P_FILE = r"\s*'([a-z]+)'\s*:\s*'([A-Z0-9.a-z_]+)'\s*" #use find all
 
 class ReObjects(object):
      re_obj_morph_file = re.compile(MorphRegexPatterns.MORPH_FILE, re.I)
      re_obj_neuron_p_file = re.compile(MorphRegexPatterns.NEURON_P_FILE, re.I)
-     re_obj_set_compt_param = re.compile(MorphRegexPatterns.SET_COMPT_PARAM,re.I)
+    #re_obj_set_compt_param = re.compile(MorphRegexPatterns.SET_COMPT_PARAM,re.I)
 
 
 def find_morph_file(line):
@@ -35,13 +35,13 @@ def get_morph_file_name(line, neuron_type):
         return dict(re_obj.findall(line)).get(neuron_type, None)
     return None
 
-def process_morph_line(line, non_conds): # Mark for deletion
-    "Modifies morph file values on line using the pattern in re_obj and input non_conds dictionary."
-    re_obj = ReObjects.re_obj_set_compt_param
-    if re_obj.match(line):
-        logger.debug("Found {} {}".format(re_obj.match(line).groups(), re_obj.match(line).group('feature')))
-        if non_conds.get(re_obj.match(line).group('feature'), None):
-            new_line=line.replace(re_obj.match(line).group('value'), non_conds.get(re_obj.match(line).group('feature')))
-            logger.debug("{}".format(new_line))
-            line = new_line
-    return line
+#def process_morph_line(line, non_conds): # Mark for deletion
+#    "Modifies morph file values on line using the pattern in re_obj and input non_conds dictionary."
+#    re_obj = ReObjects.re_obj_set_compt_param
+#    if re_obj.match(line):
+#        logger.debug("Found {} {}".format(re_obj.match(line).groups(), re_obj.match(line).group('feature')))
+#        if non_conds.get(re_obj.match(line).group('feature'), None):
+#            new_line=line.replace(re_obj.match(line).group('value'), non_conds.get(re_obj.match(line).group('feature')))
+#            logger.debug("{}".format(new_line))
+#            line = new_line
+#    return line

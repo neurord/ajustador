@@ -9,7 +9,7 @@ from datetime import datetime
 from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.save_param.process_morph import find_morph_file
 from ajustador.helpers.save_param.process_morph import get_morph_file_name
-from ajustador.helpers.save_param.process_morph import process_morph_line
+#from ajustador.helpers.save_param.process_morph import process_morph_line
 from ajustador.helpers.save_param.process_param_cond import get_state_machine
 from ajustador.helpers.save_param.process_param_cond import process_cond_line
 
@@ -24,25 +24,31 @@ def create_path(path,*args):
     path.mkdir(parents=True)
     return path
 
-def get_least_fitness_params(data): #need to discuss with professor.
-    "Returns least fitness parameters list."
-    logger.debug("{}".format(data['fitvals'].shape))
-    logger.debug("{}".format(np.argmin(data['fitvals'], axis=0)))
-    rows = np.argmin(data['fitvals'], axis=0)
-    logger.debug("{}".format(data['fitvals'][np.argmin(data['fitvals'], axis=0)[-1],]))
-    return [np.dstack((data['params'][row],data['paramnames'])) for row in rows]
+def get_least_fitness_params(data, fitnum= None): # Test this made some changes.
+    """ fitnum == None -> return last item least fitness parameters list.
+        fitnum == integer -> return fitnum item from data(npz object).
+    """
+    #logger.debug("{}".format(data['fitvals'].shape))
+    #logger.debug("{}".format(np.argmin(data['fitvals'], axis=0)))
+    row = fitnum if fitnum else np.argmin(data['fitvals'][:,11])
+    logger.debug("row number: {}".format(row))
+    #rows = np.argmin(data['fitvals'], axis=0)
+    #logger.debug("{}".format(data['fitvals'][np.argmin(data['fitvals'], axis=0)[-1],]))
+    return np.dstack((data['params'][row],data['paramnames']))[0]
 
-def get_conds_non_conds(param_data_list):
-    logger.debug("{}".format(param_data_list))
-    conds = [(ele[1].split('_')[-2], ele[1].split('_')[-1], ele[0]) for item in param_data_list[-1] for ele in item if '_' in ele[1]]
+def get_conds_non_conds(param_data_list): #identify all forms of conductances.
+    logger.debug("{}".format(param_data_list))  #fix conds to get 1 _,2 _ and None.
+    non_conds = dict([(item[1],item[0]) for item in param_data_list if not item[1].startswith('Cond_')])
+    logger.debug("{}".format(non_conds))
+    conds = [item for item in param_data_list if item[1].startswith('Cond_')]
     logger.debug("{}".format(conds))
-    non_conds = [(ele[1].split('_')[-1], ele[0]) for item in param_data_list[-1] for ele in item if '_' not in ele[1]]
-    non_conds = dict(non_conds)
+    ### Find a log to easily index different conductances over a dict.
+    logger.debug("{}".format(conds))
     logger.debug("{}".format(non_conds))
     return(conds, non_conds)
 
 
-def create_npz_param(npz_file, model, neuron_type, store_param_path, cond_file='param_cond.py'):
+def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None, cond_file='param_cond.py'):
     import moose_nerp
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file.")
@@ -50,7 +56,8 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, cond_file='
     logger.info("END STEP 1!!! loading npz file.")
 
     logger.info("START STEP 2!!! Prepare params for loaded npz.")
-    param_data_list = get_least_fitness_params(data)
+    param_data_list = get_least_fitness_params(data, fitnum)
+    #logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
     logger.info("END STEP 2!!! Prepared params for loaded npz.")
 
@@ -81,7 +88,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, cond_file='
     model_obj = Object(__file__ = str(model_path), value = model)
 
     from ajustador.basic_simulation import morph_morph_file
-    morph_morph_file(model_obj, neuron_type, str(morph_file), new_file = open(str(new_param_path/morph_file),'w'),
+    morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
                  **non_conds)
    # shutil.copy(str(model_path/morph_file), str(new_param_path)) # Mark for deletion.
    # with fileinput.input(files=(str(new_param_path/morph_file)), inplace=True) as f_obj:
