@@ -14,7 +14,7 @@ logger.setLevel(logging.INFO)
 class MorphRegexPatterns(object):
     	#SET_COMPT_PARAM = r"^\*set_compt_param\s*(?P<feature>[A-Z]+)\s+(?P<value>[\-.0-9]+)"
     	MORPH_FILE = r"morph_file\s+=\s+\{" #checks in param_cond
-    	NEURON_P_FILE = r"\s*'([a-z]+)'\s*:\s*'([A-Z0-9.a-z_]+)'\s*" #use find all
+    	NEURON_P_FILE = r"\s*'([a-zA-Z0-9]+)'\s*:\s*'([A-Z0-9.a-z_\-]+)'\s*" #use find all
 
 class ReObjects(object):
      re_obj_morph_file = re.compile(MorphRegexPatterns.MORPH_FILE, re.I)

@@ -2,14 +2,10 @@ import logging
 import fileinput
 import shutil
 import numpy as np
-import re
-import sys
 from pathlib import Path
-from datetime import datetime
 from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.save_param.process_morph import find_morph_file
 from ajustador.helpers.save_param.process_morph import get_morph_file_name
-#from ajustador.helpers.save_param.process_morph import process_morph_line
 from ajustador.helpers.save_param.process_param_cond import get_state_machine
 from ajustador.helpers.save_param.process_param_cond import process_cond_line
 
@@ -28,21 +24,15 @@ def get_least_fitness_params(data, fitnum= None): # Test this made some changes.
     """ fitnum == None -> return last item least fitness parameters list.
         fitnum == integer -> return fitnum item from data(npz object).
     """
-    #logger.debug("{}".format(data['fitvals'].shape))
-    #logger.debug("{}".format(np.argmin(data['fitvals'], axis=0)))
     row = fitnum if fitnum else np.argmin(data['fitvals'][:,11])
     logger.debug("row number: {}".format(row))
-    #rows = np.argmin(data['fitvals'], axis=0)
-    #logger.debug("{}".format(data['fitvals'][np.argmin(data['fitvals'], axis=0)[-1],]))
     return np.dstack((data['params'][row],data['paramnames']))[0]
 
 def get_conds_non_conds(param_data_list): #identify all forms of conductances.
     logger.debug("{}".format(param_data_list))  #fix conds to get 1 _,2 _ and None.
-    non_conds = dict([(item[1],item[0]) for item in param_data_list if not item[1].startswith('Cond_')])
+    non_conds = {item[1]:item[0] for item in param_data_list if not item[1].startswith('Cond_')}
     logger.debug("{}".format(non_conds))
-    conds = [item for item in param_data_list if item[1].startswith('Cond_')]
-    logger.debug("{}".format(conds))
-    ### Find a log to easily index different conductances over a dict.
+    conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
     logger.debug("{}".format(conds))
     logger.debug("{}".format(non_conds))
     return(conds, non_conds)
@@ -57,7 +47,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
 
     logger.info("START STEP 2!!! Prepare params for loaded npz.")
     param_data_list = get_least_fitness_params(data, fitnum)
-    #logger.debug("Param_data: {}".format(param_data_list))
+    logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
     logger.info("END STEP 2!!! Prepared params for loaded npz.")
 
@@ -90,17 +80,15 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
     from ajustador.basic_simulation import morph_morph_file
     morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
                  **non_conds)
-   # shutil.copy(str(model_path/morph_file), str(new_param_path)) # Mark for deletion.
-   # with fileinput.input(files=(str(new_param_path/morph_file)), inplace=True) as f_obj:
-   ##    for line in f_obj:
-    ##       new_line = process_morph_line(line, non_conds)
-     #      sys.stdout.write(new_line)
     logger.info("END STEP 5!!! Modify the respective *.p file in the holding folder")
-
     logger.info("START STEP 6!!! Modify the param_cond.py file in the holding folder")
     with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj:
-       machine = get_state_machine(neuron_type, conds)
+       machine = get_state_machine(model_obj.value, neuron_type, conds)
        for line in f_obj:
            process_cond_line(line, machine)
     logger.info("END STEP 6!!! Modified the param_cond.py file in the holding folder")
 
+    logger.info("START STEP 7!!! Renaming morph and param_cond files.")
+    logger.info("{} {}".format(type(new_param_path/cond_file), type(new_param_path/morph_file)))
+    #fit_name = get_fit_name(npz_file)  ## Need to discuss with Professor.
+    logger.info("END STEP 7!!! Renaming morph and param_cond files.")
