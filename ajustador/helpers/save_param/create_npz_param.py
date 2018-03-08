@@ -1,3 +1,11 @@
+"""
+@Description: Primary execution module to generate modified param_cond.py and
+              morph_file.p based on the conductance parameters present in npz file.
+@Author: Sri Ram Sagar Kappagantula
+@e-mail: skappag@masonlive.gmu.edu
+@Date: 5th Mar, 2018.
+"""
+
 import logging
 import fileinput
 import shutil
@@ -20,7 +28,7 @@ def create_path(path,*args):
     path.mkdir(parents=True)
     return path
 
-def get_least_fitness_params(data, fitnum= None): # Test this made some changes.
+def get_least_fitness_params(data, fitnum= None):
     """ fitnum == None -> return last item least fitness parameters list.
         fitnum == integer -> return fitnum item from data(npz object).
     """
@@ -28,8 +36,9 @@ def get_least_fitness_params(data, fitnum= None): # Test this made some changes.
     logger.debug("row number: {}".format(row))
     return np.dstack((data['params'][row],data['paramnames']))[0]
 
-def get_conds_non_conds(param_data_list): #identify all forms of conductances.
-    logger.debug("{}".format(param_data_list))  #fix conds to get 1 _,2 _ and None.
+def get_conds_non_conds(param_data_list):
+    "Function to structure a dictonary and filter conds and non_conds parameters for npz file."
+    logger.debug("{}".format(param_data_list))
     non_conds = {item[1]:item[0] for item in param_data_list if not item[1].startswith('Cond_')}
     logger.debug("{}".format(non_conds))
     conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
@@ -37,8 +46,13 @@ def get_conds_non_conds(param_data_list): #identify all forms of conductances.
     logger.debug("{}".format(non_conds))
     return(conds, non_conds)
 
-
 def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None, cond_file='param_cond.py'):
+    """Main function to be executed to generate parameter file from npz_file.
+       Inputs => *.npz file; model can be 'gp', 'd1d2', 'ep' or 'ca1' soon;
+                 neuron_type can be 'proto', 'D1' or 'D2' soon;
+                 store_param_path is user intended path to store neuron parameter files;
+                 fitnum is user desired fitnumber to extract from npz file;
+    """
     import moose_nerp
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file.")

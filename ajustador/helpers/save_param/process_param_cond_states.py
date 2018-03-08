@@ -1,3 +1,11 @@
+"""
+@Description: Sates and state machine to updated param_cond.py file based on the model
+              and neuron_type.
+@Author: Sri Ram Sagar Kappagantula
+@e-mail: skappag@masonlive.gmu.edu
+@Date: 5th Mar, 2018.
+"""
+
 import logging
 import sys
 from collections import defaultdict
@@ -13,21 +21,24 @@ class State(object):
         pass
 
 class ModelCompare(State):
-    RE_OBJ = ReObjects.re_obj_util_nameddict
+    """Model state to check the start of conductance parameter using regex compile
+     object"""
 
-    def __init__(self, neuron_type):
+    def __init__(self, neuron_type, re_obj):
         self.neuron_type = neuron_type
+        self.re_obj = re_obj
 
     def run(self, line):
         logger.debug(" Logger in ModelCompare State!!!")
-        match_obj = ModelCompare.RE_OBJ.search(line)
+        match_obj = self.re_obj.search(line)
         if match_obj:
         	if match_obj.groups()[0] == self.neuron_type:
             		return(line, 'model', 'feature')
         return(line, 'model', 'write')
 
-
 class FeatureCompare(State):
+    """Feature state to check identify actual conductance parameter values using regex compile
+     object"""
 
     def __init__(self, parameter_obj):  #DO changes to identify kluge
         self.parameter_obj = parameter_obj
@@ -42,6 +53,8 @@ class FeatureCompare(State):
         return(line, 'feature', 'blockend')
 
 class ChangeLine(State):
+    """Change line state to modify the parameter values inplace
+       using regex compile object"""
     def __init__(self, conds, re_strip_objs, repl_strips, parameter_obj):
         self.parameter_obj = parameter_obj
         self.generate_nested_dict(conds)
@@ -69,13 +82,16 @@ class ChangeLine(State):
         return(self.parameter_obj.match(line).groups()[0])
 
     def get_cond_values(self):
-        #logger.debug("!!!!!!!!!!!!{} {}".format(self.conds, self.cond_name))
+        "Function to structue condctance value based on the conductance."
+        logger.debug("!!!!!!!!!!!!{} {}".format(self.conds, self.cond_name))
         item = self.conds.get(self.cond_name)
         if isinstance(item, dict):
             return item
         return({str(i):item for i in range(len(self.re_strip_objs))})
 
     def generate_nested_dict(self, conds):
+        """ Re structure conductance to consume the values with ease
+          by change line state."""
         self.conds = defaultdict(dict)
         logger.debug("{}".format(conds))
         for key, value in conds.items():
@@ -88,6 +104,7 @@ class ChangeLine(State):
         logger.debug("{}".format(self.conds))
 
 class BlockEnd(State):
+    "Parameter set block end identification state."
     RE_OBJ = ReObjects.re_obj_block_end
     def run(self, line):
         logger.debug(" Logger in BlockEnd State!!!")
@@ -97,6 +114,8 @@ class BlockEnd(State):
         return(line, 'blockend', 'write')
 
 class WriteOuput(State):
+    """ Write output state write a line to stdout inorder to write to a file.
+        the state machine should be run internal to a fileoutput instance loop."""
     def run(self, line, prev_state):
         logger.debug(" Logger in WriteOutput State!!!")
         sys.stdout.write(line)
@@ -105,12 +124,17 @@ class WriteOuput(State):
         return(line, 'write', 'feature')
 
 class WriteAll(State):
+    """ WriteAll State flushes a single line to the output stream
+        and stay on the same state.
+    """
     def run(self, line):
         logger.debug("Logger in WriteAll state!!!")
         sys.stdout.write(line)
         return(line, 'writeall', 'writeall')
 
 class CondParamMachine(object):
+    """State machine class with execution mechanics.
+    """
     machine = None
     def __init__(self, **all_states):
         if CondParamMachine.machine == None:
@@ -160,11 +184,13 @@ class CondParamMachine(object):
            self.current_state = self.all_states.get(self.next) # State writeall
            return
 
-def build_state_machine(neuron_type, conds, re_strip_objs, repl_strips, parameter_obj):
+def build_state_machine(neuron_type, conds, re_strip_objs, repl_strips, parameter_obj, re_model_obj):
+    """ State Machine factory method to construct state machine and link it with
+        state objects"""
     state_space = { 'blockend': BlockEnd(),
                     'changeline': ChangeLine(conds, re_strip_objs, repl_strips, parameter_obj),
                     'feature': FeatureCompare(parameter_obj),
-                    'model': ModelCompare(neuron_type),
+                    'model': ModelCompare(neuron_type, re_model_obj),
                     'write': WriteOuput(),
                     'writeall': WriteAll()
                    }
