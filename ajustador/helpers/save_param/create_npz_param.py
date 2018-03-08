@@ -9,6 +9,7 @@
 import logging
 import fileinput
 import shutil
+import sys
 import numpy as np
 from pathlib import Path
 from ajustador.helpers.loggingsystem import getlogger
@@ -34,7 +35,7 @@ def get_least_fitness_params(data, fitnum= None):
     """
     row = fitnum if fitnum else np.argmin(data['fitvals'][:,11])
     logger.debug("row number: {}".format(row))
-    return np.dstack((data['params'][row],data['paramnames']))[0]
+    return (row, np.dstack((data['params'][row],data['paramnames']))[0])
 
 def get_conds_non_conds(param_data_list):
     "Function to structure a dictonary and filter conds and non_conds parameters for npz file."
@@ -54,13 +55,17 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
                  fitnum is user desired fitnumber to extract from npz file;
     """
     import moose_nerp
+    header_line = "# Generated from npzfile: {} of fit number: {}\n"
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file.")
     data = np.load(npz_file)
     logger.info("END STEP 1!!! loading npz file.")
 
     logger.info("START STEP 2!!! Prepare params for loaded npz.")
-    param_data_list = get_least_fitness_params(data, fitnum)
+    fit_number, param_data_list = get_least_fitness_params(data, fitnum)
+    npz_file_name = npz_file.rpartition('/')[2]
+    header_line = header_line.format(npz_file_name, fit_number)
+
     logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
     logger.info("END STEP 2!!! Prepared params for loaded npz.")
@@ -98,11 +103,18 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
     logger.info("START STEP 6!!! Modify the param_cond.py file in the holding folder")
     with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj:
        machine = get_state_machine(model_obj.value, neuron_type, conds)
+       header_not_written = True
        for line in f_obj:
+           if header_not_written:
+               sys.stdout.write(header_line)
+               header_not_written = False
            process_cond_line(line, machine)
+
     logger.info("END STEP 6!!! Modified the param_cond.py file in the holding folder")
 
     logger.info("START STEP 7!!! Renaming morph and param_cond files.")
-    logger.info("{} {}".format(type(new_param_path/cond_file), type(new_param_path/morph_file)))
-    #fit_name = get_fit_name(npz_file)  ## Need to discuss with Professor.
+    new_cond_file_name = new_param_path/'_'.join([str(fit_number), model_obj.value, neuron_type, cond_file])
+    new_morp_file_name = new_param_path/'_'.join([str(fit_number), model_obj.value, neuron_type, morph_file])
+    Path(str(new_param_path/cond_file)).rename(str(new_cond_file_name))
+    Path(str(new_param_path/morph_file)).rename(str(new_morp_file_name))
     logger.info("END STEP 7!!! Renaming morph and param_cond files.")
