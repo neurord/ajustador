@@ -10,6 +10,7 @@ import logging
 import fileinput
 import shutil
 import sys
+import re
 import numpy as np
 from pathlib import Path
 from ajustador.helpers.loggingsystem import getlogger
@@ -46,6 +47,12 @@ def get_conds_non_conds(param_data_list):
     logger.debug("{}".format(conds))
     logger.debug("{}".format(non_conds))
     return(conds, non_conds)
+
+def update_morph_file_name(line, neuron_type, file_name):
+    pattern = r"\'{}\'\s*:\s*\'[0-9a-zA-Z\.\-]+\'".format(neuron_type)
+    repl = "'{}':'{}'".format(neuron_type, file_name)
+    logger.debug("{} {}".format(repl, pattern))
+    return re.sub(pattern, repl, line)
 
 def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None, cond_file='param_cond.py'):
     """Main function to be executed to generate parameter file from npz_file.
@@ -113,8 +120,23 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
     logger.info("END STEP 6!!! Modified the param_cond.py file in the holding folder")
 
     logger.info("START STEP 7!!! Renaming morph and param_cond files.")
-    new_cond_file_name = new_param_path/'_'.join([str(fit_number), model_obj.value, neuron_type, cond_file])
-    new_morp_file_name = new_param_path/'_'.join([str(fit_number), model_obj.value, neuron_type, morph_file])
-    Path(str(new_param_path/cond_file)).rename(str(new_cond_file_name))
-    Path(str(new_param_path/morph_file)).rename(str(new_morp_file_name))
-    logger.info("END STEP 7!!! Renaming morph and param_cond files.")
+    new_cond_file_name, _, extn = cond_file.rpartition('.')
+    new_cond_file_name = '_'.join([model_obj.value, neuron_type, new_cond_file_name, str(fit_number)]) + _+ extn
+    new_morp_file_name, _, extn =  morph_file.rpartition('.')
+    new_morp_file_name = '_'.join([model_obj.value, neuron_type, new_morp_file_name, str(fit_number)]) + _ + extn
+    new_cond_file = new_param_path/new_cond_file_name
+    new_morp_file = new_param_path/new_morp_file_name
+    Path(str(new_param_path/cond_file)).rename(str(new_cond_file))
+    Path(str(new_param_path/morph_file)).rename(str(new_morp_file))
+    logger.info("END STEP 7!!! New file names morph and param_cond files are {} {}".format(new_cond_file, new_morp_file))
+    logger.info("START STEP 8!!! Update the file name in cond_param file {}".format(new_cond_file))
+    with fileinput.input(files=(str(new_cond_file)), inplace=True) as f_obj:
+         for line in f_obj:
+           if find_morph_file(line):
+              logger.debug("{}".format(new_morp_file_name))
+              new_line = update_morph_file_name(line, neuron_type, new_morp_file_name)
+              logger.debug("{}".format(new_line))
+              sys.stdout.write(new_line)
+              continue
+           sys.stdout.write(line)
+    logger.info("END STEP 8!!!")
