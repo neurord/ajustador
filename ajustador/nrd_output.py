@@ -292,12 +292,14 @@ class OutputGroup(object):
                          minor_axis=self.species())
         frame = panel.transpose(2, 1, 0).to_frame()
         frame.index.names = ['voxel', 'time']
+        #print('######### OutputGroup.counts frame',frame)
         return frame
 
     def concentrations(self):
         "Counts converted to concentrations using voxel volumes"
-        counts = self.counts()
+        counts = self.counts(output_group)
         volumes = self._output_model.volumes() * PUVC
+        print('######### OutputGroup.concs volumes,counts.index, .size',volumes,counts.index, counts.index.size)
         # blow up volumes to match the size of the counts index
         volumes = np.repeat(volumes, counts.index.size/volumes.size)
         ans = counts.divide(volumes, axis=0)
@@ -446,8 +448,10 @@ class Output(object):
                    C          0.00  0.000000
         """
         sims = self.simulations()
+        #sims.counts executes OutputGroup.counts
         data = dict((i, sim.counts(output_group))
                     for (i, sim) in enumerate(sims))
+        #print('******* Output.counts, data dict',data)
         panel = pd.Panel(data)
         series = panel.to_frame().stack()
         series.index.names = 'voxel time specie trial'.split()
@@ -469,11 +473,19 @@ class Output(object):
         0     0.0  A      0        1049.460511
         """
         counts = self.counts(output_group)
-        volumes = self.model.grid().volume
-        ans = counts / volumes / PUVC
+        volumes = self.model.grid().volume*PUVC
+        #print('******* Output.conc volumes:', volumes)#,'\noutput counts',counts)
+        new_vols=np.repeat(volumes, counts.index.size/volumes.size)
+        #print('******* Output.conc new_vols', np.shape(new_vols), np.shape(counts))
+        ans=counts.divide(new_vols, axis=0)
+        #ans = counts / volumes.sum() / PUVC
         ans.rename(columns={'count':'concentration'}, inplace=1)
         return ans
 
+    def volumes(self, output_group='__main__'):
+        volumes = self.model.grid().volume
+        return volumes,PUVC
+    
     @functools.lru_cache()
     def events(self):
         "A log of events from all simulations"
