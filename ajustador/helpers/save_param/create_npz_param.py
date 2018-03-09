@@ -33,7 +33,7 @@ def get_least_fitness_params(data, fitnum= None):
     """ fitnum == None -> return last item least fitness parameters list.
         fitnum == integer -> return fitnum item from data(npz object).
     """
-    row = fitnum if fitnum else np.argmin(data['fitvals'][:,11])
+    row = fitnum if fitnum else np.argmin(data['fitvals'][:,-1])
     logger.debug("row number: {}".format(row))
     return (row, np.dstack((data['params'][row],data['paramnames']))[0])
 
