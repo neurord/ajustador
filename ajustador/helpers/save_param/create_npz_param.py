@@ -134,14 +134,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path, fitnum=None
          for line in f_obj:
            if find_morph_file(line):
               logger.debug("{}".format(new_morp_file_name))
-<<<<<<< HEAD
               line = update_morph_file_name(line, neuron_type, new_morp_file_name)
               logger.debug("{}".format(line))
-=======
-              new_line = update_morph_file_name(line, neuron_type, new_morp_file_name)
-              logger.debug("{}".format(new_line))
-              sys.stdout.write(new_line)
-              continue
->>>>>>> 391c915f5d79f66be36b4adda2586a2a687dbc05
            sys.stdout.write(line)
     logger.info("END STEP 8!!!")
