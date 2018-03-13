@@ -13,7 +13,7 @@ from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.save_param.process_param_cond import ReObjects
 
 logger = getlogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class State(object):
     "Interface class for the param_cond line states"
@@ -68,9 +68,7 @@ class ChangeLine(State):
         new_line = line
         self.cond_name = self.get_feature_name(line)
         logger.debug("{}".format(self.cond_name))
-        logger.debug("{}".format(self.conds))
         for pos, value in self.get_cond_values().items():
-            logger.debug("{} {}".format(pos, value))
             obj = self.re_strip_objs.get(pos)
             logger.debug("{} {} {}".format(pos, obj, self.cond_name))
             new_line = obj.sub(self.repl_strips.get(pos).format(value), new_line)
@@ -83,7 +81,6 @@ class ChangeLine(State):
 
     def get_cond_values(self):
         "Function to structue condctance value based on the conductance."
-        logger.debug("!!!!!!!!!!!!{} {}".format(self.conds, self.cond_name))
         item = self.conds.get(self.cond_name)
         if isinstance(item, dict):
             return item
@@ -93,7 +90,6 @@ class ChangeLine(State):
         """ Re structure conductance to consume the values with ease
           by change line state."""
         self.conds = defaultdict(dict)
-        logger.debug("{}".format(conds))
         for key, value in conds.items():
             if key.count('_') == 1:
                self.conds[key.split('_')[1]] = value
@@ -101,7 +97,6 @@ class ChangeLine(State):
                  if not isinstance(self.conds[key.split('_')[1]], defaultdict):
                     self.conds[key.split('_')[1]] = defaultdict(dict)
                  self.conds[key.split('_')[1]][key.split('_')[2]] = value
-        logger.debug("{}".format(self.conds))
 
 class BlockEnd(State):
     "Parameter set block end identification state."

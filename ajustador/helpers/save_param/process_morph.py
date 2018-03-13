@@ -6,13 +6,9 @@
 @Date: 5th Mar, 2018.
 """
 
-import logging
 import numpy as np
 import re
 from ajustador.helpers.loggingsystem import getlogger
-
-logger = getlogger(__name__)
-logger.setLevel(logging.INFO)
 
 class MorphRegexPatterns(object):
      " Regex patterns to idenfiy the morph_file name in param_cond file."
@@ -31,8 +27,6 @@ def find_morph_file(line):
 def get_morph_file_name(line, neuron_type):
     "Get morph file name from the the line if it mathes with pattern in re_obj."
     re_obj = ReObjects.re_obj_neuron_p_file
-    logger.debug("Found {} {}".format(re_obj.search(line), line))
     if re_obj.search(line):
-        logger.debug("Found {}".format(re_obj.findall(line)))
         return dict(re_obj.findall(line)).get(neuron_type, None)
     return None
