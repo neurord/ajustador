@@ -132,14 +132,11 @@ class CondParamMachine(object):
     """
     machine = None
     def __init__(self, **all_states):
-        if CondParamMachine.machine == None:
-            self.all_states = all_states
-            self.prev = 'write'
-            self.next = 'model'
-            self.current_state = self.all_states.get(self.next)
-            CondParamMachine.machine = self
-        else:
-           logger.info("State Machine is live please use CondParamMachine.machine!!!")
+        self.all_states = all_states
+        self.prev = 'write'
+        self.next = 'model'
+        self.current_state = self.all_states.get(self.next)
+        CondParamMachine.machine = self
 
     def run(self, line):
         if self.next == 'model':
