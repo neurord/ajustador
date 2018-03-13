@@ -47,7 +47,9 @@ def update_morph_file_name(line, neuron_type, file_name):
     repl = "'{}':'{}'".format(neuron_type, file_name)
     return re.sub(pattern, repl, line)
 
-def create_npz_param(npz_file, model, neuron_type, store_param_path=None, fitnum=None, cond_file='param_cond.py'):
+def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
+                     fitnum=None, cond_file='param_cond.py',
+                     morph_accepts_only = ('RM', 'Eleak', 'RA', 'CM')):
     """Main function to be executed to generate parameter file from npz_file.
        Inputs => *.npz file; model can be 'gp', 'd1d2', 'ep' or 'ca1' soon;
                  neuron_type can be 'proto', 'D1' or 'D2' soon;
@@ -86,8 +88,9 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None, fitnum
     model_obj = Object(__file__ = str(model_path), value = model)
 
     from ajustador.basic_simulation import morph_morph_file
+
     morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
-                 **non_conds)
+                 **{k:v for k,v in non_conds.items() if k in morph_accepts_only})
 
     logger.info("START STEP 6!!! Modify the param_cond.py file in {}".format(str(new_param_path)))
     with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj:
@@ -117,4 +120,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None, fitnum
               line = update_morph_file_name(line, neuron_type, new_morp_file_name)
               logger.debug("{}".format(line))
            sys.stdout.write(line)
+
+    logger.info("!!!Environment cleanup!!!")
+    del machine
     logger.info("!!!! CONDUCTANCE PARAMTER SAVE COMPLETED !!!!")
