@@ -48,8 +48,7 @@ def update_morph_file_name(line, neuron_type, file_name):
     return re.sub(pattern, repl, line)
 
 def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
-                     fitnum=None, cond_file='param_cond.py',
-                     morph_accepts_only = ('RM', 'Eleak', 'RA', 'CM')):
+                     fitnum=None, cond_file='param_cond.py'):
     """Main function to be executed to generate parameter file from npz_file.
        Inputs => *.npz file; model can be 'gp', 'd1d2', 'ep' or 'ca1' soon;
                  neuron_type can be 'proto', 'D1' or 'D2' soon;
@@ -57,6 +56,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                  fitnum is user desired fitnumber to extract from npz file;
     """
     import moose_nerp
+    morph_features = ('RM', 'Eleak', 'RA', 'CM')
     header_line = "# Generated from npzfile: {} of fit number: {}\n"
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file: {}.".format(npz_file))
@@ -90,7 +90,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     from ajustador.basic_simulation import morph_morph_file
 
     morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
-                 **{k:v for k,v in non_conds.items() if k in morph_accepts_only})
+                 **{k:v for k,v in non_conds.items() if k in morph_features})
 
     logger.info("START STEP 6!!! Modify the param_cond.py file in {}".format(str(new_param_path)))
     with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj:
