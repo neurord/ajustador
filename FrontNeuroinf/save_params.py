@@ -27,6 +27,8 @@ def save_params(fitX, start,threshold):
     header.append('fitness')
     header.insert(0,'cell iteration')
     feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
+    feature_list.append('model='+fitX.model)
+    feature_list.append('neuron='+fitX.neuron_type)
     #
     #save as text file to read into sas
     np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
