@@ -70,8 +70,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
 
-
-    new_param_path = create_path(store_param_path, neuron_type) if store_param_path else create_path(model_path/'conductance_save', neuron_type)
+    new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
     logger.info("START STEP 3!!! Copy {} file from {} to {} folder.".format(cond_file ,str(model_path), str(new_param_path)))
     shutil.copy(str(model_path/cond_file), str(new_param_path))
 
@@ -104,9 +103,9 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     logger.info("START STEP 7!!! Renaming morph and param_cond files.")
     new_cond_file_name, _, extn = cond_file.rpartition('.')
-    new_cond_file_name = '_'.join([model_obj.value, neuron_type, new_cond_file_name, str(fit_number)]) + _+ extn
+    new_cond_file_name = '_'.join([new_cond_file_name, neuron_type, str(fit_number)]) + _+ extn
     new_morp_file_name, _, extn =  morph_file.rpartition('.')
-    new_morp_file_name = '_'.join([model_obj.value, neuron_type, new_morp_file_name, str(fit_number)]) + _ + extn
+    new_morp_file_name = '_'.join([new_morp_file_name, neuron_type, str(fit_number)]) + _ + extn
     new_cond_file = new_param_path/new_cond_file_name
     new_morp_file = new_param_path/new_morp_file_name
     Path(str(new_param_path/cond_file)).rename(str(new_cond_file))
