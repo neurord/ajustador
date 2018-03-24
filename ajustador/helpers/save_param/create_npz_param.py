@@ -22,6 +22,7 @@ from ajustador.helpers.save_param.process_param_cond import process_cond_line
 from ajustador.helpers.save_param.support import create_path
 from ajustador.helpers.save_param.support import get_least_fitness_params
 from ajustador.helpers.save_param.support import get_conds_non_conds
+from ajustador.helpers.save_param.support import get_cond_file_abs_path
 
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
@@ -51,9 +52,10 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
 
-    new_param_path = create_path(store_ param_path) if store_param_path else create_path(model_path/'conductance_save')
+    new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
     logger.info("START STEP 3!!! Copy {} file from {} to {} folder.".format(cond_file ,str(model_path), str(new_param_path)))
-    shutil.copy(str(model_path/cond_file), str(new_param_path)) #fix this by adding search.
+
+    shutil.copy(get_cond_file_abs_path(model_path,cond_file), str(new_param_path))
 
     logger.info("START STEP 4!!! Extract morph_file from param_cond.py file in the holding folder")
     with fileinput.input(files=(str(new_param_path/cond_file))) as f_obj:

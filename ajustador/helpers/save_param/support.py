@@ -20,3 +20,12 @@ def get_conds_non_conds(param_data_list):
     non_conds = {item[1]:item[0] for item in param_data_list if not item[1].startswith('Cond_')}
     conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
     return(conds, non_conds)
+
+def get_cond_file_abs_path(model_path, cond_file):
+    "Function to resolve correct path to cond_file path for the system."
+    if (model_path/cond_file).is_file():
+        return str(model_path/cond_file)
+    elif (model_path/'conductance_save'/cond_file).is_file():
+        return str(model_path/'conductance_save'/cond_file)
+    else:
+        raise("Cond_file NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!")
