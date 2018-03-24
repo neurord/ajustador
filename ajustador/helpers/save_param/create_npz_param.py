@@ -16,36 +16,15 @@ from pathlib import Path
 from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.save_param.process_morph import find_morph_file
 from ajustador.helpers.save_param.process_morph import get_morph_file_name
+from ajustador.helpers.save_param.process_morph import update_morph_file_name
 from ajustador.helpers.save_param.process_param_cond import get_state_machine
 from ajustador.helpers.save_param.process_param_cond import process_cond_line
+from ajustador.helpers.save_param.support import create_path
+from ajustador.helpers.save_param.support import get_least_fitness_params
+from ajustador.helpers.save_param.support import get_conds_non_conds
 
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
-
-def create_path(path,*args):
-    "Creates sub-directories recursively if they are not available"
-    path = Path(path)
-    path = path.joinpath(*args)
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-def get_least_fitness_params(data, fitnum= None):
-    """ fitnum == None -> return last item least fitness parameters list.
-        fitnum == integer -> return fitnum item from data(npz object).
-    """
-    row = fitnum if fitnum else np.argmin(data['fitvals'][:,-1])
-    return (row, np.dstack((data['params'][row],data['paramnames']))[0])
-
-def get_conds_non_conds(param_data_list):
-    "Function to structure a dictonary and filter conds and non_conds parameters for npz file."
-    non_conds = {item[1]:item[0] for item in param_data_list if not item[1].startswith('Cond_')}
-    conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
-    return(conds, non_conds)
-
-def update_morph_file_name(line, neuron_type, file_name):
-    pattern = r"\'{}\'\s*:\s*\'[0-9a-zA-Z\.\-]+\'".format(neuron_type)
-    repl = "'{}':'{}'".format(neuron_type, file_name)
-    return re.sub(pattern, repl, line)
 
 def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                      fitnum=None, cond_file='param_cond.py'):
@@ -72,7 +51,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
     logger.info("START STEP 3!!! Copy {} file from {} to {} folder.".format(cond_file ,str(model_path), str(new_param_path)))
-    shutil.copy(str(model_path/cond_file), str(new_param_path))
+    shutil.copy(str(model_path/cond_file), str(new_param_path)) #fix this by adding search.
 
     logger.info("START STEP 4!!! Extract morph_file from param_cond.py file in the holding folder")
     with fileinput.input(files=(str(new_param_path/cond_file))) as f_obj:
