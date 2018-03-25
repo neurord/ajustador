@@ -28,4 +28,4 @@ def get_cond_file_abs_path(model_path, cond_file):
     elif (model_path/'conductance_save'/cond_file).is_file():
         return str(model_path/'conductance_save'/cond_file)
     else:
-        raise("Cond_file NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!")
+        raise ValueError("Cond_file NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!")
