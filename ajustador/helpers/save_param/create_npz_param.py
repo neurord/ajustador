@@ -40,13 +40,13 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     import moose_nerp
     morph_features = ('RM', 'Eleak', 'RA', 'CM')
     header_line = "# Generated from npzfile: {} of fit number: {}\n"
+    npz_file_name = npz_file.rpartition('/')[2]
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file: {}.".format(npz_file))
     data = np.load(npz_file)
 
     logger.info("START STEP 2!!! Prepare params.")
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
-    npz_file_name = npz_file.rpartition('/')[2]
     header_line = header_line.format(npz_file_name, fit_number)
 
     logger.debug("Param_data: {}".format(param_data_list))
@@ -54,12 +54,13 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
     logger.info("START STEP 3!!! Copy {} file from {} to {} folder.".format(cond_file ,str(model_path), str(new_param_path)))
+# Create a new cond_file name and assign it it cond_file
 
     if not str(new_param_path) in get_cond_file_abs_path(model_path,cond_file):
-       shutil.copy(get_cond_file_abs_path(model_path,cond_file), str(new_param_path))
+       shutil.copy(get_cond_file_abs_path(model_path,cond_file), str(new_param_path))  # Assign new_cond_name
 
     logger.info("START STEP 4!!! Extract morph_file from param_cond.py file in the holding folder")
-    with fileinput.input(files=(str(new_param_path/cond_file))) as f_obj:
+    with fileinput.input(files=(str(new_param_path/cond_file))) as f_obj: #new_param_cond
        for line in f_obj:
            if find_morph_file(line):
                morph_file = get_morph_file_name(line, neuron_type)
@@ -76,7 +77,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                  **{k:v for k,v in non_conds.items() if k in morph_features})
 
     logger.info("START STEP 6!!! Modify the param_cond.py file in {}".format(str(new_param_path)))
-    with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj:
+    with fileinput.input(files=(str(new_param_path/cond_file)), inplace=True) as f_obj: #new_param_cond
        machine = get_state_machine(model_obj.value, neuron_type, conds)
        header_not_written = True
        for line in f_obj:
@@ -86,7 +87,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
            process_cond_line(line, machine)
 
     logger.info("START STEP 7!!! Renaming morph and param_cond files.")
-    new_cond_file_name, _, extn = cond_file.rpartition('.')
+    new_cond_file_name, _, extn = cond_file.rpartition('.') #new_param_cond
     new_cond_file_name = '_'.join([new_cond_file_name, neuron_type, str(fit_number)]) + _+ extn
     new_morp_file_name, _, extn =  morph_file.rpartition('.')
     new_morp_file_name = '_'.join([new_morp_file_name, neuron_type, str(fit_number)]) + _ + extn
