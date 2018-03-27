@@ -39,15 +39,15 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     """
     import moose_nerp
     morph_features = ('RM', 'Eleak', 'RA', 'CM')
-    header_line = "# Generated from npzfile: {} of fit number: {}\n"
-    npz_file_name = npz_file.rpartition('/')[2]
+ 
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
     logger.info("START STEP 1!!!loading npz file: {}.".format(npz_file))
     data = np.load(npz_file)
 
     logger.info("START STEP 2!!! Prepare params.")
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
-    header_line = header_line.format(npz_file_name, fit_number)
+    header_line = "# Generated from npzfile: {} of fit number: {}\n".format(
+                  npz_file.rpartition('/')[2], fit_number)
 
     logger.debug("Param_data: {}".format(param_data_list))
     conds, non_conds = get_conds_non_conds(param_data_list)
