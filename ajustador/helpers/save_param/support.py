@@ -1,5 +1,11 @@
+import logging
 import numpy as np
 from pathlib import Path
+
+from ajustador.helpers.loggingsystem import getlogger
+
+logger = getlogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 def create_path(path,*args):
     "Creates sub-directories recursively if they are not available"
@@ -29,3 +35,20 @@ def get_cond_file_abs_path(model_path, cond_file):
         return str(model_path/'conductance_save'/cond_file)
     else:
         raise ValueError("Cond_file NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!")
+
+def check_key_in_npz_data(npz_data, key):
+    if key in npz_data.files:
+         return True
+    # I want to show key is not present in npz file
+    logger.error("No KEY {} in optimization npz data load!!!".format(key))
+    return False
+
+def make_cond_file_name(npz_data, npz_file_name, neuron_type):
+    "Makes new cond file name from npz data"
+    logger.debug("{} {} {}".format(npz_data, npz_file_name, neuron_type))
+    if check_key_in_npz_data(npz_data,'neuron_type') \
+    and check_key_in_npz_data(npz_data,'measurment_name'):
+       if npz_data['neuron_type'] in npz_data['measurment_name']:
+           return 'param_cond_'+ npz_data['measurment_name'] + '.py'
+       return 'param_cond_' + npz_data['measurment_name'] + npz_data['neuron_type'] + '.py'
+    return npz_file_name.rpartition('-' + neuron_type + '-')[2].rstrip('.npz') + '.py'
