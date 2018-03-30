@@ -70,3 +70,6 @@ def get_file_name_with_version(file_):
        v_num = int(re.search(p_, file_).group(1)) + 1
        return re.sub(p_, '_V{}.p'.format(v_num), file_)
     return re.sub(r'.p$', '_V1.p', file_)
+
+def get_morph_file_abs_path(morph_file_name, model_path):
+    pass

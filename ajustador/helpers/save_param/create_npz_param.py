@@ -23,6 +23,7 @@ from ajustador.helpers.save_param.support import create_path
 from ajustador.helpers.save_param.support import get_least_fitness_params
 from ajustador.helpers.save_param.support import get_conds_non_conds
 from ajustador.helpers.save_param.support import get_cond_file_abs_path
+from ajustador.helpers.save_param.support import get_morph_file_abs_path
 from ajustador.helpers.save_param.support import make_cond_file_name
 from ajustador.helpers.save_param.support import get_file_name_with_version
 
@@ -70,6 +71,14 @@ def clone_param_cond_file(src_path, src_file, dest_file):
     logger.info("{}".format(dest_file))
     return dest_file
 
+def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type):
+    morph_file = extract_morp_file_from_cond(param_cond_file, neuron_type)
+    morph_file_path = get_morph_file_abs_path(morph_file)
+    model_obj = make_model_path_obj(model_path, model)
+    from ajustador.basic_simulation import morph_morph_file
+    morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
+                 **{k:v for k,v in non_conds.items() if k in morph_features})
+
 def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                      fitnum=None, cond_file='param_cond.py'):
     """Main function to be executed to generate parameter file from npz_file.
@@ -101,21 +110,21 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     #if not str(new_param_path) in get_cond_file_abs_path(model_path, cond_file): #check this logic!!!
     logger.info("START STEP 3!!! Copy \n source : {} \n dest: {}".format(get_cond_file_abs_path(model_path,cond_file), new_param_cond))
     new_param_cond = clone_param_cond_file(src_path=model_path, src_file=cond_file, dest_file=new_param_cond)
-    sys.exit(0)
 
     logger.info("START STEP 4!!! Extract morph_file from param_cond.py file in the holding folder")
-    morph_file = extract_morp_file_from_cond(new_param_cond, neuron_type)
+    morph_file = clone_and_change_morph_file(new_param_cond, model_path, model, neuron_type)
+    logger.info("\n {}".format(morph_file))
+    sys.exit()
+    #morph_file = extract_morp_file_from_cond(new_param_cond, neuron_type)
 
     logger.info("START STEP 5!!! Modify the respective *.p file in {}".format(str(new_param_path)))
-    model_obj = make_model_path_obj(model_path, model)
-
-    from ajustador.basic_simulation import morph_morph_file
-
-    morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
-                 **{k:v for k,v in non_conds.items() if k in morph_features})
+    #model_obj = make_model_path_obj(model_path, model)
+    #from ajustador.basic_simulation import morph_morph_file
+    #morph_morph_file(model_obj, neuron_type, str(model_path/morph_file), new_file = open(str(new_param_path/morph_file),'w'),
+    #             **{k:v for k,v in non_conds.items() if k in morph_features})
 
     logger.info("START STEP 6!!! Modify the param file {}".format(new_param_cond))
-    machine = get_state_machine(model_obj.value, neuron_type, conds)
+    machine = get_state_machine(model, neuron_type, conds)
     exercise_machine_on_cond(machine, new_param_cond,
                              header_line)
 
