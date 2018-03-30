@@ -1,4 +1,6 @@
 import logging
+import re
+import os
 import numpy as np
 from pathlib import Path
 
@@ -43,12 +45,28 @@ def check_key_in_npz_data(npz_data, key):
     logger.error("No KEY {} in optimization npz data load!!!".format(key))
     return False
 
-def make_cond_file_name(npz_data, npz_file_name, neuron_type):
+def make_cond_file_name(npz_data, npz_file_name, dest_path, neuron_type):
     "Makes new cond file name from npz data"
-    logger.debug("{} {} {}".format(npz_data, npz_file_name, neuron_type))
+    logger.debug("{} {} {} {}".format(npz_data, npz_file_name, dest_path, neuron_type))
     if check_key_in_npz_data(npz_data,'neuron_type') \
     and check_key_in_npz_data(npz_data,'measurment_name'):
        if npz_data['neuron_type'] in npz_data['measurment_name']:
-           return 'param_cond_'+ npz_data['measurment_name'] + '.py'
-       return 'param_cond_' + npz_data['measurment_name'] + npz_data['neuron_type'] + '.py'
-    return npz_file_name.rpartition('-' + neuron_type + '-')[2].rstrip('.npz') + '.py'
+           file_name = 'param_cond_'+ npz_data['measurment_name'] + '.py'
+           return os.path.join(dest_path, file_name)
+       file_name = 'param_cond_' + npz_data['measurment_name'] + npz_data['neuron_type'] + '.py'
+       return os.path.join(dest_path, file_name)
+    file_name = npz_file_name.rpartition('-' + neuron_type + '-')[2].rstrip('.npz') + '.py'
+    return os.path.join(dest_path, file_name)
+
+def get_file_name_with_version(file_):
+    if file_.endswith('.py'):
+        py_ = r'_V(\d+).py$'
+        if re.search(py_, file_):
+           v_num = int(re.search(py_, file_).group(1)) + 1
+           return re.sub(py_, '_V{}.py'.format(v_num), file_)
+        return re.sub(r'.py$', '_V1.py', file_)
+    p_ = r'_V\d+.p$'
+    if re.search(p_, file_):
+       v_num = int(re.search(p_, file_).group(1)) + 1
+       return re.sub(p_, '_V{}.p'.format(v_num), file_)
+    return re.sub(r'.p$', '_V1.p', file_)
