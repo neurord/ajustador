@@ -29,14 +29,14 @@ def get_conds_non_conds(param_data_list):
     conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
     return(conds, non_conds)
 
-def get_cond_file_abs_path(model_path, cond_file):
-    "Function to resolve correct path to cond_file path for the system."
-    if (model_path/cond_file).is_file():
-        return str(model_path/cond_file)
-    elif (model_path/'conductance_save'/cond_file).is_file():
-        return str(model_path/'conductance_save'/cond_file)
+def get_file_abs_path(model_path, file_):
+    "Function to resolve correct path to cond_file and *.p path for the system."
+    if (model_path/file_).is_file():
+        return str(model_path/file_)
+    elif (model_path/'conductance_save'/file_).is_file():
+        return str(model_path/'conductance_save'/file_)
     else:
-        raise ValueError("Cond_file NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!")
+        raise ValueError("file {} NOT FOUND in MODEL PATH and CONDUCTANCE_SAVE directories!!!".format(file_))
 
 def check_key_in_npz_data(npz_data, key):
     if key in npz_data.files:
@@ -59,6 +59,7 @@ def make_cond_file_name(npz_data, npz_file_name, dest_path, neuron_type):
     return os.path.join(dest_path, file_name)
 
 def get_file_name_with_version(file_):
+    file_ = str(file_)
     if file_.endswith('.py'):
         py_ = r'_V(\d+).py$'
         if re.search(py_, file_):
@@ -71,5 +72,10 @@ def get_file_name_with_version(file_):
        return re.sub(p_, '_V{}.p'.format(v_num), file_)
     return re.sub(r'.p$', '_V1.p', file_)
 
-def get_morph_file_abs_path(morph_file_name, model_path):
-    pass
+def check_version_build_file_path(file_, neuron_type, fit_number):
+    abs_file_name, _, extn = file_.rpartition('.')
+    if re.search('_V\d*$', abs_file_name):
+        post_fix = re.search('_(V\d*)$', abs_file_name).group(1)
+        abs_file_name = abs_file_name.strip('_'+ post_fix)
+        return '_'.join([abs_file_name, neuron_type, str(fit_number), post_fix]) + _ + extn
+    return '_'.join([abs_file_name, neuron_type, str(fit_number)]) + _ + extn
