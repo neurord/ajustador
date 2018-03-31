@@ -32,6 +32,6 @@ def get_morph_file_name(line, neuron_type):
     return None
 
 def update_morph_file_name(line, neuron_type, file_name):
-    pattern = r"\'{}\'\s*:\s*\'[0-9a-zA-Z\.\-]+\'".format(neuron_type)
+    pattern = r"\'{}\'\s*:\s*\'[0-9a-zA-Z\.\-_]+\'".format(neuron_type)
     repl = "'{}':'{}'".format(neuron_type, file_name)
     return re.sub(pattern, repl, line)
