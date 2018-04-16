@@ -1,3 +1,5 @@
+import numpy as np
+
 def save_params(fitX, start,threshold):
 
     #initialized arrays and lists for feature fitnesses and param values
@@ -32,7 +34,7 @@ def save_params(fitX, start,threshold):
     np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
     print ('parameters saved to', fname)
     #save entire parameters and individual fitness values as dictionary
-    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,neuron_type=fitX.neuron_type, measurement_name=fit.measurement.name)
+    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,neuron_type=fitX.neuron_type, measurement_name=fitX.measurement.name)
 
 #To access the data:
 #dat=np.load(fname)
