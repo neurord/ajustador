@@ -120,6 +120,7 @@ def rectification_fitness(sim, measurement, full=False, error=ErrorCalc.relative
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
     return _evaluate(m1.rectification, m2.rectification, error=error)
 
+#This should be calculated for positive current injection, even if no spike.  Maybe only if no spike
 def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
     if len(m2) == 0:
@@ -127,6 +128,7 @@ def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relativ
     return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight,
                      error=error)
 
+#alternatively, could do falling curve for positive current injection if no spike
 def falling_curve_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)
     if len(m2) == 0:

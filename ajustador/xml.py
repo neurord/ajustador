@@ -11,6 +11,7 @@ import os
 from lxml import etree
 import glob    
 import numpy as np
+import operator
 
 from ajustador import nrd_output  
 from . import optimize, loader
@@ -80,8 +81,7 @@ class NeurordResult(optimize.SimulationResult):
         super().__init__(dirname, features)
 
         output=[nrd_output.Output(fname) for fname in filenames]
-        #to do:
-        #output.sort(key=operator.attrgetter('model_num'))
+        output.sort(key=operator.attrgetter('injection'))
         self.output = np.array(output)
         #self.output=nrd_output.Output(filename)
 
@@ -115,7 +115,7 @@ class NeurordSimulation(optimize.Simulation):
             model_num=modelname_to_param(model_nm,model)
             param_set.append(model_num)
             logger.info('model _name, _num: {} {}'.format(model_nm, model_num))
-            modelfile = self.tmpdir.name + '/model'+str(model_num)+'.xml'  #name for xml with new parameters
+            modelfile = self.tmpdir.name + '/model-'+str(model_num)+'.xml'  #name for xml with new parameters
             write_model(model2, modelfile)  #actually write the xml to the modelfile
             model_set.append(modelfile) #collect all model files into one array
             fout = (modelfile[:-4] + '.h5' if modelfile.endswith('.xml')
@@ -137,6 +137,7 @@ class NeurordSimulation(optimize.Simulation):
         open(tag, 'w').close()
         
         output=[nrd_output.Output(result[i]) for i in range(len(result))]
+        output.sort(key=operator.attrgetter('injection'))
         self.output=np.array(output,dtype=object)
 
     @classmethod

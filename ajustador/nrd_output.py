@@ -389,6 +389,23 @@ class Output(object):
         except tables.exceptions.NoSuchNodeError:
             element = self.file.root.trial0.model
         self.model = Model(element)
+        #add injection to object to allow aju.drawing to work,
+        #and also to allow set of files with different stimulation
+        import os
+        fname=os.path.basename(filename)
+        if '-' in fname:
+            fname_parts=fname.split('-')
+            self.injection=fname_parts[-1].split('.h5')[0]
+            print('Extracting injection',filename,fname,fname_parts,self.injection)
+        else:
+            self.injection=0
+
+        self._attributes = {'injection':self.injection}
+
+    def __getattr__(self, name):
+        if name != '_attributes' and name in self._attributes:
+            return getattr(self._attributes[name], name)
+        raise AttributeError(name)
 
     def __enter__(self):
         return self
