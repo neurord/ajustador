@@ -29,12 +29,14 @@ def save_params(fitX, start,threshold):
     header.append('fitness')
     header.insert(0,'cell iteration')
     feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
+    feature_list.append('model='+fitX.model)
+    feature_list.append('neuron='+fitX.neuron_type)
     #
     #save as text file to read into sas
     np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
     print ('parameters saved to', fname)
     #save entire parameters and individual fitness values as dictionary
-    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,neuron_type=fitX.neuron_type, measurement_name=fitX.measurement.name)
+    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list)
 
 #To access the data:
 #dat=np.load(fname)

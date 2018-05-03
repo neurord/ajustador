@@ -1,7 +1,7 @@
 import ajustador as aju
+from ajustador.helpers import save_params,converge
 import numpy as np
 from ajustador import drawing
-from matplotlib import pyplot
 import gpedata_experimental as gpe
 import os
 
@@ -11,15 +11,18 @@ import os
 ntype='proto'
 modeltype='gp'
 rootdir='/home/avrama/moose/gp_opt/'
-#use 1 and 3 for testing, 250 and 8 for optimization
-generations=300
+#use 1 and 3 for testing, 200 and 8 for optimization
+generations=200
 popsiz=8
+seed=62938
+#after generations, do 25 more at a time and test for convergence
+test_size=25
 
 ################## neuron /data specific specifications #############
 dataname='proto079'
 exp_to_fit = gpe.data[dataname+'-2s'][[0,2,4]]
 
-dirname=dataname+'F2'
+dirname=dataname+'F_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -28,13 +31,11 @@ tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dirname
 
 ######## set up parameters and fitness to be used for all opts  ############
 
-exec(open("/home/avrama/moose/save_params.py").read())
-
 P = aju.optimize.AjuParam
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=-0.005),
-    P('RA',                 1.74,     min=0.1, max=10),
-    P('RM',                 1.3,      min=0.1,  max=4),
+    P('RA',                 1.74,     min=0.1, max=12),
+    P('RM',                 1.3,      min=0.1,  max=8),
     P('CM',                 0.014,   min=0.005, max=0.05),
     P('Eleak', -0.056, min=-0.070, max=-0.030),
     P('Cond_KDr_0', 40, min=0, max=1000),
@@ -94,7 +95,8 @@ fit1 = aju.optimize.Fit(tmpdir,
 
 fit1.load()
 
-fit1.do_fit(generations, popsize=popsiz)
+fit1.do_fit(generations, popsize=popsiz,seed=seed)
+mean_dict1,std_dict1,CV1=converge.iterate_fit(fit1,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
@@ -102,15 +104,14 @@ drawing.plot_history(fit1, fit1.measurement)
 #Save parameters of good results toward the end, and all fitness values
 startgood=1500  #set to 0 to print all
 threshold=0.40  #median 
-
-save_params(fit1, startgood, threshold)
-persist(fit1,'.')
+save_params.save_params(fit1, startgood, threshold)
+#save_params.persist(fit1,'.')
 
 ################## Next neuron #############
 dataname='proto154'
 exp_to_fit = gpe.data[dataname+'-2s'][[0,2,4]]
 
-dirname=dataname+'F2'
+dirname=dataname+'F_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -126,12 +127,14 @@ fit2 = aju.optimize.Fit(tmpdir,
 
 fit2.load()
 
-fit2.do_fit(generations, popsize=popsiz)
+fit2.do_fit(generations, popsize=popsiz,seed=seed)
+mean_dict2,std_dict2,CV2=converge.iterate_fit(fit2,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit2, fit2.measurement)
+
 startgood=1500
 threshold=0.34 #median = 0.34 
-save_params(fit2, startgood, threshold) 
-persist(fit2,'.')
+save_params.save_params(fit2, startgood, threshold) 
+#save_params.persist(fit2,'.')
 

@@ -4,24 +4,20 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 from importlib import reload
 import glob
-import anal_util as au  #must be in ~/moose directory for this to work
+import anal_util as au  #must be in FrontNeuroinf subdir for this to work
 plt.ion()
 
-pattern='gp_opt/*F/*.npz'
+pattern='/home/avrama/moose/gp_opt/*8/*.npz'
+#pattern='/home/avrama/moose/SPN_opt/*8/*.npz'
 fnames=glob.glob(pattern)
 #list SPN fits since there are multiple ones
-fnames=['SPN_opt/D1_042811_pas2/fitd1d2-D1-D1_042811_pas2.npz',
-        'SPN_opt/D1_051811_pas2/fitd1d2-D1-D1_051811_pas2.npz',
-        'SPN_opt/D1_010612_pas3/fitd1d2-D1-D1_010612_pas3.npz',
-        'SPN_opt/D2_051311_pas2/fitd1d2-D2-D2_051311_pas2.npz',
-        'SPN_opt/D2_081011_pas2/fitd1d2-D2-D2_081011_pas2.npz',
-        'SPN_opt/D2_010612_pas2/fitd1d2-D2-D2_010612_pas2.npz'] 
-#separating them into classes is not necessary for outputting SAS files
-type1_names=[f for f in fnames if 'D1' in f]
-type2_names=[f for f in fnames if 'D2' in f]
 
-#type1_names=[f for f in fnames if 'arky' in f]
-#type2_names=[f for f in fnames if 'proto' in f]
+#separating them into classes is not necessary for outputting SAS files
+#type1_names=[f for f in fnames if 'D1' in f]
+#type2_names=[f for f in fnames if 'D2' in f]
+
+type1_names=[f for f in fnames if 'arky' in f]
+type2_names=[f for f in fnames if 'proto' in f]
 
 #only return the best %tile of samples
 tile=0.025
@@ -55,7 +51,7 @@ for i in range(len(fit_len)):  #long_fits:
     
 ########## correlation among all columns for all of one type or other type
 sig=0.0001
-corrthresh=0.9
+corrthresh=0.7
 for celldf in [type1df,type2df]:
     corr,pvalues=au.calculate_pvalues(celldf)
     sig_list=au.create_sig_list(pvalues,corr,sig,corrthresh)
