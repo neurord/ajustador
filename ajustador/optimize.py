@@ -458,7 +458,7 @@ class Fit:
 
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
-
+        #add check here for existance of filename
         utilities.mkdir_p(dirname)
 
     def load(self, last=None):

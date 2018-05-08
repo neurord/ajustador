@@ -42,7 +42,7 @@ def do_replacements(model, paramset):
         if isinstance(mech, XMLParamMechanism):
             elems = model.xpath(mech.xpath)
             #print(param,elems,elems[0].text)
-            print(param)
+            #print(param)
             if len(elems) != 1:
                 raise ValueError('xpath matched {} elements'.format(len(elems)))
             elems[0].text = str(param.value)
@@ -114,7 +114,7 @@ class NeurordSimulation(optimize.Simulation):
             model2 = update_model(model1, params) #xml with new parameters
             model_num=modelname_to_param(model_nm,model)
             param_set.append(model_num)
-            logger.info('model _name, _num: {} {}'.format(model_nm, model_num))
+            logger.info('model {}, num  {}'.format(model_nm, model_num))
             modelfile = self.tmpdir.name + '/model-'+str(model_num)+'.xml'  #name for xml with new parameters
             write_model(model2, modelfile)  #actually write the xml to the modelfile
             model_set.append(modelfile) #collect all model files into one array
