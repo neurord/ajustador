@@ -30,11 +30,20 @@ import functools
 import numpy as np
 import pandas as pd
 from lxml import etree
+import os
 
 AVOGADRO = 6.02214179
 """Avogadro constant from CODATA 2006"""
 PUVC = AVOGADRO / 10
 """Converts concentrations to particle numbers"""
+
+def nrd_output_conc(sim_output,species):
+    #may need to add specification of trial and/or voxel
+    pop1count = sim_output.population.xs(species,level=2)
+    volumes=sim_output.vols
+    tot_vol=np.sum(volumes)
+    pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
+    return pop1conc
 
 def decode_species_names(array):
     return list(sp.decode('utf-8') for sp in array)
@@ -391,16 +400,18 @@ class Output(object):
         self.model = Model(element)
         #add injection to object to allow aju.drawing to work,
         #and also to allow set of files with different stimulation
-        import os
         fname=os.path.basename(filename)
         if '-' in fname:
             fname_parts=fname.split('-')
             self.injection=fname_parts[-1].split('.h5')[0]
-            print('Extracting injection',filename,fname,fname_parts,self.injection)
+            #print('Extracting injection',filename,fname,fname_parts,self.injection)
         else:
             self.injection=0
 
         self._attributes = {'injection':self.injection}
+        self.vols=self.model.grid().volume*PUVC
+        self.specie_names=self.model.species()
+        self.population=self.counts()
 
     def __getattr__(self, name):
         if name != '_attributes' and name in self._attributes:
