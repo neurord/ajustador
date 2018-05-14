@@ -87,7 +87,11 @@ class NeurordResult(optimize.SimulationResult):
 
 def modelname_to_param(modelname,root_name):
     root_name_length=len(root_name)
-    model_num=modelname[root_name_length:-4]
+    dot_loc=str.rfind(modelname,'.')
+    if dot_loc>root_name_length:
+        model_num=modelname[root_name_length:dot_loc]
+    else:
+        model_num=0
     return model_num
    
 class NeurordSimulation(optimize.Simulation):
