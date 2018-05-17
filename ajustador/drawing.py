@@ -9,7 +9,7 @@ from scipy import stats, interpolate
 import pandas as pd
 from ajustador.nrd_output import PUVC
 
-from . import loader, fitnesses, utilities,xml,nrd_output
+from . import loader, fitnesses, utilities, xml, nrd_output, loadconc
 
 def _on_close(event):
     event.canvas.figure.closed = True
@@ -46,15 +46,15 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
         f.suptitle('\n'.join(fit_rpt), fontsize=7)
-    #print('type',type(measurement))
+    print('type',type(measurement))
     #determine molecules to plot from the molecules in the experimental and simulated data
     mollist_sim=sim.output[0].specie_names
     if isinstance(measurement,xml.NeurordResult):
         mollist_exp=measurement.output[0].specie_names
         exp_data=measurement.output
     else:
-        mollist_exp=measurement[0].waves.keys()
-        exp_data=mesurement
+        mollist_exp=list(measurement.data[0].waves.keys())
+        exp_data=measurement.data
     mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim)))
     #set up graph, either as one column or multiple columns depending on number of molecules
     if len(mol_list)>8:
@@ -73,11 +73,15 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
             labl=stim_data.injection
             #print('stimdata', stim_data.file.filename, stim_data.injection, 'color', colr)
             for k,mol in enumerate(mol_list):
-                if isinstance(stim_data,nrd_output.Output) and (mol in stim_data.specie_names):
-                    plotdata=nrd_output.nrd_output_conc(stim_data,mol)
-                    axes[k].plot(plotdata.index.values/1000,plotdata.values[:,0]/1000,label=labl,color=colr)
-                elif (mol in stim_data.specie_names):
-                    axes[k].plot(stim_data.waves[mol].wave.x,stim_data.waves[mol].wave.y,color=colr)
+                if isinstance(stim_data,nrd_output.Output):
+                    if mol in stim_data.specie_names:
+                        plotdata=nrd_output.nrd_output_conc(stim_data,mol)
+                        axes[k].plot(plotdata.index.values/1000,plotdata.values[:,0]/1000,label=labl,color=colr)
+                elif isinstance(stim_data,loadconc.CSV_conc):
+                    if mol in list(stim_data.waves.keys()):
+                        axes[k].plot(stim_data.waves[mol].wave.x,stim_data.waves[mol].wave.y,color=colr)
+                else:
+                    print('drawing.py: new type of data format')
                 axes[k].set_ylabel(mol+" uM")
     axes[0].legend(loc='upper right', fontsize=8,ncol=2)
     for i in range(-cols,0):
