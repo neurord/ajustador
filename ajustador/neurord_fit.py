@@ -4,6 +4,11 @@ import numpy as np
 from ajustador import nrd_output,xml
 import os
 
+import logging 
+from ajustador.helpers.loggingsystem import getlogger 
+logger = getlogger(__name__) 
+logger.setLevel(logging.INFO)
+
 ''' to do: align experiments and simulations so that simulations can be shorter than experiments
 a. instantiate a wave class with stim start time
 b. possibly read stim start from model.xml
@@ -13,7 +18,7 @@ d. align the simulation with experiment in fitness function based on filename pa
 
 def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=0,norm='max'):
     def fitness(sim, measurement, full=False):
-        print('sim',type(sim),'exp',type(measurement))
+        logger.debug('sim type {}, exp type {}'.format(type(sim),type(measurement)))
         fitarray=np.zeros((len(species_list),len(sim.output)))
         fit_dict={}
         start_ms=start*1000
@@ -21,15 +26,14 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=0,norm=
             fit_dict[species]={}
             for j,stim_set in enumerate(sim.output):
                 pop1=nrd_output.nrd_output_conc(stim_set,species)
-                print('sim:',os.path.basename(stim_set.file.filename))
                 stim_set.__exit__()
                 if isinstance(measurement,xml.NeurordResult):
                     pop2 = nrd_output.nrd_output_conc(measurement.output[j],species)
                     diff = pop2 - pop1
                     max_mol=np.mean([np.max(pop1.values),np.max(pop2.values)])
-                    print('exp',os.path.basename(measurement.output[j].file.filename))
+                    logger.info('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
-                    print('exp:',measurement.data[j].name)#, type(measurement.data[j]))
+                    print('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),measurement.data[j].name))
                     pop2 = measurement.data[j].waves[species].wave
                     wave1y=pop1.values[:,0]
                     wave1x=pop1.index

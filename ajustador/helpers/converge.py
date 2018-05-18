@@ -54,10 +54,10 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06):
                 fitfile.write(line+'\n')
                 if np.abs(mean_dict['slope'][j])<slope_crit and mean_dict['std'][j]<std_crit:
                         converge=True                    #above tests the latest fitness value for convergence
-                        print('*************** optimization converged at', len(fitX), 'with m=',mean_dict['mean'][j] )
+                        print('*************** optimization converged at', j*test_size*popsiz, 'with m=',mean_dict['mean'][j] )
                 else:
                         print('**************  optimization NOT converged', j*test_size*popsiz,'m=',mean_dict['mean'][j])
             last_j=j+1
             #print('last_j',j,'new range', list(range(last_j,last_j+1)))
-    print('end of iterate_fit.py', fitX.name, 'len of fitness',len(fitX), 'last_j', last_j)
+    print('end of iterate_fit.py', fitX.name, 'len of fitness',len(fitX), 'last_j', last_j,'len(mean_dict)',len(mean_dict['mean']))
     return mean_dict,std_dict,CV
