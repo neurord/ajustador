@@ -409,7 +409,7 @@ class Output(object):
             self.injection=0
 
         self._attributes = {'injection':self.injection}
-        self.vols=self.model.grid().volume*PUVC
+        self.vols=self.model.grid().volume
         self.specie_names=self.model.species()
         self.population=self.counts()
 
