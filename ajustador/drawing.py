@@ -46,9 +46,9 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
         f.suptitle('\n'.join(fit_rpt), fontsize=7)
-    print('type',type(measurement))
     #determine molecules to plot from the molecules in the experimental and simulated data
     mollist_sim=sim.output[0].specie_names
+    ms_per_sec=1000
     if isinstance(measurement,xml.NeurordResult):
         mollist_exp=measurement.output[0].specie_names
         exp_data=measurement.output
@@ -76,12 +76,12 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
                 if isinstance(stim_data,nrd_output.Output):
                     if mol in stim_data.specie_names:
                         plotdata=nrd_output.nrd_output_conc(stim_data,mol)
-                        axes[k].plot(plotdata.index.values/1000,plotdata.values[:,0]/1000,label=labl,color=colr)
+                        axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0]/ms_per_sec,label=labl,color=colr)
                 elif isinstance(stim_data,loadconc.CSV_conc):
                     if mol in list(stim_data.waves.keys()):
-                        axes[k].plot(stim_data.waves[mol].wave.x,stim_data.waves[mol].wave.y,color=colr)
+                        axes[k].plot(stim_data.waves[mol].wave.x/ms_per_sec,stim_data.waves[mol].wave.y,color=colr)
                 else:
-                    print('drawing.py: new type of data format')
+                    print('drawing.py: new type of data format', type(measurement))
                 axes[k].set_ylabel(mol+" uM")
     axes[0].legend(loc='upper right', fontsize=8,ncol=2)
     for i in range(-cols,0):
@@ -264,8 +264,10 @@ def plot_history(groups, measurement=None, *,
         groups = groups,
 
     func = fitness or groups[0].fitness_func
-
-    name = 'fit history {}'.format(measurement.name)
+    if len(measurement.name):
+        name = 'fit history {}'.format(measurement.name)
+    else:
+        name='fit history {}'.format(groups.dirname.split('/')[-2])
     f = _get_graph(name, clear=clear, newplot=newplot)
     ax = f.gca()
 
