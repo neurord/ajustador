@@ -32,9 +32,9 @@ class CSV_conc(object):
         x_head=csv.index.name.split()
         if len(x_head)>1:
             time_units=x_head[-1]
-            if time_units.startswith('sec'):
+            if time_units.startswith('sec') or time_units.startswith('(sec'):
                 time_factor=1e3
-            elif time_units.startswith('min'):
+            elif time_units.startswith('min') or time_units.startswith('(min'):
                 time_factor=1e3*60
             else:
                 time_factor=1
