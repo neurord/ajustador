@@ -41,11 +41,15 @@ def do_replacements(model, paramset):
         mech = param.mech
         if isinstance(mech, XMLParamMechanism):
             elems = model.xpath(mech.xpath)
-            #print(param,elems,elems[0].text)
-            #print(param)
-            if len(elems) != 1:
-                raise ValueError('xpath matched {} elements'.format(len(elems)))
-            elems[0].text = str(param.value)
+            #concentration (and surface density) sets have different format.
+            #they have values and attrib, not text. May need to enhance this for region specific sets
+            if elems[0].text==None:
+                elems[0].attrib['value']=str(param.value)
+                #print('do_replace: conc', elems[0].values())
+            else:  #perhaps elif len(elems[0].text):
+                if len(elems) != 1:
+                    raise ValueError('xpath matched {} elements'.format(len(elems)))
+                elems[0].text = str(param.value)
         else:
             raise ValueError('Unknown mechanism {}'.format(mech))
 
