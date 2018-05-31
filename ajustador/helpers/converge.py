@@ -52,6 +52,7 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06):
                 for key in std_dict.keys():
                         line=line+'   '+str(np.round(std_dict[key][j],5))
                 fitfile.write(line+'\n')
+                #possibly divide both by mean_dict['mean'] (may need to 2x or 3x the criteria) so that convergence scales with fit?
                 if np.abs(mean_dict['slope'][j])<slope_crit and mean_dict['std'][j]<std_crit:
                         converge=True                    #above tests the latest fitness value for convergence
                         print('*************** optimization converged at', j*test_size*popsiz, 'with m=',mean_dict['mean'][j] )

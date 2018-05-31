@@ -42,7 +42,7 @@ class CSV_conc(object):
         else:
             time_factor=1
         x = csv.index.values*time_factor #time values
-        
+        #may want to read units of y value, e.g. allow uM or mM and convert to nM
         self.waves = {col.split()[0]:trace(col.split()[0], x, csv[col].values) for col in csv.columns}
 
 class CSV_conc_set(object):

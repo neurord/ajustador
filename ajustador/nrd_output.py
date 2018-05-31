@@ -51,10 +51,10 @@ def nrd_output_percent(sim_output,specie,start_ms):
     wave1x=pop1.index
     start_index=np.fabs(wave1x-start_ms).argmin()
     wave1y_basal=np.mean(wave1y[0:start_index])  #mean value of baseline
-    wave1y=wave1y/wave1y_basal
-    #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ~4.0 (not 0.4 as in fret)
+    #wave1y=wave1y/wave1y_basal
+    #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ratio ~4.0 (not 0.4 as in fret)
     #perhaps should add ability to parse and execute arbitrary equation
-    #wave1y=1.0+wave1y/1000
+    wave1y=1.0+wave1y/1000
     print('nrd_out_pcnt: sim=', sim_output.injection,'start= ',start_index, 'basal=', wave1y_basal,'peak=',np.max(wave1y))
     return wave1y,wave1x
 
