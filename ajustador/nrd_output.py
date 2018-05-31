@@ -37,13 +37,26 @@ AVOGADRO = 6.02214179
 PUVC = AVOGADRO / 10
 """Converts concentrations to particle numbers"""
 
-def nrd_output_conc(sim_output,species):
+def nrd_output_conc(sim_output,specie):
     #may need to add specification of trial and/or voxel
-    pop1count = sim_output.population.xs(species,level=2)
+    pop1count = sim_output.population.xs(specie,level=2)
     volumes=sim_output.vols
     tot_vol=np.sum(volumes)
     pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
     return pop1conc
+
+def nrd_output_percent(sim_output,specie,start_ms):
+    pop1=nrd_output_conc(sim_output,specie)
+    wave1y=pop1.values[:,0]
+    wave1x=pop1.index
+    start_index=np.fabs(wave1x-start_ms).argmin()
+    wave1y_basal=np.mean(wave1y[0:start_index])  #mean value of baseline
+    wave1y=wave1y/wave1y_basal
+    #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ~4.0 (not 0.4 as in fret)
+    #perhaps should add ability to parse and execute arbitrary equation
+    #wave1y=1.0+wave1y/1000
+    print('nrd_out_pcnt: sim=', sim_output.injection,'start= ',start_index, 'basal=', wave1y_basal,'peak=',np.max(wave1y))
+    return wave1y,wave1x
 
 def decode_species_names(array):
     return list(sp.decode('utf-8') for sp in array)
