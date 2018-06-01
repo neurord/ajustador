@@ -52,18 +52,18 @@ def execute(p):
     from . import basic_simulation
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
-    logger.debug("Unseralized params:\n {}".format(params)) #SRIRAM 02192018
+    logger.debug("Unseralized params:\n {} inject {}".format(params,injection)) #SRIRAM 02192018
     params['injection_delay'] = params['injection_delay'][0] #SRIRAM 02192018
     params['injection_width'] = params['injection_width'][0] #SRIRAM 02192018
     params = basic_simulation.serialize_options(params)
-    result = iv_filename(injection)
+    result = iv_filename(injection) #result is filename
     cmdline = [sys.executable,
                basic_simulation.__file__,
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
     #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
-    logger.info("Logger in execute function!!!")
+    logger.debug("Logger in execute function!!!")
     logger.debug("Seralized params:\n {}".format(params)) #SRIRAM 02192018
     logger.debug("Basic_simulation command:\n {}".format(cmdline)) #SRIRAM 02192018
     with utilities.chdir(dirname):
@@ -95,7 +95,7 @@ class Simulation(loader.Attributable):
 
         self.name = (', '.join('{}={}'.format(k,v) for k,v in self.params.items())
                      if self.params else 'unmodified')
-        logger.info("Logger in Simulation!!!") #SRIRAM 02192018
+        logger.debug("Logger in Simulation!!!") #SRIRAM 02192018
         logger.debug("Params of simulation\n {}".format(self.name)) #SRIRAM 02192018
 
         self.tmpdir = utilities.TemporaryDirectory(dir=dir)
@@ -147,13 +147,11 @@ class MooseSimulation(Simulation):
         params = ((self.tmpdir.name, inj, junction_potential, self.params, self.features)
                   for inj in injection_currents)
         if async:
-            logger.info("Logger in MooseSimulation.execute_for async!!!") #SRIRAM
-            logger.debug("Parmas in execute_for \n {}".format(params)) #SRIRAM
+            logger.debug("MooseSimulation, Params in execute_for \n {}".format(params)) #SRIRAM
             self._result = exe_map(single=False, async=True)(execute, params, callback=self._set_result)
         else:
             self._result = None
-            logger.info("Logger in MooseSimulation.execute_for sync!!!") #SRIRAM
-            logger.debug("Parmas in execute_for \n {} {}".format(self.params, self.features)) #SRIRAM
+            logger.debug("MooseSimulation, Params in execute_for \n {} featues {}".format(self.params, self.features)) #SRIRAM
             result = exe_map(single=single, async=False)(execute, params)
             self._set_result(result)
 
@@ -170,7 +168,7 @@ class MooseSimulation(Simulation):
         injection_delay=measurement.features[0].injection_start,    #SRIRAM 02192018
         injection_width=measurement.features[0].injection_interval,  #SRIRAM 02192018
         baseline = measurement.mean_baseline.x
-        logger.info("Logger in MooseSimulation.make!!!") #SRIRAM
+        logger.debug("Logger in MooseSimulation.make!!!") #SRIRAM
         logger.debug("Params \n {}".format(params))
 
         return cls(dir=dir,
@@ -460,7 +458,7 @@ class Fit:
 
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
-
+        #add check here for existance of filename
         utilities.mkdir_p(dirname)
 
     def load(self, last=None):
@@ -536,6 +534,7 @@ class Fit:
 
     def fitness_multi(self, many_values):
         self._async = True
+        #many values is the population_size set of parameter values
         sims = [self.sim(values) for values in many_values]
         for sim in sims:
             sim.wait()

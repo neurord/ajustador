@@ -7,8 +7,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from scipy import stats, interpolate
 import pandas as pd
+from ajustador.nrd_output import PUVC
 
-from . import loader, fitnesses, utilities
+from . import loader, fitnesses, utilities, xml, nrd_output, loadconc
 
 def _on_close(event):
     event.canvas.figure.closed = True
@@ -40,6 +41,58 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
+def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
+    #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
+    f = _get_graph(measurement.name) #adding additional label in arbitrary place
+    if fit_rpt:
+        f.suptitle('\n'.join(fit_rpt), fontsize=7)
+    #determine molecules to plot from the molecules in the experimental and simulated data
+    mollist_sim=sim.output[0].specie_names
+    ms_per_sec=1000
+    if isinstance(measurement,xml.NeurordResult):
+        mollist_exp=measurement.output[0].specie_names
+        exp_data=measurement.output
+    else:
+        mollist_exp=list(measurement.data[0].waves.keys())
+        exp_data=measurement.data
+    mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim)))
+    #set up graph, either as one column or multiple columns depending on number of molecules
+    if len(mol_list)>8:
+        rows=int(np.round(np.sqrt(len(mol_list))))
+        cols=int(np.ceil(len(mol_list)/float(rows)))
+    else:
+        cols=1
+        rows=len(mol_list)
+    axes=[f.add_subplot(rows,cols,v+1) for v in range(len(mol_list))]
+    colors=[pyplot.get_cmap('gist_heat'),pyplot.get_cmap('viridis')]
+    #plot the data - both experiment and simulated
+    for i,dataset in enumerate([sim.output,exp_data]):
+        color_increment=int(round(256.0/(len(dataset)+1)))
+        for j,stim_data in enumerate(dataset):  #one or more different simulations/stimulations
+            colr = colors[i].__call__(j*color_increment % colors[i].N)
+            labl=stim_data.injection
+            #print('stimdata', stim_data.file.filename, stim_data.injection, 'color', colr)
+            for k,mol in enumerate(mol_list):
+                if isinstance(stim_data,nrd_output.Output):
+                    if mol in stim_data.specie_names:
+                        plotdata=nrd_output.nrd_output_conc(stim_data,mol)
+                        axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0],label=labl,color=colr)
+                elif isinstance(stim_data,loadconc.CSV_conc):
+                    if mol in list(stim_data.waves.keys()):
+                        ydata=stim_data.waves[mol].wave.y*stim_data.waves[mol].scale
+                        axes[k].plot(stim_data.waves[mol].wave.x/ms_per_sec,ydata,color=colr)
+                else:
+                    print('drawing.py: new type of data format', type(measurement))
+                axes[k].set_ylabel(mol+" uM")
+    axes[0].legend(loc='upper right', fontsize=8,ncol=2)
+    for i in range(-cols,0):
+        axes[i].set_xlabel('time, sec')
+    #f.subplots_adjust(left=0.5, right=0.7, top=0.2, bottom=0.1)
+    #f.tight_layout()
+    f.canvas.draw()
+    f.show()
+    return f
+ 
 def plot_together(*groups, offset=False, labels=None, separate=False):
     f = _get_graph(groups[0].name + ' together')
 
@@ -212,8 +265,10 @@ def plot_history(groups, measurement=None, *,
         groups = groups,
 
     func = fitness or groups[0].fitness_func
-
-    name = 'fit history {}'.format(measurement.name)
+    if len(measurement.name):
+        name = 'fit history {}'.format(measurement.name)
+    else:
+        name='fit history {}'.format(groups[0].dirname.split('/')[-2])
     f = _get_graph(name, clear=clear, newplot=newplot)
     ax = f.gca()
 
@@ -224,7 +279,7 @@ def plot_history(groups, measurement=None, *,
 
     for i, group in enumerate(groups):
         func = fitness or group.fitness_func
-
+        
         fitnesses = [func(item, measurement) for item in group]
         fitnesses = pd.DataFrame(fitnesses)
         if show_quit:
@@ -244,7 +299,7 @@ def plot_history(groups, measurement=None, *,
     if ymax is not None:
         ax.set_ylim(top=ymax)
     ax.legend(frameon=True, loc='upper right', fontsize=8, numpoints=1)
-    ax.set_xlabel('generation')
+    ax.set_xlabel('model evaluation')
     ax.set_ylabel(func.__name__)
     f.tight_layout()
     f.canvas.draw()
@@ -255,23 +310,37 @@ def plot_history(groups, measurement=None, *,
         ind = event.ind
         x = xdata[ind][0]
         sim = groups[0][x]
-
+        
         texts = []
         if hasattr(sim, 'report'):
             texts.append(sim.report())
         if hasattr(measurement, 'report'):
             texts.append(measurement.report())
 
-        if measurement:
-            # FIXME: map from artist to group
-            f = plot_together(measurement, sim,
-                              labels=[None, '{}: {}'.format(x, sim.name)])
-            if hasattr(func, 'report'):
-                texts.append(func.report(sim, measurement))
+        if isinstance(sim,xml.NeurordSimulation):
+            params=[sim.name.split()[i] for i in range(1,len(sim.name.split()),2)]
+            fit_dict=func(sim, measurement,full=1)
+            for mol,molfit in fit_dict.items():
+                text_string=mol
+                for f,v in molfit.items():
+                    text_string=text_string+' '+f+': '+str(round(v,2)) 
+                texts.append(text_string)
+            print(params)
+            print('Fitness report',fit_dict)
+            f = plot_neurord_tog(measurement,sim,
+                                 labels='iteration {}:{}'.format(x,' '.join(params)),
+                                 fit_rpt=texts)
         else:
-            plot_together(sim)
-        if texts:
-            f.axes[0].text(0, 1, '\n\n'.join(texts),
+            if measurement:
+                # FIXME: map from artist to group
+                f = plot_together(measurement, sim,
+                              labels=[None, '{}: {}'.format(x, sim.name)])
+                if hasattr(func, 'report'):
+                    texts.append(func.report(sim, measurement))
+            else:
+                plot_together(sim)
+            if texts:
+                f.axes[0].text(0, 1, '\n\n'.join(texts),
                            verticalalignment='top',
                            transform=ax.transAxes,
                            fontsize=7)

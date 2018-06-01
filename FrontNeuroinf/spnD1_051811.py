@@ -1,7 +1,7 @@
 import ajustador as aju
+from ajustador.helpers import save_params,converge
 import numpy as np
 from ajustador import drawing
-from matplotlib import pyplot
 import measurements1 as ms1
 import os
 
@@ -13,15 +13,18 @@ ghkkluge=1
 modeltype='d1d2'
 rootdir='/home/avrama/moose/SPN_opt/'
 #use 1 and 3 for testing, 250 and 8 for optimization
-generations=350
+generations=200
 popsiz=8
+seed=62938
+#after generations, do 25 more at a time and test for convergence
+test_size=25
 
 ################## neuron /data specific specifications #############
 ntype='D1'
 dataname='D1_051811'
 exp_to_fit = ms1.D1waves051811[[8,20,22,23]] #0, 6 are hyperpolarizing
 
-dirname=dataname+'_pas2'
+dirname=dataname+'_pas_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -95,16 +98,19 @@ fit1 = aju.optimize.Fit(tmpdir,
 
 fit1.load()
 
-fit1.do_fit(generations, popsize=popsiz)
+fit1.do_fit(generations, popsize=popsiz,seed=seed)
+mean_dict,std_dict,CV=converge.iterate_fit(fit1,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
 
-#Save parameters of good results toward the end, and all fitness values
+#Save parameters of good results from end of optimization, and all fitness values
 startgood=1000  #set to 0 to print all
 threshold=0.8  #set to large number to print all
 
-exec(open("/home/avrama/moose/save_params.py").read())
-save_params(fit1, startgood, threshold)
+save_params.save_params(fit1, startgood, threshold)
+
+#to save the fit object
+#save_params.persist(fit1,'.')
 
 
