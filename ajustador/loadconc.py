@@ -10,9 +10,25 @@ import operator
 
 class trace(object):
     def __init__(self, molname, x, y):
-        self.molname=molname
+        molname_parts=molname.split()
+        self.molname=molname_parts[0]
         wave=np.rec.fromarrays((x, y), names='x,y')
-        self.wave=wave
+        if len(molname_parts)>1:
+            self.units=molname_parts[1]
+            if len(molname_parts)>2:
+                #strip out any training non-numeric characteris
+                self.scale=int(''.join([c for c in molname_parts[2] if c.isdigit()]))
+            else:
+                self.scale=1
+        if self.units.startswith('m') or self.units.startswith('(m'):
+            #convert from mM to nM
+            self.wave=wave*1e6
+        elif self.units.startswith('u') or self.units.startswith('(u'):
+            #convert from uM to nM
+            self.wave=wave*1e3
+        else:
+            #assume nM (or percent if fret)
+            self.wave=wave
         #may need features associated with each wave
 
 class CSV_conc(object):
@@ -43,7 +59,7 @@ class CSV_conc(object):
             time_factor=1
         x = csv.index.values*time_factor #time values
         #may want to read units of y value, e.g. allow uM or mM and convert to nM
-        self.waves = {col.split()[0]:trace(col.split()[0], x, csv[col].values) for col in csv.columns}
+        self.waves = {col.split()[0]:trace(col, x, csv[col].values) for col in csv.columns}
 
 class CSV_conc_set(object):
     #set of files, each one a CSV_conc object, differing in stim protocol

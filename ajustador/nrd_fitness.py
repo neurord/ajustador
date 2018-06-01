@@ -36,7 +36,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=0,norm=
                     logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
                     if norm=='percent':
-                        wave1y,wave1x=nrd_output.nrd_output_percent(stim_set,species,start_ms)
+                        wave1y,wave1x=nrd_output.nrd_output_percent(stim_set,species,start_ms,scale=measurement.data[j].waves[species].scale)
                     else:
                         pop1=nrd_output.nrd_output_conc(stim_set,species)
                         wave1y=pop1.values[:,0]
