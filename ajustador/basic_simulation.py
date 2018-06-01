@@ -77,6 +77,10 @@ def option_parser():
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
 
     p.add_argument('--save-vm')
+    # Add vshift argument here
+    p.add_argument('--vshift', type=real)
+    # Add tau_multiplier argument here
+    p.add_argument('--tau-multiplier', type=real)
     return p
 
 @util.listize
@@ -150,6 +154,19 @@ def setup(param_sim, model):
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
         model.Channels.Kir.X.B_vhalf += param_sim.Kir_offset
+
+    # Add param_sim.vshift to channel As and Bs values like above.
+    if param_sim.vshift is not None:
+        model.Channels.Na.X.A_vhalf += param_sim.vshift #check
+        model.Channels.Na.X.B_vhalf += param_sim.vshift
+        model.Channels.K.X.A_vhalf += param_sim.vshift
+        model.Channels.K.X.B_vhalf += param_sim.vshift
+    # Add param_sim.tau_multiplier to channel As and Bs values like above need to think.
+    if param_sim.tau_multiplier is not None:
+        model.Channels.Na.X.A_rate *= param_sim.tau_multiplier
+        model.Channels.Na.X.B_rate *= param_sim.tau_multiplier
+        model.Channels.K.X.A_B *= param_sim.tau_multiplier
+        model.Channels.K.X.B_B *= param_sim.tau_multiplier
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
