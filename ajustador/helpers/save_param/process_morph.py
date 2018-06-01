@@ -29,7 +29,7 @@ def find_morph_file(line):
     return True if ReObjects.re_obj_morph_file.match(line) else False
 
 def get_morph_file_name(line, neuron_type):
-    "Get morph file name from the the line if it mathes with pattern in re_obj."
+    "Get morph file name from the the line if it matches with pattern in re_obj."
     re_obj = ReObjects.re_obj_neuron_p_file
     if re_obj.search(line):
         return dict(re_obj.findall(line)).get(neuron_type, None)
@@ -54,11 +54,13 @@ def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type,
     morph_features = ('RM', 'Eleak', 'RA', 'CM')
     model_obj = make_model_path_obj(model_path, model)
     logger.debug("\n{} \n{}".format(param_cond_file, neuron_type))
-    morph_file = extract_morph_file_from_cond(param_cond_file, neuron_type)
+    morph_file = extract_morph_file_from_cond(param_cond_file, neuron_type) #PROBLEM HERE.  NOT RETURNING CORRECT FILE FOR D2
     logger.debug('\n{} \n{}'.format(model_path, morph_file))
     src_morph_file_path = get_file_abs_path(model_path, morph_file)
+    print('src_morph', src_morph_file_path)
     if 'conductance_save' in src_morph_file_path:
         new_morph_file_path = get_file_name_with_version(src_morph_file_path)
+        print('new_morph_path',new_morph_file_path)
         morph_morph_file(model_obj, neuron_type, src_morph_file_path, new_file = open(new_morph_file_path,'w'),
         **{k:v for k,v in non_conds.items() if k in morph_features})
         return new_morph_file_path

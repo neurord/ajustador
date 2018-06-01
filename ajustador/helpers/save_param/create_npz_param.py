@@ -48,6 +48,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
         cond_file = 'param_cond.py'
     new_param_cond = make_cond_file_name(data, npz_file,
                          str(new_param_path), neuron_type, cond_file)
+    print('***** NPZ',npz_file,'new path',str(new_param_path),'input cond',cond_file,'output cond',new_param_cond)
 
     process_modification(new_param_cond, model_path, new_param_path,
                          neuron_type, fit_number, cond_file, model,

@@ -80,9 +80,8 @@ def process_modification(new_param_cond, model_path, new_param_path,
      logger.info("START STEP 6!!! Renaming morph file after checking version.")
      new_morph_file_name = check_version_build_file_path(morph_file, neuron_type, fit_number)
      Path(str(new_param_path/morph_file)).rename(str(new_morph_file_name))
-     logger.info("END STEP 7!!! New files names \n morph: {1} \n param_cond files: {0}".format(new_cond_file_name, new_morph_file_name))
+     logger.info("END STEP 7!!! and START STEP 8!!! New files names \n morph: {1} \n param_cond files: {0}".format(new_cond_file_name, new_morph_file_name))
 
-     logger.info("START STEP 8!!! Update the morph file name in cond_param file {}".format(new_cond_file_name))
      update_morph_file_name_in_cond(new_cond_file_name, neuron_type, new_morph_file_name.rpartition('/')[2])
 
      logger.info("!!!Environment cleanup!!!")
