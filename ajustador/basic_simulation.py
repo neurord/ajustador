@@ -36,9 +36,16 @@ from moose_nerp.prototypes import (cell_proto,
                                    util,
                                    standard_options)
 from moose_nerp.graph import neuron_graph
-
+import logging
+from ajustador.helpers.loggingsystem import getlogger
+logger = getlogger(__name__)
+logger.setLevel(logging.DEBUG)
+stream_handle = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handle)
 
 def real(s):
+    ''' Function to convert a value into float and raises ValueError if it is NAN.
+    '''
     f = float(s)
     if np.isnan(f):
         raise ValueError
@@ -46,6 +53,7 @@ def real(s):
 
 def cond_setting(s):
     "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
+    # TODO check wheatehr it is un reachable code.
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
     chan, comp = lhs.split(',', 1)
@@ -53,7 +61,28 @@ def cond_setting(s):
         comp = int(comp)
     return chan, comp, rhs
 
+def chan_setting(s):
+    ''' Should process chan setting simillar to cond.
+    '''
+    pass
+
+def scale_voltage_dependents_tau_muliplier(chanset, someting_tuple):
+    ''' Scales the HH-channel model volatge dependents parametes with a factor
+        which controls the time constants of the channel implicitly.
+    '''
+    # Zgate is special
+    pass
+
+def offset_voltage_dependents_vshift(chanset, something_tuple):
+    ''' Offsets the HH-channel model volatge dependents parametes with vshift.
+    '''
+    # Zgate is special
+    pass
+
 def option_parser():
+    ''' Extends moose_nerp.prototypes.standard_options by defining additional
+        console arguments  simulation.
+    '''
     p = standard_options.standard_options(
         default_injection_delay=0.2,
         default_injection_width=0.4,
@@ -75,37 +104,48 @@ def option_parser():
     p.add_argument('--Kir-offset', type=real)
 
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
-
+    # TODO how type in add_argument computes.
     p.add_argument('--save-vm')
-    # Add vshift argument here
-    p.add_argument('--vshift', type=real)
-    # Add tau_multiplier argument here
-    p.add_argument('--tau-multiplier', type=real)
+    p.add_argument('--chan', default=[], nargs='+', type=chan_setting, action=standard_options.AppendFlat)
     return p
 
 @util.listize
 def serialize_options(opts):
     conds = []
+    chans = [] #Channel options for tau_multiplier and Vshift for threshold.
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
             continue
         if val is not None:
             parts = key.split('_')
-            num = getattr(val, 'value', val)
-            if parts[0] == 'Cond' and len(parts) == 3: # e.g. Cond_NaF_0
+            num = getattr(val, 'value', val) #if val is object return val.value else val.
+            if parts[0] == 'Cond' and len(parts) == 3: # e.g. Cond_NaF_0=value
                 conds.append('{},{}={}'.format(parts[1], parts[2], num))
-            elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir
+            elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir=value
                 conds.append('{},:={}'.format(parts[1], num))
+                #Chan_Na_Vshift_GateX/Y_compartment = value
+            #elif parts[0] == 'Chan' and len(parts) == 4: #0Chan_1Na_2Vshift_3[X/y/z] # How will you differentiate X,Y and Zgates.
+            #    chans.append('{},{}={}'.format(parts[1],parts[2],parts[3], num))
+            #elif parts[0] == 'Chan' and len(parts) == 3:
+            #    chans.append('{},{}={}'.format(parts[1], parts[2], num))
+            # write chan_Na_vshift/tau_multiplier_[X/Y] thiing to process values.
             else:
                 key = key.replace('_', '-')
                 yield '--{}={}'.format(key, num)
+    logger.DEBUG('{}'.format(conds))
     if conds:
         yield '--cond'
         yield from conds
+    if chans: # Check how it is generating options. it should be simillar to conds.
+        yield '--chan'
+        yield from chans
 
 def morph_morph_file(model, ntype, morph_file, new_file=None,
                      RA=None, RM=None, CM=None, Erest=None, Eleak=None):
+    ''' Fuction to create a new_morph_file by updated values for RA, RM, CM,
+        EREST_ACT and ELEAK input arguments.
+    '''
     if morph_file:
         morph_file = util.find_model_file(model, morph_file)
     else:
@@ -134,7 +174,15 @@ def morph_morph_file(model, ntype, morph_file, new_file=None,
 
     return new_file
 
+# Write a function to setup vshift and taumul simillar to setup_conductances.
 def setup_conductance(condset, name, index, value):
+    ''' Updates condset object's attribute with name.
+        index == ':' -> Sets all child members values of condset.name
+                        with value(input argument).
+        index != ':' -> Set specific child member value of condset.name
+                        with value(input argument).
+    distance depeing conductances.
+    '''
     attr = getattr(condset, name)
     keys = sorted(attr.keys())
     if index == ':':
@@ -142,7 +190,7 @@ def setup_conductance(condset, name, index, value):
             attr[k] = value
     else:
         attr[keys[index]] = value
-
+######################start from here.
 def setup(param_sim, model):
     if param_sim.calcium is not None:
         model.calYN = param_sim.calcium
@@ -150,28 +198,25 @@ def setup(param_sim, model):
         model.spineYN = param_sim.spines
 
     condset = getattr(model.Condset, param_sim.neuron_type)
+    # TODO print condset
+    # get channel parameter information simillar to condset.
+    # Use the chanset to setup threshold offset and tau multiplier.
 
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
         model.Channels.Kir.X.B_vhalf += param_sim.Kir_offset
-
-    # Add param_sim.vshift to channel As and Bs values like above.
-    if param_sim.vshift is not None:
-        model.Channels.Na.X.A_vhalf += param_sim.vshift #check
-        model.Channels.Na.X.B_vhalf += param_sim.vshift
-        model.Channels.K.X.A_vhalf += param_sim.vshift
-        model.Channels.K.X.B_vhalf += param_sim.vshift
-    # Add param_sim.tau_multiplier to channel As and Bs values like above need to think.
-    if param_sim.tau_multiplier is not None:
-        model.Channels.Na.X.A_rate *= param_sim.tau_multiplier
-        model.Channels.Na.X.B_rate *= param_sim.tau_multiplier
-        model.Channels.K.X.A_B *= param_sim.tau_multiplier
-        model.Channels.K.X.B_B *= param_sim.tau_multiplier
-
+# model.Channels['k'].X
+#Write simillar below for loop for param_sim.chan to process channel Vshift and tau.
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
         print('cond:', name, comp, value)
         setup_conductance(condset, name, comp, value)
+
+    for chan in param_sim.chan:
+        something_tuple = chan
+        # TODO add logic to split chan and call setup_time_constants and setup__voltages_offset.
+        scale_voltage_dependents_tau_muliplier(chanset, something_tuple) #will it be condset??? need to verify!!!
+        offset_voltage_dependents_vshift(chanset, something_tuple)
 
     new_file = morph_morph_file(model,
                                 param_sim.neuron_type,
@@ -227,10 +272,13 @@ def run_simulation(injection_current, simtime, param_sim, model):
     moose.start(simtime)
 
 def main(args):
+    import sys # Remove it placed to debug!!!!!
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
     model = importlib.import_module('moose_nerp.' + param_sim.model)
     model.neurontypes([param_sim.neuron_type])
+    logger.DEBUG("conductances:::::: {}".format(param_sim.cond))
+    sys.exit(0) # Remove it placed to debug!!!!!
     pulse_gen, hdf5writer = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
     hdf5writer.close()
