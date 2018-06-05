@@ -31,16 +31,14 @@ def check_key_in_npz_data(npz_data, key):
 
 def make_cond_file_name(npz_data, npz_file_name, dest_path, neuron_type, cond_file):
     "Makes new cond file name from npz data"
-    logger.debug("{} {} {} {}".format(npz_data, npz_file_name, dest_path, neuron_type))
+    logger.info("cond_file={} npz_file={} dest_path={} {}".format(cond_file, npz_file_name, dest_path, neuron_type))
     if check_key_in_npz_data(npz_data,'neuron_type') \
     and check_key_in_npz_data(npz_data,'measurment_name'): # may be removed in future.
        if npz_data['neuron_type'] in npz_data['measurment_name']:
            file_name = cond_file.rstrip('.py') + '_' + npz_data['measurment_name'] + '.py'
-           logger.debug("1 {} {}".format(cond_file.strip('.py'), file_name))
-           return os.path.join(dest_path, file_name)
-       file_name = cond_file.rstrip('.py') + '_' + npz_data['measurment_name'] + npz_data['neuron_type'] + '.py'
-       logger.debug("2 {} {}".format(cond_file.strip('.py'), file_name))
-       return os.path.join(dest_path, file_name)
-    file_name = cond_file.rstrip('.py') + '_' + npz_file_name.rpartition('-' + neuron_type + '-')[2].rstrip('.npz') + '.py'
-    logger.debug("3 {} {}".format(cond_file.rstrip('.py'), file_name))
+       else:
+           file_name = cond_file.rstrip('.py') + '_' + npz_data['measurment_name'] + npz_data['neuron_type'] + '.py'
+    else:
+        file_name = cond_file.rstrip('.py') + '_' + os.path.basename(npz_file_name).rpartition('-' + neuron_type + '-')[2].rstrip('.npz') + '.py'
+    logger.debug("{} {}".format(cond_file.rstrip('.py'), file_name))
     return os.path.join(dest_path, file_name)
