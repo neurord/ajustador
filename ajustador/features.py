@@ -566,6 +566,9 @@ class AHP(Feature):
         `spike_ahp_window` is used to determine the extent of the AHP.
         An average of the bottom area of the window of the width of the
         spike is used.
+        Probably this should be changed to return the difference between threshold and minimum y
+        thresh=spikes.spike_threshold
+        mean=vartype.array_mean(cut.y)-thresh[i], or ans[i]=mean.x-spikes.spike_threshold[i],mean.dev
         """
         windows = self.spike_ahp_window
         spikes = self._obj.spikes

@@ -1,28 +1,30 @@
 import ajustador as aju
+from ajustador.helpers import save_params,converge
 import numpy as np
 from ajustador import drawing
-from matplotlib import pyplot
 import measurements1 as ms1
 import os
 
-#1. delete noCM (unless much better) - also in tmp
-#2. save to _pas2, since using _pas /Kir
-#3. include a small hyerpolarizing current
-#4. limit Cm to 0.03, start at 0.01; use 350 generations; run all at once
+# a. simplest approach is to use CAPOOL (vs CASHELL, and CASLAB for spines)
+# b. no spines
+# c. use ghk (and ghkkluge=0.35e-6) once that is working/implemented in moose
 ghkkluge=1
 
 modeltype='d1d2'
 rootdir='/home/avrama/moose/SPN_opt/'
-#use 1 and 3 for testing, 250 and 8 for optimization
-generations=350
+#use 1 and 3 for testing, 200 and 8 for optimization
+generations=200
 popsiz=8
+seed=62938
+#after generations, do 25 more at a time and test for convergence
+test_size=25
 
 ################## neuron /data specific specifications #############
 ntype='D2'
 dataname='D2_010612'
 exp_to_fit = ms1.D2waves010612[[8, 18,20,22]] #0, 6, 
 
-dirname=dataname+'_pas2'
+dirname=dataname+'_pas2_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -95,14 +97,17 @@ fit3 = aju.optimize.Fit(tmpdir,
 
 fit3.load()
 
-fit3.do_fit(generations, popsize=popsiz)
+fit3.do_fit(generations, popsize=popsiz,seed=seed)
+mean_dict,std_dict,CV=converge.iterate_fit(fit3,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit3, fit3.measurement)
 
+#Save parameters of good results from end of optimization, and all fitness values
 startgood=1000  #set to 0 to print all
 threshold=0.8  #set to large number to print all
-exec(open("/home/avrama/moose/save_params.py").read())
-save_params(fit3, startgood, threshold)
+save_params.save_params(fit3, startgood, threshold)
 
+#to save the fit object
+#save_params.persist(fit3,'.')
 

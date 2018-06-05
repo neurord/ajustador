@@ -21,8 +21,8 @@ def load_npz(fname, tile):
     fit_param=pd.concat([param,fit],axis=1)
 
     thresh=fit_param.quantile(tile)['total'] #values of 10th percentile
-    print('cell', fname, 'percentile', tile, 'threshold', thresh)
     goodsamples=fit_param[fit_param['total']<thresh]
+    print('cell', fname, 'percentile', tile, 'threshold', thresh, 'samples',len(goodsamples),'from',len(fit_param))
     return goodsamples,features
 
 ############## 

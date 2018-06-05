@@ -30,11 +30,35 @@ import functools
 import numpy as np
 import pandas as pd
 from lxml import etree
+import os
 
 AVOGADRO = 6.02214179
 """Avogadro constant from CODATA 2006"""
 PUVC = AVOGADRO / 10
 """Converts concentrations to particle numbers"""
+
+def nrd_output_conc(sim_output,specie):
+    #may need to add specification of trial and/or voxel
+    pop1count = sim_output.population.xs(specie,level=2)
+    volumes=sim_output.vols
+    tot_vol=np.sum(volumes)
+    pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
+    return pop1conc
+
+def nrd_output_percent(sim_output,specie,start_ms,scale=1):
+    pop1=nrd_output_conc(sim_output,specie)
+    wave1y=pop1.values[:,0]
+    wave1x=pop1.index
+    start_index=np.fabs(wave1x-start_ms).argmin()
+    wave1y_basal=np.mean(wave1y[0:start_index])  #mean value of baseline
+    if scale==1:
+        wave1y=wave1y/wave1y_basal
+    else:
+        #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ratio ~4.0 (not 0.4 as in fret)
+        #perhaps should add ability to parse and execute arbitrary equation
+        wave1y=1.0+wave1y/scale
+    print('nrd_out_pcnt: sim=', sim_output.injection,'start= ',start_index, 'basal=', wave1y_basal,'peak=',np.max(wave1y))
+    return wave1y,wave1x
 
 def decode_species_names(array):
     return list(sp.decode('utf-8') for sp in array)
@@ -292,12 +316,14 @@ class OutputGroup(object):
                          minor_axis=self.species())
         frame = panel.transpose(2, 1, 0).to_frame()
         frame.index.names = ['voxel', 'time']
+        #print('######### OutputGroup.counts frame',frame)
         return frame
 
     def concentrations(self):
         "Counts converted to concentrations using voxel volumes"
-        counts = self.counts()
+        counts = self.counts(output_group)
         volumes = self._output_model.volumes() * PUVC
+        print('######### OutputGroup.concs volumes,counts.index, .size',volumes,counts.index, counts.index.size)
         # blow up volumes to match the size of the counts index
         volumes = np.repeat(volumes, counts.index.size/volumes.size)
         ans = counts.divide(volumes, axis=0)
@@ -387,6 +413,25 @@ class Output(object):
         except tables.exceptions.NoSuchNodeError:
             element = self.file.root.trial0.model
         self.model = Model(element)
+        #add injection to object to allow aju.drawing to work,
+        #and also to allow set of files with different stimulation
+        fname=os.path.basename(filename)
+        if '-' in fname:
+            fname_parts=fname.split('-')
+            self.injection=fname_parts[-1].split('.h5')[0]
+            #print('Extracting injection',filename,fname,fname_parts,self.injection)
+        else:
+            self.injection=0
+
+        self._attributes = {'injection':self.injection}
+        self.vols=self.model.grid().volume
+        self.specie_names=self.model.species()
+        self.population=self.counts()
+
+    def __getattr__(self, name):
+        if name != '_attributes' and name in self._attributes:
+            return getattr(self._attributes[name], name)
+        raise AttributeError(name)
 
     def __enter__(self):
         return self
@@ -446,8 +491,10 @@ class Output(object):
                    C          0.00  0.000000
         """
         sims = self.simulations()
+        #sims.counts executes OutputGroup.counts
         data = dict((i, sim.counts(output_group))
                     for (i, sim) in enumerate(sims))
+        #print('******* Output.counts, data dict',data)
         panel = pd.Panel(data)
         series = panel.to_frame().stack()
         series.index.names = 'voxel time specie trial'.split()
@@ -469,11 +516,19 @@ class Output(object):
         0     0.0  A      0        1049.460511
         """
         counts = self.counts(output_group)
-        volumes = self.model.grid().volume
-        ans = counts / volumes / PUVC
+        volumes = self.model.grid().volume*PUVC
+        #print('******* Output.conc volumes:', volumes)#,'\noutput counts',counts)
+        new_vols=np.repeat(volumes, counts.index.size/volumes.size)
+        #print('******* Output.conc new_vols', np.shape(new_vols), np.shape(counts))
+        ans=counts.divide(new_vols, axis=0)
+        #ans = counts / volumes.sum() / PUVC
         ans.rename(columns={'count':'concentration'}, inplace=1)
         return ans
 
+    def volumes(self, output_group='__main__'):
+        volumes = self.model.grid().volume
+        return volumes,PUVC
+    
     @functools.lru_cache()
     def events(self):
         "A log of events from all simulations"

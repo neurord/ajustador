@@ -13,11 +13,7 @@ gp1opt.py
 gp2opt.py
 gp3opt.py
 
-3. additional python scripts for saving and analyzing data
-save_params.py - has functions for two different functions
-a. save parameters, feature values, and fitness value for each individual
-b. save all information about the optimization, to allow continuing the optimization after existing from python
-
+3. additional python scripts for analyzing data
 analysis.py - read in a set of files produced by save_params and
 a. combine for analysis, e.g. correlation
 b. output features and fitness for the best individuals in format for SAS for statistical analysis
