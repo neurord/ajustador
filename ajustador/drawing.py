@@ -76,7 +76,7 @@ def plot_together(*groups, offset=False, labels=None, separate=False):
             ax.plot(curve.wave.x, y, c=tuple(c), **kwargs)
 
     ax.legend(loc='lower right', fontsize=8)
-    f.tight_layout()
+    #f.tight_layout()
     f.canvas.draw()
     f.show()
     return f

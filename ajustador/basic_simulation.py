@@ -170,7 +170,7 @@ def setup(param_sim, model):
     tables.graphtables(model, neurons,
                        param_sim.plot_current,
                        param_sim.plot_current_message)
-    writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
+    writer = tables.setup_hdf5_output(model, neurons, compartments=['axon'], filename='squid.h5') #static decarations
 
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
