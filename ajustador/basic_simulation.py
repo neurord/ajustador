@@ -53,7 +53,8 @@ def real(s):
 
 def cond_setting(s):
     "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
-    # TODO check wheatehr it is un reachable code.
+    # TODO check wheatehr it is un reachable coded
+    logger.debug("logger in cond_setting!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
     chan, comp = lhs.split(',', 1)
@@ -62,7 +63,7 @@ def cond_setting(s):
     return chan, comp, rhs
 
 def chan_setting(s):
-    ''' Should process chan setting simillar to cond.
+    ''' Processes chan setting simillar to cond.
     '''
     pass
 
@@ -81,7 +82,7 @@ def offset_voltage_dependents_vshift(chanset, something_tuple):
 
 def option_parser():
     ''' Extends moose_nerp.prototypes.standard_options by defining additional
-        console arguments  simulation.
+        console arguments simulation.
     '''
     p = standard_options.standard_options(
         default_injection_delay=0.2,
@@ -133,7 +134,7 @@ def serialize_options(opts):
             else:
                 key = key.replace('_', '-')
                 yield '--{}={}'.format(key, num)
-    logger.DEBUG('{}'.format(conds))
+    logger.debug('{}'.format(conds))
     if conds:
         yield '--cond'
         yield from conds
@@ -181,7 +182,7 @@ def setup_conductance(condset, name, index, value):
                         with value(input argument).
         index != ':' -> Set specific child member value of condset.name
                         with value(input argument).
-    distance depeing conductances.
+    distance dependent conductances.
     '''
     attr = getattr(condset, name)
     keys = sorted(attr.keys())
@@ -199,6 +200,7 @@ def setup(param_sim, model):
 
     condset = getattr(model.Condset, param_sim.neuron_type)
     # TODO print condset
+    logger.debug(condset)
     # get channel parameter information simillar to condset.
     # Use the chanset to setup threshold offset and tau multiplier.
 
