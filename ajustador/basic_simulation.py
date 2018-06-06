@@ -40,8 +40,6 @@ import logging
 from ajustador.helpers.loggingsystem import getlogger
 logger = getlogger(__name__)
 logger.setLevel(logging.DEBUG)
-stream_handle = logging.StreamHandler(sys.stdout)
-logger.addHandler(stream_handle)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
