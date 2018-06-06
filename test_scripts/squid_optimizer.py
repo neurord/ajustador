@@ -23,7 +23,7 @@ popsiz=3
 
 ################## neuron /data specific specifications #############
 dataname='proto079'
-sys.exit(0) # TODO Remove it after test!!!!
+sys.exit(0) # TODO Remove it after test!!!! Test from below this point.
 #dataname='nr120' #SRIRAM01312018
 neuron_file_loc = '/home/ram/neural_prj/outputs/squid_opt/'+dataname+'F'
 #Change directory so that outcmaes*.dat will be saved to different directories
