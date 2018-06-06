@@ -9,7 +9,7 @@ import ajustador as aju
 import numpy as np
 from ajustador import drawing
 from matplotlib import pyplot
-import gpedata_experimental as gpe #creata file to data in .npy.
+import squid_experimental as squid #creata file to data in .npy.
 import os
 
 ########### Optimization of GP neurons ##############3
@@ -22,18 +22,17 @@ generations=1
 popsiz=3
 
 ################## neuron /data specific specifications #############
-dataname='proto079'
+dataname='squid' # what should be the dataname???
 sys.exit(0) # TODO Remove it after test!!!! Test from below this point.
-#dataname='nr120' #SRIRAM01312018
 neuron_file_loc = '/home/ram/neural_prj/outputs/squid_opt/'+dataname+'F'
-#Change directory so that outcmaes*.dat will be saved to different directories
+#Change directory so that outcomes*.dat will be saved to different directories
 if not os.path.exists(neuron_file_loc):
      os.mkdir(neuron_file_loc)
 
 os.chdir(neuron_file_loc)
 
-print("gpe data keys:", gpe.data.keys())
-exp_to_fit = gpe.data[dataname + '-2s'][[0,2,4]] #SRIRAM01312018 removed '-2s'
+print("squid data keys:", squid.data.keys())
+exp_to_fit = squid.data[dataname + '-2s'][[0,2,4]] #SRIRAM01312018 removed '-2s'
 
 tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dataname+'F'
 
