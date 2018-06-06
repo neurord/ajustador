@@ -20,6 +20,8 @@ class trace(object):
                 self.scale=int(''.join([c for c in molname_parts[2] if c.isdigit()]))
             else:
                 self.scale=1
+        else:
+            self.units='nM'
         if self.units.startswith('m') or self.units.startswith('(m'):
             #convert from mM to nM
             self.wave=wave*1e6
