@@ -51,7 +51,6 @@ def real(s):
 
 def cond_setting(s):
     "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
-    # TODO check wheatehr it is un reachable coded
     logger.debug("logger in cond_setting!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)

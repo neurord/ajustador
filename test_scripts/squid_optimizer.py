@@ -25,10 +25,9 @@ if not os.path.exists(neuron_file_loc):
 os.chdir(neuron_file_loc)
 
 print("squid data keys:", squid.data.keys())
-exp_to_fit = squid.data[dataname] #check for data!!!
+exp_to_fit = squid.data[dataname] # TODO check for data!!! get professors help.
 
 tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dataname+'F'
-
 
 ######## setup parameters for fitness ############
 
@@ -45,7 +44,7 @@ params1 = aju.optimize.ParamSet(
     P('Cond_Na_0', 766, min=0, max=1000),
     P('Cond_Na_1', 146.6, min=0, max=2000),
     P('Cond_Na_2', 1266, min=0, max=2000),
-    #P('Chan_K_vshift_X', 0.001, min=0, max=2000),
+    #P('Chan_K_vshift_X', 0.001, min=0, max=0.002),
     P('morph_file', 'squid.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))
