@@ -277,7 +277,7 @@ def main(args):
     param_sim = option_parser().parse_args(args)
     model = importlib.import_module('moose_nerp.' + param_sim.model)
     model.neurontypes([param_sim.neuron_type])
-    logger.DEBUG("conductances:::::: {}".format(param_sim.cond))
+    logger.debug("conductances:::::: {}".format(param_sim.cond))
     sys.exit(0) # Remove it placed to debug!!!!!
     pulse_gen, hdf5writer = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
