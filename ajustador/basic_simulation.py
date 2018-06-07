@@ -51,7 +51,7 @@ def real(s):
 
 def cond_setting(s):
     "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
-    logger.debug("logger in cond_setting!!!")
+    logger.debug("logger in cond_settings!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
     chan, comp = lhs.split(',', 1)
@@ -62,18 +62,28 @@ def cond_setting(s):
 def chan_setting(s):
     ''' Processes chan setting simillar to cond.
     '''
-    pass
+    # TODO verify and modify after sample run.
+    logger.debug("logger in chan_settings!!!")
+    lhs, rhs = s.split('=', 1)
+    rhs = float(rhs)
+    chan, comp= lhs.split(',', 1)
+    if comp != ':':
+        comp = int(comp)
+    return chan, comp, rhs
 
 def scale_voltage_dependents_tau_muliplier(chanset, someting_tuple):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
         which controls the time constants of the channel implicitly.
     '''
+    # TODO write tau_multiplier functionality.
+
     # Zgate is special
     pass
 
 def offset_voltage_dependents_vshift(chanset, something_tuple):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
+    # TODO write vshift functionality.
     # Zgate is special
     pass
 
@@ -102,7 +112,6 @@ def option_parser():
     p.add_argument('--Kir-offset', type=real)
 
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
-    # TODO how type in add_argument computes.
     p.add_argument('--save-vm')
     p.add_argument('--chan', default=[], nargs='+', type=chan_setting, action=standard_options.AppendFlat)
     return p
