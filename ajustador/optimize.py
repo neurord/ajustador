@@ -21,7 +21,7 @@ from . import loader, features as _features, fitnesses, utilities
 import logging #SRIRAM 02152018
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
 logger = getlogger(__name__) #SRIRAM 02152018
-logger.setLevel(logging.INFO) #SRIRAM 02152018
+logger.setLevel(logging.DEBUG) #SRIRAM 02152018
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
