@@ -17,10 +17,10 @@ popsiz=3 # 3 for test run and 8 for actual run.
 
 ################## neuron /data specific specifications #############
 dataname='squid_experimental' # what should be the dataname???
-neuron_file_loc = '/home/ram/neural_prj/outputs/squid_opt/'+dataname+'F'
+neuron_file_loc = '/home/Sriramsagar/neural_prj/outputs/squid_opt/'+dataname+'F'
 #Change directory so that outcomes*.dat will be saved to different directories
 if not os.path.exists(neuron_file_loc):
-     os.mkdir(neuron_file_loc)
+    os.mkdir(neuron_file_loc)
 
 os.chdir(neuron_file_loc)
 
