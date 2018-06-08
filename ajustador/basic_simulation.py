@@ -133,16 +133,10 @@ def serialize_options(opts):
                 conds.append('{},{}={}'.format(parts[1], parts[2], num))
             elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir=value
                 conds.append('{},:={}'.format(parts[1], num))
-                #Chan_Na_vshift_X/Y/G = value
-                # Not correct procedure need to check how conducances are added to moose.elememts.
-                # Then exact picture to code will surface!!!!
-           # elif parts[0] == 'Chan' and parts[2] == 'vshift' and len(parts) == 4:
-            #    chans.append('{},{}={}'.format(parts[1], parts[3], num))
-            #elif parts[0] == 'Chan' and parts[2] == 'taumul' and len(parts) == 4:
-            #    chans.append('{},{}={}'.format(parts[1], parts[3], num))
-            #elif parts[0] == 'Chan' and len(parts) == 3:
-            #    chans.append('{},{}, :={}'.format(parts[1], parts[2], num))
-            # write chan_Na_vshift/tau_multiplier_[X/Y] thiing to process values.
+            elif parts[0] == 'Chan' and len(parts) == 4: # Chan_NaF_vshift/taumul_[X/Y/Z]=value
+                chans.append('{},{},{}={}'.format(parts[1],parts[2], parts[3], num))
+            elif parts[0] == 'Chan' and len(parts) == 3: # Chan_NaF_vshift/taumul=value
+                chans.append('{},{},:={}'.format(parts[1], parts[2], num))
             else:
                 key = key.replace('_', '-')
                 yield '--{}={}'.format(key, num)
@@ -203,7 +197,6 @@ def setup_conductance(condset, name, index, value):
             attr[k] = value
     else:
         attr[keys[index]] = value
-######################start from here.
 def setup(param_sim, model):
     if param_sim.calcium is not None:
         model.calYN = param_sim.calcium
@@ -213,8 +206,8 @@ def setup(param_sim, model):
     condset = getattr(model.Condset, param_sim.neuron_type)
     # TODO print condset
     logger.debug(' ????????? {}'.format(condset)) # Model conductances here !!!!
-    # get channel parameter information simillar to condset.
-    # Use the chanset to setup threshold offset and tau multiplier.
+    # TODO get channel parameter information simillar to condset.
+    # TODO Use the chanset to setup threshold offset and tau multiplier.
 
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
@@ -227,10 +220,13 @@ def setup(param_sim, model):
         setup_conductance(condset, name, comp, value)
 
     for chan in param_sim.chan:
-        something_tuple = chan
+        chan_name, opt, gate, value  = chan
         # TODO add logic to split chan and call setup_time_constants and setup__voltages_offset.
-        scale_voltage_dependents_tau_muliplier(chanset, something_tuple) #will it be condset??? need to verify!!!
-        offset_voltage_dependents_vshift(chanset, something_tuple)
+######################start from here.
+        if opt == 'vshift':
+           scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value) #will it be condset??? need to verify!!!
+        elif opt == 'taumul':
+           offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
 
     new_file = morph_morph_file(model,
                                 param_sim.neuron_type,
