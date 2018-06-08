@@ -118,8 +118,10 @@ def option_parser():
 
 @util.listize
 def serialize_options(opts):
-    conds = []
-    chans = [] #Channel options for tau_multiplier and Vshift for threshold.
+    conds = []          # Channel conductances.
+    chans = []
+    #vshifts = []        # Channel voltage dependents threshold shifts.
+    #tau_multiplier = [] # Channel voltage depenents time constants multiplier.
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
@@ -131,11 +133,15 @@ def serialize_options(opts):
                 conds.append('{},{}={}'.format(parts[1], parts[2], num))
             elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir=value
                 conds.append('{},:={}'.format(parts[1], num))
-                #Chan_Na_Vshift_GateX/Y_compartment = value
-            #elif parts[0] == 'Chan' and len(parts) == 4: #0Chan_1Na_2Vshift_3[X/y/z] # How will you differentiate X,Y and Zgates.
-            #    chans.append('{},{}={}'.format(parts[1],parts[2],parts[3], num))
+                #Chan_Na_vshift_X/Y/G = value
+                # Not correct procedure need to check how conducances are added to moose.elememts.
+                # Then exact picture to code will surface!!!!
+           # elif parts[0] == 'Chan' and parts[2] == 'vshift' and len(parts) == 4:
+            #    chans.append('{},{}={}'.format(parts[1], parts[3], num))
+            #elif parts[0] == 'Chan' and parts[2] == 'taumul' and len(parts) == 4:
+            #    chans.append('{},{}={}'.format(parts[1], parts[3], num))
             #elif parts[0] == 'Chan' and len(parts) == 3:
-            #    chans.append('{},{}={}'.format(parts[1], parts[2], num))
+            #    chans.append('{},{}, :={}'.format(parts[1], parts[2], num))
             # write chan_Na_vshift/tau_multiplier_[X/Y] thiing to process values.
             else:
                 key = key.replace('_', '-')
@@ -206,7 +212,7 @@ def setup(param_sim, model):
 
     condset = getattr(model.Condset, param_sim.neuron_type)
     # TODO print condset
-    logger.debug(condset)
+    logger.debug(' ????????? {}'.format(condset)) # Model conductances here !!!!
     # get channel parameter information simillar to condset.
     # Use the chanset to setup threshold offset and tau multiplier.
 
@@ -287,10 +293,10 @@ def main(args):
     model.neurontypes([param_sim.neuron_type])
     logger.debug("conductances:::::: {}".format(param_sim.cond))
     pulse_gen, hdf5writer = setup(param_sim, model)
-    sys.exit(0) # Remove it placed to debug!!!!!
     # TODO Check from here
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
     hdf5writer.close()
+    sys.exit(0) # Remove it placed to debug!!!!!
 
     if param_sim.plot_vm:
         neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])

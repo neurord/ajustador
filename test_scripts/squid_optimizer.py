@@ -80,11 +80,6 @@ sys.exit(0) # TODO Remove it after test!!!! Test from below this point.
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
 
-#Save parameters of good results toward the end, and all fitness values
-startgood=1500  #set to 0 to print all
-threshold=0.40  #median for jan 11 fit to proto079
-
-#save_params(fit1, startgood, threshold)
 
 #Temporary directory cleanup #SRIRAM01022018
 #import shutil                      #SRIRAM02022018
