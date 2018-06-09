@@ -69,7 +69,7 @@ def chan_setting(s):
     chan, opt, gate= lhs.split(',', 2)
     return chan, opt, gate, rhs
 
-def scale_voltage_dependents_tau_muliplier(chanset, someting_tuple):
+def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
         which controls the time constants of the channel implicitly.
     '''
@@ -78,7 +78,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, someting_tuple):
     # Zgate is special
     pass
 
-def offset_voltage_dependents_vshift(chanset, something_tuple):
+def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
     # TODO write vshift functionality.
@@ -200,7 +200,6 @@ def setup(param_sim, model):
         model.spineYN = param_sim.spines
 
     condset = getattr(model.Condset, param_sim.neuron_type)
-    # TODO print condset
     logger.debug(' ????????? {}'.format(condset)) # Model conductances here !!!!
     # TODO get channel parameter information simillar to condset.
     # TODO Use the chanset to setup threshold offset and tau multiplier.
@@ -217,11 +216,11 @@ def setup(param_sim, model):
 
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
-        # TODO add logic to split chan and call setup_time_constants and setup__voltages_offset.
-######################start from here.
         if opt == 'vshift':
+           # TODO test
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value) #will it be condset??? need to verify!!!
         elif opt == 'taumul':
+           # TODO test
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
 
     new_file = morph_morph_file(model,
