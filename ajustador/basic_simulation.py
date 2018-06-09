@@ -60,16 +60,14 @@ def cond_setting(s):
     return chan, comp, rhs
 
 def chan_setting(s):
-    ''' Processes chan setting simillar to cond.
+    ''' Splits channel voltagent dependent parameters to four parts.
+        'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)
     '''
-    # TODO verify and modify after sample run.
     logger.debug("logger in chan_settings!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
-    chan, comp= lhs.split(',', 1)
-    if comp != ':':
-        comp = int(comp)
-    return chan, comp, rhs
+    chan, opt, gate= lhs.split(',', 2)
+    return chan, opt, gate, rhs
 
 def scale_voltage_dependents_tau_muliplier(chanset, someting_tuple):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
@@ -119,9 +117,7 @@ def option_parser():
 @util.listize
 def serialize_options(opts):
     conds = []          # Channel conductances.
-    chans = []
-    #vshifts = []        # Channel voltage dependents threshold shifts.
-    #tau_multiplier = [] # Channel voltage depenents time constants multiplier.
+    chans = []          # Channel voltage dependent's time constants and vshifts
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
@@ -133,9 +129,9 @@ def serialize_options(opts):
                 conds.append('{},{}={}'.format(parts[1], parts[2], num))
             elif parts[0] == 'Cond' and len(parts) == 2: # e.g. Cond_Kir=value
                 conds.append('{},:={}'.format(parts[1], num))
-            elif parts[0] == 'Chan' and len(parts) == 4: # Chan_NaF_vshift/taumul_[X/Y/Z]=value
+            elif parts[0] == 'Chan' and len(parts) == 4: # e.g. Chan_NaF_vshift/taumul_[X/Y/Z]=value
                 chans.append('{},{},{}={}'.format(parts[1],parts[2], parts[3], num))
-            elif parts[0] == 'Chan' and len(parts) == 3: # Chan_NaF_vshift/taumul=value
+            elif parts[0] == 'Chan' and len(parts) == 3: # e.g. Chan_NaF_vshift/taumul=value
                 chans.append('{},{},:={}'.format(parts[1], parts[2], num))
             else:
                 key = key.replace('_', '-')
