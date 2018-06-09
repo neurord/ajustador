@@ -60,9 +60,7 @@ def cond_setting(s):
     return chan, comp, rhs
 
 def chan_setting(s):
-    ''' Splits channel voltagent dependent parameters to four parts.
-        'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)
-    '''
+        "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
     logger.debug("logger in chan_settings!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
@@ -177,7 +175,6 @@ def morph_morph_file(model, ntype, morph_file, new_file=None,
 
     return new_file
 
-# Write a function to setup vshift and taumul simillar to setup_conductances.
 def setup_conductance(condset, name, index, value):
     ''' Updates condset object's attribute with name.
         index == ':' -> Sets all child members values of condset.name
