@@ -234,7 +234,8 @@ def setup(param_sim, model):
     tables.graphtables(model, neurons,
                        param_sim.plot_current,
                        param_sim.plot_current_message)
-    writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
+    #writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
+    writer = tables.setup_hdf5_output(model, neurons, compartments=['axon'], filename='squid.h5') # Squid model sim data creation.
 
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
@@ -274,7 +275,6 @@ def run_simulation(injection_current, simtime, param_sim, model):
     moose.start(simtime)
 
 def main(args):
-    import sys # Remove it placed to debug!!!!!
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
     model = importlib.import_module('moose_nerp.' + param_sim.model)
@@ -284,7 +284,6 @@ def main(args):
     # TODO Check from here
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
     hdf5writer.close()
-    sys.exit(0) # Remove it placed to debug!!!!!
 
     if param_sim.plot_vm:
         neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
