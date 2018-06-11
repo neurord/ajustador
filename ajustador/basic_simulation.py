@@ -115,7 +115,7 @@ def option_parser():
 @util.listize
 def serialize_options(opts):
     conds = []          # Channel conductances.
-    chans = []          # Channel voltage dependent's time constants and vshifts
+    chans = []          # Channel voltage dependent's time constants and vshifts.
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
