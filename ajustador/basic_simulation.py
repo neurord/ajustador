@@ -60,7 +60,7 @@ def cond_setting(s):
     return chan, comp, rhs
 
 def chan_setting(s):
-        "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
+    "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
     logger.debug("logger in chan_settings!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
