@@ -290,7 +290,11 @@ def main(args):
         util.block_if_noninteractive()
     if param_sim.save_vm:
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
-        np.save(param_sim.save_vm, moose.element(elemname).vector)
+        persist_data = {"simtime": param_sim.simtime,
+                        "injection_current":param_sim.injection_current,
+                        "voltage_trace": moose.element(elemname).vector,
+                        "data_points": len(moose.element(elemname).vector)}
+        np.save(param_sim.save_vm, persist_data)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
