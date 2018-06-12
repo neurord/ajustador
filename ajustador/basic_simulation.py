@@ -235,6 +235,9 @@ def setup(param_sim, model):
                        param_sim.plot_current,
                        param_sim.plot_current_message)
     #writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
+    # TODO Add some control to write hd5 file. Discuss with Dr. Blackwell.
+    # TODO Give a mechanism to specify which compartment to write hdf5 output. Discuss with Dr. Blackwell.
+    # TODO Get a new filename or use prefix of save_vm as filename argument. Discuss witth Dr. Blackwell. 
     writer = tables.setup_hdf5_output(model, neurons, compartments=['axon'], filename='squid.h5') # Squid model sim data creation.
 
     simpaths=['/'+param_sim.neuron_type]
