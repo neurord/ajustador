@@ -36,6 +36,9 @@ from moose_nerp.prototypes import (cell_proto,
                                    util,
                                    standard_options)
 from moose_nerp.graph import neuron_graph
+from ajustador.helpers.regulate_chan_kinetics import chan_setting
+from ajustador.helpers.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+from ajustador.helpers.regulate_chan_kinetics import offset_voltage_dependents_vshift
 import logging
 from ajustador.helpers.loggingsystem import getlogger
 logger = getlogger(__name__)
@@ -58,30 +61,6 @@ def cond_setting(s):
     if comp != ':':
         comp = int(comp)
     return chan, comp, rhs
-
-def chan_setting(s):
-    "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
-    logger.debug("logger in chan_settings!!!")
-    lhs, rhs = s.split('=', 1)
-    rhs = float(rhs)
-    chan, opt, gate= lhs.split(',', 2)
-    return chan, opt, gate, rhs
-
-def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
-    ''' Scales the HH-channel model volatge dependents parametes with a factor
-        which controls the time constants of the channel implicitly.
-    '''
-    # TODO write tau_multiplier functionality.
-
-    # Zgate is special
-    pass
-
-def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
-    ''' Offsets the HH-channel model volatge dependents parametes with vshift.
-    '''
-    # TODO write vshift functionality.
-    # Zgate is special
-    pass
 
 def option_parser():
     ''' Extends moose_nerp.prototypes.standard_options by defining additional
@@ -115,7 +94,7 @@ def option_parser():
 @util.listize
 def serialize_options(opts):
     conds = []          # Channel conductances.
-    chans = []          # Channel voltage dependent's time constants and vshifts.
+    chans = []          # Channel voltage dependent's tau multiplier and vshifts.
     for key,val in opts.items():
         if key == 'junction_potential':
             # ignore, handled by the caller
@@ -196,16 +175,13 @@ def setup(param_sim, model):
     if param_sim.spines is not None:
         model.spineYN = param_sim.spines
 
-    condset = getattr(model.Condset, param_sim.neuron_type)
-    logger.debug(' ????????? {}'.format(condset)) # Model conductances here !!!!
-    # TODO get channel parameter information simillar to condset.
-    # TODO Use the chanset to setup threshold offset and tau multiplier.
+    condset = getattr(model.Condset, param_sim.neuron_type) # Fetch reference for model condutances.
+    chanset = model.Channels                                # Fetch reference for model channels.
 
     if param_sim.Kir_offset is not None:
         model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
         model.Channels.Kir.X.B_vhalf += param_sim.Kir_offset
-# model.Channels['k'].X
-#Write simillar below for loop for param_sim.chan to process channel Vshift and tau.
+
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
         print('cond:', name, comp, value)
@@ -215,7 +191,7 @@ def setup(param_sim, model):
         chan_name, opt, gate, value  = chan
         if opt == 'vshift':
            # TODO test
-           scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value) #will it be condset??? need to verify!!!
+           scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
         elif opt == 'taumul':
            # TODO test
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
@@ -237,7 +213,7 @@ def setup(param_sim, model):
     #writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
     # TODO Add some control to write hd5 file. Discuss with Dr. Blackwell.
     # TODO Give a mechanism to specify which compartment to write hdf5 output. Discuss with Dr. Blackwell.
-    # TODO Get a new filename or use prefix of save_vm as filename argument. Discuss witth Dr. Blackwell. 
+    # TODO Get a new filename or use prefix of save_vm as filename argument. Discuss witth Dr. Blackwell.
     writer = tables.setup_hdf5_output(model, neurons, compartments=['axon'], filename='squid.h5') # Squid model sim data creation.
 
     simpaths=['/'+param_sim.neuron_type]
@@ -284,7 +260,6 @@ def main(args):
     model.neurontypes([param_sim.neuron_type])
     logger.debug("conductances:::::: {}".format(param_sim.cond))
     pulse_gen, hdf5writer = setup(param_sim, model)
-    # TODO Check from here
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
     hdf5writer.close()
 
@@ -295,8 +270,10 @@ def main(args):
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
         persist_data = {"simtime": param_sim.simtime,
                         "injection_current":param_sim.injection_current,
-                        "voltage_trace": moose.element(elemname).vector,
-                        "data_points": len(moose.element(elemname).vector)}
+                        "voltage_data_points": moose.element(elemname).vector,
+                        "data_points_count": len(moose.element(elemname).vector)}
+        # TODO Discuss with Dr.Blackwell what is the main objective of saving in numpy file.
+        # TODO Question to Dr.Blackwell, For human readibility or other systems to use?
         np.save(param_sim.save_vm, persist_data)
 
 if __name__ == '__main__':
