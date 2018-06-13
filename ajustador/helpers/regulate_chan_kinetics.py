@@ -27,6 +27,7 @@ def chan_setting(s):
 def scale_xy_gate_taumul(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
+            logger.debug("logger processing taumul for AlphaBetaChannelParams!!!")
             gate_params_set.A_rate *= value
             gate_params_set.A_B *= value
             gate_params_set.B_rate *= value
@@ -34,18 +35,22 @@ def scale_xy_gate_taumul(gate_params_set, value):
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing taumul for StandardMooseTauInfChannelParams!!!")
             pass
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing taumul for TauInfMinChannelParams!!!")
             pass
         elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing taumul for SSTauQuadraticChannelParams!!!")
             pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
             # TODO should I check for singularity fixture? Will it impact the scaleing of tau?
+            logger.debug("logger processing vshift for AlphaBetaChannelParams!!!")
             gate_params_set.A_rate += value
             gate_params_set.A_vhalf += value
             gate_params_set.B_rate += value
@@ -53,20 +58,25 @@ def offset_xy_gate_vshift(gate_params_set, value):
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing vshift for StandardMooseTauInfChannelParams!!!")
             pass
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing vshift for TauInfMinChannelParams!!!")
             pass
         elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
             # TODO code voltage dependents setup values.
+            logger.debug("logger processing vshift for SSTauQuadraticChannelParams!!!")
             pass
 
 def scale_z_gate_taumul(gate_params_set, value):
     # TODO Add functionality
+    logger.debug("logger processing taumul for z_gate!!!")
     pass
 
 def offset_z_gate_vshift(gate_params_set, value):
     # TODO Add functionality
+    logger.debug("logger processing offset for z_gate!!!")
     pass
 
 def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
