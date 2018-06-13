@@ -27,24 +27,39 @@ def chan_setting(s):
 def scale_xy_gate_taumul(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
-            gate_params_set.
+            gate_params_set.A_rate *= value
+            gate_params_set.A_B *= value
+            gate_params_set.B_rate *= value
+            gate_params_set.B_B *= value
+            return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
-            gate_params_set.
+            # TODO code voltage dependents setup values.
+            pass
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            gate_params_set.
+            # TODO code voltage dependents setup values.
+            pass
         elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
-            gate_params_set.
+            # TODO code voltage dependents setup values.
+            pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
-            gate_params_set.A_vhalf
+            # TODO should I check for singularity fixture? Will it impact the scaleing of tau?
+            gate_params_set.A_rate += value
+            gate_params_set.A_vhalf += value
+            gate_params_set.B_rate += value
+            gate_params_set.B_vhalf += value
+            return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
-            gate_params_set.A_vhalf
+            # TODO code voltage dependents setup values.
+            pass
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            gate_params_set.A_vhalf
+            # TODO code voltage dependents setup values.
+            pass
         elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
-            gate_params_set.A_vhalf
+            # TODO code voltage dependents setup values.
+            pass
 
 def scale_z_gate_taumul(gate_params_set, value):
     # TODO Add functionality
@@ -78,6 +93,9 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
+    # TODO Discuss with Dr.Blackwell this can be further reduced to a single function by
+    # passing function as input based on type offset or vshift by holding functions in a
+    # datastructure by adds in complexity.
     if gate in ('X','Y'):
        specific_chan_set = getattr(chanset, chan_name)
        specific_chan_gate = getattr(specific_chan_set, gate)
