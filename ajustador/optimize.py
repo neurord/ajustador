@@ -79,6 +79,8 @@ def load_simulation(ivfile, simtime, junction_potential, features):
     injection_current = iv_filename_to_current(ivfile)
     voltage = np.load(ivfile)
     x = np.linspace(0, float(simtime), voltage.size)
+    logger.debug("type of voltage {} type of junction_potential {}".format(type(voltage),
+                                                                           type(junction_potential)))
     iv = loader.IVCurve(None, None,
                         injection=injection_current,
                         x=x, y=voltage - float(junction_potential),
