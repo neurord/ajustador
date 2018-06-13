@@ -6,12 +6,12 @@
 # TODO test the code.
 import logging
 from ajustador.helpers.loggingsystem import getlogger
-from moose_nerp.prototypes.cha_proto import AlphaBetaChannelParams
-from moose_nerp.prototypes.cha_proto import StandardMooseTauInfChannelParams
-from moose_nerp.prototypes.cha_proto import TauInfMinChannelParams
-from moose_nerp.prototypes.cha_proto import SSTauQuadraticChannelParams
-from moose_nerp.prototypes.cha_proto import ZChannelParams
-from moose_nerp.prototypes.cha_proto import BKChannelParams
+from moose_nerp.prototypes.chan_proto import AlphaBetaChannelParams
+from moose_nerp.prototypes.chan_proto import StandardMooseTauInfChannelParams
+from moose_nerp.prototypes.chan_proto import TauInfMinChannelParams
+from moose_nerp.prototypes.chan_proto import SSTauQuadraticChannelParams
+from moose_nerp.prototypes.chan_proto import ZChannelParams
+from moose_nerp.prototypes.chan_proto import BKChannelParams
 
 logger = getlogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -95,9 +95,9 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
        scale_z_gate_taumul(gate_params_set, value)
        return
     elif gate is ':':
-       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='X', value)
-       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='Y', value)
-       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='Z', value)
+       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='X', value=value)
+       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='Y', value=value)
+       scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate='Z', value=value)
        return
 
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
@@ -118,7 +118,7 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
        offset_z_gate_vshift(gate_params_set, value)
        return
     elif gate is ':':
-       offset_voltage_dependents_vshift(chanset, chan_name, gate='X', value)
-       offset_voltage_dependents_vshift(chanset, chan_name, gate='Y', value)
-       offset_voltage_dependents_vshift(chanset, chan_name, gate='Z', value)
+       offset_voltage_dependents_vshift(chanset, chan_name, gate='X', value=value)
+       offset_voltage_dependents_vshift(chanset, chan_name, gate='Y', value=value)
+       offset_voltage_dependents_vshift(chanset, chan_name, gate='Z', value=value)
        return
