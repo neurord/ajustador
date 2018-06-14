@@ -16,10 +16,13 @@ class trace(object):
         if len(molname_parts)>1:
             self.units=molname_parts[1]
             if len(molname_parts)>2:
-                #strip out any training non-numeric characteris
+                #strip out any trailing non-numeric characteris
                 self.scale=int(''.join([c for c in molname_parts[2] if c.isdigit()]))
             else:
                 self.scale=1
+        else:
+            self.units='nM'
+            self.scale=1
         if self.units.startswith('m') or self.units.startswith('(m'):
             #convert from mM to nM
             self.wave=wave*1e6

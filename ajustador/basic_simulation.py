@@ -1,3 +1,4 @@
+#2. update d1d2, 3. test spines, etc
 """Run a single simulation from the command-line
 
 This module takes a set of parameters which override the defaults
@@ -177,7 +178,7 @@ def setup(param_sim, model):
                          model.param_cond.NAME_SOMA)
 
     if param_sim.hsolve and model.calYN:
-        calcium.fix_calcium(model.neurontypes(), model)
+        calcium.fix_calcium(util.neurontypes(model.param_cond), model)
 
     return pg, writer
 
@@ -213,7 +214,7 @@ def main(args):
     global param_sim, pulse_gen
     param_sim = option_parser().parse_args(args)
     model = importlib.import_module('moose_nerp.' + param_sim.model)
-    model.neurontypes([param_sim.neuron_type])
+    model.param_cond.neurontypes=util.neurontypes(model.param_cond,[param_sim.neuron_type])
     pulse_gen, hdf5writer = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
     hdf5writer.close()
