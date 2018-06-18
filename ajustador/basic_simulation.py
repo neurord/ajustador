@@ -36,9 +36,9 @@ from moose_nerp.prototypes import (cell_proto,
                                    util,
                                    standard_options)
 from moose_nerp.graph import neuron_graph
-from ajustador.helpers.regulate_chan_kinetics import chan_setting
-from ajustador.helpers.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
-from ajustador.helpers.regulate_chan_kinetics import offset_voltage_dependents_vshift
+from ajustador.regulate_chan_kinetics import chan_setting
+from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 import logging
 from ajustador.helpers.loggingsystem import getlogger
 logger = getlogger(__name__)
