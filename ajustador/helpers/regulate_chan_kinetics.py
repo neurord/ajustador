@@ -9,7 +9,6 @@ from ajustador.helpers.loggingsystem import getlogger
 from moose_nerp.prototypes.chan_proto import AlphaBetaChannelParams
 from moose_nerp.prototypes.chan_proto import StandardMooseTauInfChannelParams
 from moose_nerp.prototypes.chan_proto import TauInfMinChannelParams
-from moose_nerp.prototypes.chan_proto import SSTauQuadraticChannelParams
 from moose_nerp.prototypes.chan_proto import ZChannelParams
 from moose_nerp.prototypes.chan_proto import BKChannelParams
 
@@ -33,17 +32,17 @@ def scale_xy_gate_taumul(gate_params_set, value):
             gate_params_set.B_rate *= value
             gate_params_set.B_B *= value
             return
-        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
+        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
             # TODO code voltage dependents setup values.
             logger.debug("logger processing taumul for StandardMooseTauInfChannelParams!!!")
-            pass
+            gate_params_set.A_rate *= value
+            gate_params_set.A_B *= value
+            gate_params_set.B_rate *= value
+            gate_params_set.B_B *= value
+            return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO code voltage dependents setup values.
             logger.debug("logger processing taumul for TauInfMinChannelParams!!!")
-            pass
-        elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
-            # TODO code voltage dependents setup values.
-            logger.debug("logger processing taumul for SSTauQuadraticChannelParams!!!")
             pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
@@ -55,19 +54,20 @@ def offset_xy_gate_vshift(gate_params_set, value):
             gate_params_set.A_vhalf += value
             gate_params_set.B_rate += value
             gate_params_set.B_vhalf += value
-            return
-        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
+        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
             # TODO code voltage dependents setup values.
             logger.debug("logger processing vshift for StandardMooseTauInfChannelParams!!!")
-            pass
+            gate_params_set.A_rate += value
+            gate_params_set.A_vhalf += value
+            gate_params_set.B_rate += value
+            gate_params_set.B_vhalf += value
+            return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO code voltage dependents setup values.
             logger.debug("logger processing vshift for TauInfMinChannelParams!!!")
-            pass
-        elif isinstance(gate_params_set, SSTauQuadraticChannelParams):
-            # TODO code voltage dependents setup values.
-            logger.debug("logger processing vshift for SSTauQuadraticChannelParams!!!")
-            pass
+            gate_params_set.SS_vhalf += value
+            gate_params_set.T_vhalf += value
+            return
 
 def scale_z_gate_taumul(gate_params_set, value):
     # TODO Add functionality
