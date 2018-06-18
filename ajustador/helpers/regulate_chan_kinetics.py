@@ -26,6 +26,7 @@ def chan_setting(s):
 def scale_xy_gate_taumul(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
+            # TODO Test
             logger.debug("logger processing taumul for AlphaBetaChannelParams!!!")
             gate_params_set.A_rate *= value
             gate_params_set.A_B *= value
@@ -33,7 +34,7 @@ def scale_xy_gate_taumul(gate_params_set, value):
             gate_params_set.B_B *= value
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
-            # TODO code voltage dependents setup values.
+            # TODO Test
             logger.debug("logger processing taumul for StandardMooseTauInfChannelParams!!!")
             gate_params_set.A_rate *= value
             gate_params_set.A_B *= value
@@ -49,6 +50,7 @@ def offset_xy_gate_vshift(gate_params_set, value):
     # TODO verify for each type and compute respectively for parameters.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
             # TODO should I check for singularity fixture? Will it impact the scaleing of tau?
+            # TODO TEST
             logger.debug("logger processing vshift for AlphaBetaChannelParams!!!")
             gate_params_set.A_rate += value
             gate_params_set.A_vhalf += value
