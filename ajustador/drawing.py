@@ -41,7 +41,7 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
-def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
+def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
     #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
@@ -76,6 +76,8 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None):
                 if isinstance(stim_data,nrd_output.Output):
                     if mol in stim_data.specie_names:
                         plotdata=nrd_output.nrd_output_conc(stim_data,mol)
+                        if stim_data.norm=='percent' and norm=='percent':
+                            plotdata=nrd_output.nrd_output_conc(stim_data,mol)/stim_data.basal(mol)['basal']
                         axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0],label=labl,color=colr)
                 elif isinstance(stim_data,loadconc.CSV_conc):
                     if mol in list(stim_data.waves.keys()):
@@ -259,7 +261,8 @@ def plot_param_space(group, measurement=None, *what, **options):
 def plot_history(groups, measurement=None, *,
                  show_quit=False, labels=None, ymax=None, fitness=None,
                  clear=True,
-                 newplot=False):
+                 newplot=False,
+                 Norm=None):
 
     if hasattr(groups[0], 'name'):
         groups = groups,
@@ -329,7 +332,7 @@ def plot_history(groups, measurement=None, *,
             print('Fitness report',fit_dict)
             f = plot_neurord_tog(measurement,sim,
                                  labels='iteration {}:{}'.format(x,' '.join(params)),
-                                 fit_rpt=texts)
+                                 fit_rpt=texts,norm=Norm)
         else:
             if measurement:
                 # FIXME: map from artist to group
