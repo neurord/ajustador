@@ -37,7 +37,7 @@ class trace(object):
         #calculate features: baseline, peaktime, peak value
         start_index,basal=nrd_fitness.basal(x,yvalue,stim_time)
         pt,peak=nrd_fitness.peak(x,yvalue,start_index)
-        self.features={'basal':basal,'peaktime':pt,'peakval': peak}
+        self.features={'basal':basal, 'stim_pt': start_index,'peaktime':pt,'peakval': peak}
 
 class CSV_conc(object):
     """Load a series of concentration measurements from a CSV file
@@ -87,11 +87,11 @@ class CSV_conc_set(object):
                 filenames=glob.glob(rootname+'*.csv')
             dirname = os.path.dirname(rootname)
             self.name=os.path.basename(rootname)
-        print('CSV_conc_set:',self.name, 'rootname', rootname,'dir',dirname,'files',filenames)
+        print('CSV_conc_set:',self.name, 'dir',dirname,'files',filenames,'stim_start (ms)', self.stim_time)
         if len(filenames)==0:
             print('**************** CSV_conc_set: NO FILES FOUND **************************')
         
-        csv_list=[CSV_conc(fn,rootname,stim_time,features) for fn in filenames]
+        csv_list=[CSV_conc(fn,rootname,self.stim_time,features) for fn in filenames]
         csv_list.sort(key=operator.attrgetter('injection'))
         self.data=csv_list
 
