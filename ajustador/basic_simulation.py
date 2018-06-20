@@ -268,13 +268,7 @@ def main(args):
         util.block_if_noninteractive()
     if param_sim.save_vm:
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
-        persist_data = {"simtime": param_sim.simtime,
-                        "injection_current":param_sim.injection_current,
-                        "voltage_data_points": moose.element(elemname).vector,
-                        "data_points_count": len(moose.element(elemname).vector)}
-        # TODO Discuss with Dr.Blackwell what is the main objective of saving in numpy file.
-        # TODO Question to Dr.Blackwell, For human readibility or other systems to use?
-        np.save(param_sim.save_vm, persist_data)
+        np.save(param_sim.save_vm, moose.element(elemname).vector)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

@@ -4,7 +4,7 @@ import os
 import sys
 import numpy as np
 import ajustador as aju
-import squid_experimental as squid # Acutual experimental data from waves.
+import squid_experimental as squid_exp # Acutual experimental data from waves.
 
 from ajustador import drawing
 from matplotlib import pyplot
@@ -24,8 +24,8 @@ if not os.path.exists(neuron_file_loc):
 
 os.chdir(neuron_file_loc)
 
-print("squid data keys:", squid.data.keys())
-exp_to_fit = squid.data[dataname] # TODO check for data!!! get professors help.
+print("squid data keys:", squid_exp.data.keys())
+exp_to_fit = squid_exp.data[dataname] # TODO check for data!!! get professors help.
 
 tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dataname+'F'
 
@@ -51,14 +51,14 @@ params1 = aju.optimize.ParamSet(
 
 fitness = aju.fitnesses.combined_fitness('empty',
                                          response=1,
-                                         baseline_pre=0,
+                                         baseline_pre=1,
                                          baseline_post=1,
-                                         rectification=2,
+                                         rectification=1,
                                          falling_curve_time=1,
-                                         spike_time=0.5,
+                                         spike_time=1,
                                          spike_width=1,
                                          spike_height=1,
-                                         spike_latency=0,
+                                         spike_latency=1,
                                          spike_count=1,
                                          spike_ahp=1,
                                          ahp_curve=1,
@@ -75,11 +75,9 @@ fit1 = aju.optimize.Fit(tmpdir,
 fit1.load()
 
 fit1.do_fit(generations, popsize=popsiz)
-sys.exit(0) # TODO Remove it after test!!!! Test from below this point.
 
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
-
 
 #Temporary directory cleanup #SRIRAM01022018
 #import shutil                      #SRIRAM02022018
