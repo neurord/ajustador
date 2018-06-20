@@ -1,7 +1,11 @@
 """
 @description : Fuctions to adjust channel kinectics like Time constants,
                Half actitavtion voltage.
+@Author: Sri Ram Sagar Kappagantula
+@e-mail: skappag@masonlive.gmu.edu
+@Date: 20th JUN, 2018.
 """
+
 # TODO TESTING add logger statements in everybranch.
 # TODO test the code.
 import logging
@@ -44,6 +48,8 @@ def scale_xy_gate_taumul(gate_params_set, value):
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO code voltage dependents setup values.
             logger.debug("logger processing taumul for TauInfMinChannelParams!!!")
+            gate_params_set.T_min *= value
+            gate_params_set.T_vdep *= value
             pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
@@ -73,19 +79,16 @@ def offset_xy_gate_vshift(gate_params_set, value):
             return
 
 def scale_z_gate_taumul(gate_params_set, value):
-    # TODO Add functionality
+    # TODO TEST
     logger.debug("logger processing taumul for z_gate!!!")
-    gate_params_set.T_min *= value
-    gate_params_set.T_vdep *= value
+    gate_params_set.tau *= value
+    gate_params_set.taumax *= value
     return
 
 def offset_z_gate_Ca_shift(gate_params_set, value):
-    # TODO Add functionality
+    # TODO TEST
     logger.debug("logger processing offset for z_gate!!!")
-    # Check are Kd, tau and taumax are of same units and order?????
     gate_params_set.Kd += value
-    gate_params_set.tau += value
-    gate_params_set.taumax += value
     return
 
 def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
@@ -101,12 +104,17 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     if gate in ('X','Y'):
        scale_xy_gate_taumul(specific_chan_gate, value)
        return
-    elif gate is 'Z' and specific_chan_gate.useConcentration: # Check how to get use concentration.
+    elif gate is 'Z' and specific_chan_gate.__class__: # Check how to get ChannelZparams..
        # Zgate is special
        scale_z_gate_taumul(gate_params_set, value)
        return
+    elif gate is 'Z':
     # TODO check for z gate normal case
-    scale_xy_gate_taumul(gate_params_set, value)
+       scale_xy_gate_taumul(gate_params_set, value)
+       return
+    else:
+       logger.info("Channel gate other than X, Y and Z!!!")
+       return
 
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
@@ -123,9 +131,14 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     if gate in ('X','Y'):
        offset_xy_gate_vshift(specific_chan_gate, value)
        return
-    elif gate is 'Z' and specifi.useConcentration:
+    elif gate is 'Z' and specifi.useConcentration: #check channelZparams class.
        # Zgate is special
        offset_z_gate_Ca_shift(gate_params_set, value)
        return
+    elif gate is 'Z':
     # TODO Check for z gate normal case.
-    offset_xy_gate_vshift(gate_params_set, value)
+       offset_xy_gate_vshift(gate_params_set, value)
+       return
+    else:
+       logger.info("Channel gate other than X, Y and Z!!!")
+       return
