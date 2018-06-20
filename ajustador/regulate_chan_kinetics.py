@@ -6,7 +6,6 @@
 @Date: 20th JUN, 2018.
 """
 
-# TODO TESTING add logger statements in everybranch.
 # TODO test the code.
 import logging
 from ajustador.helpers.loggingsystem import getlogger
@@ -14,7 +13,7 @@ from moose_nerp.prototypes.chan_proto import AlphaBetaChannelParams
 from moose_nerp.prototypes.chan_proto import StandardMooseTauInfChannelParams
 from moose_nerp.prototypes.chan_proto import TauInfMinChannelParams
 from moose_nerp.prototypes.chan_proto import ZChannelParams
-from moose_nerp.prototypes.chan_proto import BKChannelParams
+from moose_nerp.prototypes.chan_proto import BKChannelParams # Not used
 
 logger = getlogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -28,7 +27,7 @@ def chan_setting(s):
     return chan, opt, gate, rhs
 
 def scale_xy_gate_taumul(gate_params_set, value):
-    # TODO verify for each type and compute respectively for parameters.
+    # TODO TEST
         if isinstance(gate_params_set, AlphaBetaChannelParams):
             # TODO Test
             logger.debug("logger processing taumul for AlphaBetaChannelParams!!!")
@@ -46,16 +45,15 @@ def scale_xy_gate_taumul(gate_params_set, value):
             gate_params_set.SS_B *= value
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            # TODO code voltage dependents setup values.
+            # TODO TEST
             logger.debug("logger processing taumul for TauInfMinChannelParams!!!")
             gate_params_set.T_min *= value
             gate_params_set.T_vdep *= value
             pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
-    # TODO verify for each type and compute respectively for parameters.
+    # TODO TEST
         if isinstance(gate_params_set, AlphaBetaChannelParams):
-            # TODO should I check for singularity fixture? Will it impact the scaleing of tau?
             # TODO TEST
             logger.debug("logger processing vshift for AlphaBetaChannelParams!!!")
             gate_params_set.A_rate += value
@@ -63,8 +61,8 @@ def offset_xy_gate_vshift(gate_params_set, value):
             gate_params_set.B_rate += value
             gate_params_set.B_vhalf += value
             return
-        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
-            # TODO code voltage dependents setup values.
+        elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
+            # TODO TEST
             logger.debug("logger processing vshift for StandardMooseTauInfChannelParams!!!")
             gate_params_set.T_rate += value
             gate_params_set.T_vhalf += value
@@ -72,7 +70,7 @@ def offset_xy_gate_vshift(gate_params_set, value):
             gate_params_set.T_vhalf += value
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            # TODO code voltage dependents setup values.
+            # TODO TEST
             logger.debug("logger processing vshift for TauInfMinChannelParams!!!")
             gate_params_set.SS_vhalf += value
             gate_params_set.T_vhalf += value
@@ -81,20 +79,31 @@ def offset_xy_gate_vshift(gate_params_set, value):
 def scale_z_gate_taumul(gate_params_set, value):
     # TODO TEST
     logger.debug("logger processing taumul for z_gate!!!")
-    gate_params_set.tau *= value
-    gate_params_set.taumax *= value
+    if isinstance(gate_params_set, ZChannelParams): # Special case
+       logger.debug("logger processing special case Z gate")
+       gate_params_set.tau *= value
+       gate_params_set.taumax *= value
+    else:
+       logger.debug("logger processing normal case Z gate")
+       scale_xy_gate_taumul(gate_params_set, value) # Normal case
     return
 
 def offset_z_gate_Ca_shift(gate_params_set, value):
     # TODO TEST
     logger.debug("logger processing offset for z_gate!!!")
-    gate_params_set.Kd += value
+    if isinstance(gate_params_set, ZChannelParams): # Special case
+       logger.debug("logger processing special case Z gate")
+       gate_params_set.Kd += value
+    else:
+       logger.debug("logger processing normal case Z gate")
+       offset_xy_gate_vshift(gate_params_set, value) # Normal case
     return
 
 def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
         which controls the time constants of the channel implicitly.
     '''
+    # TODO TEST
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
@@ -104,13 +113,8 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     if gate in ('X','Y'):
        scale_xy_gate_taumul(specific_chan_gate, value)
        return
-    elif gate is 'Z' and specific_chan_gate.__class__: # Check how to get ChannelZparams..
-       # Zgate is special
-       scale_z_gate_taumul(gate_params_set, value)
-       return
     elif gate is 'Z':
-    # TODO check for z gate normal case
-       scale_xy_gate_taumul(gate_params_set, value)
+       scale_z_gate_taumul(specific_chan_gate, value)
        return
     else:
        logger.info("Channel gate other than X, Y and Z!!!")
@@ -119,9 +123,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
-    # TODO Discuss with Dr.Blackwell this can be further reduced to a single function by
-    # passing function as input based on type offset or vshift by holding functions in a
-    # datastructure by adds in complexity.
+    # TODO TEST
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
@@ -131,13 +133,8 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     if gate in ('X','Y'):
        offset_xy_gate_vshift(specific_chan_gate, value)
        return
-    elif gate is 'Z' and specifi.useConcentration: #check channelZparams class.
-       # Zgate is special
-       offset_z_gate_Ca_shift(gate_params_set, value)
-       return
     elif gate is 'Z':
-    # TODO Check for z gate normal case.
-       offset_xy_gate_vshift(gate_params_set, value)
+       offset_z_gate_Ca_shift(specific_chan_gate, value)
        return
     else:
        logger.info("Channel gate other than X, Y and Z!!!")
