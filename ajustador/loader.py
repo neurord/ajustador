@@ -226,6 +226,7 @@ class IVCurveSeries(Measurement):
 
 _known_units = {
     'pA':1e-12,
+    'A': 1
 }
 
 def parse_current(text):
