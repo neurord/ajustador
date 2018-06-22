@@ -9,8 +9,7 @@
 '''
 
 def test_chan_setting():
-    # TODO add testing code.
-    '''@Unittest: proper split of channel settings string.
+    '''@Test: proper split of channel settings string.
     '''
     from ajustador.regulate_chan_kinetics import chan_setting
     assert chan_setting('NaF,vshift,X=123.4') == ('NaF', 'vshift', 'X', 123.4)
@@ -36,23 +35,32 @@ class TestTauMultiplier(object):
 	    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 	    assert chan_setting(sample) == #something
 
+	def test_all_gates_taumul(self):
+            # TODO add testing code.
+            pass
+
 class TestVshiftMembrane(object):
 	def test_x_gate_vshift():
 	    # TODO add testing code.
 	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 	    assert chan_setting(sample) == #something
 
-	def test_y_gate_vshift():
+	def test_y_gate_vshift(self):
 	    # TODO add testing code.
 	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 	    assert chan_setting(sample) == #something
 
-	def test_z_gate_normal_ca_shift():
+	def test_z_gate_normal_ca_shift(self):
 	    # TODO add testing code.
 	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 	    assert chan_setting(sample) == #something
 
-	def test_z_gate_special_ca_shift():
+	def test_z_gate_special_ca_shift(self):
 	    # TODO add testing code.
 	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 	    assert chan_setting(sample) == #something
+
+	def test_all_gate_vshift(self):
+            # TODO add testing code.
+            pass
+
