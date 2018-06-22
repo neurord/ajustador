@@ -14,6 +14,7 @@ def test_chan_setting():
     from ajustador.regulate_chan_kinetics import chan_setting
     assert chan_setting('NaF,vshift,X=123.4') == ('NaF', 'vshift', 'X', 123.4)
 
+''''
 class TestTauMultiplier(object):
 	def test_x_gate_taumul(self):
 	    # TODO add testing code.
@@ -63,4 +64,4 @@ class TestVshiftMembrane(object):
 	def test_all_gate_vshift(self):
             # TODO add testing code.
             pass
-
+''''
