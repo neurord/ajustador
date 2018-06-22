@@ -7,7 +7,6 @@
 @email: k.sriramsagar@gmail.com
 @date: 21st JUN, 2018.
 '''
-import pytest
 
 def test_chan_setting():
     # TODO add testing code.
