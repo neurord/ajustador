@@ -2,7 +2,7 @@
 @Description: Unit test script for channel voltage depenends kinetics parameters.
 @Package: ajustador
 @Module: regulate_chan_kinetics.py
-@Test command: $pytest -q test_regulate_chan_kinetics.py
+@Test command: $python3 -m pytest test_regulate_chan_kinetics.py -v
 @Author: Sri Ram Sagar Kappagantula
 @email: k.sriramsagar@gmail.com
 @date: 21st JUN, 2018.
@@ -13,8 +13,7 @@ def test_chan_setting():
     '''@Unittest: proper split of channel settings string.
     '''
     from ajustador.regulate_chan_kinetics import chan_setting
-    sample = ""
-    assert chan_setting(sample) == #something
+    assert chan_setting('NaF,vshift,X=123.4') == ('NaF', 'vshift', 'X', 123.4)
 
 class TestTauMultiplier(object):
 	def test_x_gate_taumul(self):
