@@ -17,42 +17,44 @@ def test_chan_setting():
     sample = ""
     assert chan_setting(sample) == #something
 
-def test_x_gate_taumul():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
-    pass
+class TestTauMultiplier(object):
+	def test_x_gate_taumul(self):
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+	    assert chan_setting(sample) == #something
 
-def test_y_gate_taumul():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
-    pass
+	def test_y_gate_taumul(self):
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+	    assert chan_setting(sample) == #something
 
-def test_z_gate_normal_taumul():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
-    pass
+	def test_z_gate_normal_taumul(self):
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+	    assert chan_setting(sample) == #something
 
-def test_z_gate_special_taumul():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
-    pass
+	def test_z_gate_special_taumul(self):
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+	    assert chan_setting(sample) == #something
 
-def test_x_gate_vshift():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
-    pass
+class TestVshiftMembrane(object):
+	def test_x_gate_vshift():
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
+	    assert chan_setting(sample) == #something
 
-def test_y_gate_vshift():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
-    pass
+	def test_y_gate_vshift():
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
+	    assert chan_setting(sample) == #something
 
-def test_z_gate_normal_ca_shift():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
-    pass
+	def test_z_gate_normal_ca_shift():
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
+	    assert chan_setting(sample) == #something
 
-def test_z_gate_special_ca_shift():
-    # TODO add testing code.
-    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
-    pass
+	def test_z_gate_special_ca_shift():
+	    # TODO add testing code.
+	    from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
+	    assert chan_setting(sample) == #something
