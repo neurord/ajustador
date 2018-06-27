@@ -224,18 +224,32 @@ class IVCurveSeries(Measurement):
         return [wave for wave in waves
                 if wave.fileinfo.extra not in self._bad_extra]
 
+# TODO delete after proper dependencies testing.
 _known_units = {
     'pA':1e-12,
-    'A': 1
+    'A': 1 # TODO remove and make genric
 }
 
+# TODO delete after proper dependencies testing.
 def parse_current(text):
     parts = text.split(' ')
     if len(parts) != 2:
-        raise ValueError
+        raise ValueError  # use units in the parts current.
     mult = _known_units[parts[1]]
     value = float(parts[0])
     return value * mult
+
+def parse_units(text):
+    ''' input -> "100 pA"
+        returns -> 100, 10e-15.
+    '''
+    from ajustador.helpers.scaleing_factors import get_units_scale_factor
+    parts = text.split(' ')
+    if len(parts) != 2:
+        raise ValueError
+    if parts[0].lower().startswith('t'):
+       return parts[0], get_units_scale_factor(parts[1].strip('(')[0])
+    return float(parts[0]) * get_units_scale_factor(parts[1].strip('(')[0])
 
 class CSVSeries(Measurement):
     """Load a series of measurements from a CSV file
@@ -256,7 +270,10 @@ class CSVSeries(Measurement):
 
         csv = pd.read_csv(self.dirname, index_col=0)
         # FIXME: verify that units are really ms, mV
-        x = csv.index.values / 1000
-        waves = [Trace(parse_current(column), x, csv[column].values / 1000, self.features)
+        # Header has Time is mS, current in pA and data in mV.
+        value, factor = parse_units(csv.index.name)
+        if value.lower().startswith('t'):
+           x = csv.index.values * factor # old case replace * factor by / 1000
+        waves = [Trace(parse_units(column), x, csv[column].values / 1000, self.features)
                  for column in csv.columns]
         return waves
