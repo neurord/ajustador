@@ -27,7 +27,7 @@ os.chdir(neuron_file_loc)
 print("squid data keys:", squid_exp.data.keys())
 exp_to_fit = squid_exp.data[dataname] # TODO check for data!!! get professors help.
 
-tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dataname+'F'
+tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'F'
 
 ######## setup parameters for fitness ############
 
