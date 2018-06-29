@@ -6,4 +6,4 @@ from . import loader
 from . import optimize
 from . import utilities
 from . import vartype
-#from . import xml
+from . import xml

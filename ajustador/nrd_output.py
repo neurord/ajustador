@@ -31,6 +31,8 @@ import numpy as np
 import pandas as pd
 from lxml import etree
 import os
+from ajustador.nrd_fitness import basal as nrd_basal
+from ajustador.nrd_fitness import peak as nrd_peak
 
 AVOGADRO = 6.02214179
 """Avogadro constant from CODATA 2006"""
@@ -44,21 +46,6 @@ def nrd_output_conc(sim_output,specie):
     tot_vol=np.sum(volumes)
     pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
     return pop1conc
-
-def nrd_output_percent(sim_output,specie,start_ms,scale=1):
-    pop1=nrd_output_conc(sim_output,specie)
-    wave1y=pop1.values[:,0]
-    wave1x=pop1.index
-    start_index=np.fabs(wave1x-start_ms).argmin()
-    wave1y_basal=np.mean(wave1y[0:start_index])  #mean value of baseline
-    if scale==1:
-        wave1y=wave1y/wave1y_basal
-    else:
-        #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ratio ~4.0 (not 0.4 as in fret)
-        #perhaps should add ability to parse and execute arbitrary equation
-        wave1y=1.0+wave1y/scale
-    print('nrd_out_pcnt: sim=', sim_output.injection,'start= ',start_index, 'basal=', wave1y_basal,'peak=',np.max(wave1y))
-    return wave1y,wave1x
 
 def decode_species_names(array):
     return list(sp.decode('utf-8') for sp in array)
@@ -406,7 +393,7 @@ class Output(object):
 
     >>> out = Output('model.h5')
     """
-    def __init__(self, filename):
+    def __init__(self, filename,stim_time):
         self.file = tables.open_file(filename)
         try:
             element = self.file.root.model
@@ -423,11 +410,24 @@ class Output(object):
         else:
             self.injection=0
 
-        self._attributes = {'injection':self.injection}
         self.vols=self.model.grid().volume
         self.specie_names=self.model.species()
         self.population=self.counts()
-
+        self.stim_time=stim_time
+        self.norm=None
+        self._attributes = {'injection':self.injection,'stim_time':stim_time}
+        
+    def basal(self,mol):
+        conc=nrd_output_conc(self,mol)
+        start,base=nrd_basal(conc.index.values,conc.values,self.stim_time)
+        return {'stim_pt':start,'basal':base}
+        
+    def peak(self,mol):
+        conc=nrd_output_conc(self,mol)
+        start,base=nrd_basal(conc.index.values,conc,self.stim_time)
+        peaktime,peak=nrd_peak(conc.index.values,conc.values,start)
+        return {'peaktime':peaktime,'peak':peak}
+        
     def __getattr__(self, name):
         if name != '_attributes' and name in self._attributes:
             return getattr(self._attributes[name], name)

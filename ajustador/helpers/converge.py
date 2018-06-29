@@ -27,12 +27,16 @@ def converge_dict(fit_values,test_size,popsiz):
         means[i]=np.mean(fit_values[i*popsiz:(i+1)*popsiz])
         stdev[i]=np.std(fit_values[i*popsiz:(i+1)*popsiz])
         CV=stdev/means
-    slope_test_size=int(np.round(generations/test_size))
-    mean_dict=calc_mean_slopes(means,slope_test_size,test_size)
-    std_dict=calc_mean_slopes(stdev,slope_test_size,test_size)
+    if test_size>0:
+            slope_test_size=int(np.round(generations/test_size))
+            mean_dict=calc_mean_slopes(means,slope_test_size,test_size)
+            std_dict=calc_mean_slopes(stdev,slope_test_size,test_size)
+    else: 
+            mean_dict={'mean':means,'std':np.zeros(len(means)),'slope':np.zeros(len(means))}
+            std_dict={'mean':stdev,'std':np.zeros(len(stdev)),'slope':np.zeros(len(stdev))}
     return mean_dict,std_dict,CV
-
-def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06):
+    
+def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5000):
     converge=False
     fitness=[fitX.fitness_func(fitX[i], fitX.measurement, full=0) for i in range(len(fitX))]
     last_j=0
@@ -40,7 +44,7 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06):
     with open("convergence.dat","w") as fitfile:
         fitfile.write("data name: "+str(fitX.name)+"  test_size: "+str(test_size)+"\n")
         fitfile.write("iter mean_mean std_mean slope_mean mean_std std_std slope_std \n")
-        while not converge and len(fitness)<5000:
+        while not converge and len(fitness)<max_evals:
             fitX.do_fit(test_size, popsize=popsiz,seed=last_j*last_j)  #OPTIMIZE FOR ANOTHER TEST_SIZE GENERATIONS
             for i in range(len(fitX)-test_size*popsiz,len(fitX)):  #append fitness values
                 fitness.append(fitX.fitness_func(fitX[i], fitX.measurement, full=0))

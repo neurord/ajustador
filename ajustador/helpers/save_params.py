@@ -1,9 +1,15 @@
 import numpy as np
+from ajustador import xml
 
 def save_params(fitX, start,threshold):
 
     #initialized arrays and lists for feature fitnesses and param values
-    cols=len(fitX.fitness_func.report(fitX[0],fitX.measurement).split('\n'))
+    if isinstance(fitX[0],xml.NeurordSimulation):
+        mols=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1).keys())
+        conditions=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1)[mols[0]].keys())
+        cols=len(mols)*len(conditions)
+    else:
+        cols=len(fitX.fitness_func.report(fitX[0],fitX.measurement).split('\n'))
     rows=len(fitX)
     fitnessX=np.zeros((rows,cols))
     paramcols=len(fitX.param_names())
@@ -12,9 +18,14 @@ def save_params(fitX, start,threshold):
     
     #full=1 will print fitness of each feature, full=0 prints only overall fitness
     for i in range(len(fitX)):
-        fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
+        if isinstance(fitX[0],xml.NeurordSimulation):
+            fitness_tmp=[fitX.fitness_func(fitX[i],fitX.measurement,full=1)[mol][cond] for mol in mols for cond in conditions]
+            for j in range(len(fitness_tmp)):
+                fitnessX[i,j]=fitness_tmp[j]
+        else:
+            fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
         fitnessX[i,-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=0)
-        paramvals[i]=[np.round(fitX[i].params[j].value,6) for j in fitX.param_names()]
+        paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()]
         line=list(paramvals[i])
         line.insert(0,i)
         if fitnessX[i,-1]<threshold and i>=start:
@@ -22,15 +33,22 @@ def save_params(fitX, start,threshold):
             param_subset.append(line)
 
     fname=fitX.name
-    header=[nm+'='+str(np.round(val,6))+'+/-'+str(np.round(stdev,6))
+    if len(fitX.name)==0:
+        fname=fitX.model
+    header=[nm+'='+'%.5g'%(val)+'+/-'+'%.5g'%(stdev)
             for nm,val,stdev in zip(fitX.param_names(),
                                     fitX.params.unscale(fitX.optimizer.result()[0]),
                                     fitX.params.unscale(fitX.optimizer.result()[6]))]
     header.append('fitness')
-    header.insert(0,'cell iteration')
-    feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
+    if isinstance(fitX[0],xml.NeurordSimulation):
+        header.insert(0,'iteration')
+        feature_list=["".join(mol+' '+cond) for mol in mols for cond in conditions]
+    else:
+        header.insert(0,'cell iteration')
+        feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
     feature_list.append('model='+fitX.model)
-    feature_list.append('neuron='+fitX.neuron_type)
+    if fitX.neuron_type is not None:
+        feature_list.append('neuron='+fitX.neuron_type)
     #
     #save as text file to read into sas
     np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
