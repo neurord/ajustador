@@ -64,7 +64,7 @@ def write_model(model, fname):
         out.write(etree.tostring(model))
 
 class NeurordResult(optimize.SimulationResult):
-    def __init__(self, filename, features=[]):
+    def __init__(self, filename, features=[],stim_time=None):
         # model.h5 is used if only a directory is specified, but a .h5 file with different name can be specified
 
         print('NeurordResults', filename)
@@ -82,9 +82,9 @@ class NeurordResult(optimize.SimulationResult):
                 filenames=glob.glob(filename+'*.h5')
                 print('NeurordResult, exp_set',exp_set, ', files', filenames)
 
-        super().__init__(dirname, features)
+        super().__init__(dirname, features) #define some features here?  Such as norm, baseline, peak, peaktime?
 
-        output=[nrd_output.Output(fname) for fname in filenames]
+        output=[nrd_output.Output(fname,stim_time) for fname in filenames]
         output.sort(key=operator.attrgetter('injection'))
         self.output = np.array(output)
         #self.output=nrd_output.Output(filename)
@@ -97,7 +97,20 @@ def modelname_to_param(modelname,root_name):
     else:
         model_num=0
     return model_num
-   
+
+def stim_onset(tree):
+    xpath_onset='{http://stochdiff.textensor.org}InjectionStim/{http://stochdiff.textensor.org}onset'
+    start_ms=np.inf
+    root=tree.getroot()
+    stimset=root.find('{http://stochdiff.textensor.org}StimulationSet')
+    if stimset is not None:
+        for onset_elem in stimset.findall(xpath_onset):
+            onset_ms=float(onset_elem.text)
+            start_ms=min(onset_ms,start_ms)
+    else:
+        start_ms=0    
+    return start_ms
+
 class NeurordSimulation(optimize.Simulation):
     def __init__(self, dir,
                  *,
@@ -109,16 +122,17 @@ class NeurordSimulation(optimize.Simulation):
 
         super().__init__(dir,
                          params=params,
-                         features=[])#features)  without '=[]' doesn't work.
-
+                         features=[])
         ####### Loop over each simulation in the set #######
         model_names=(glob.glob(model+"*.xml") if not model.endswith('.xml')
                      else [model])
         model_set=[]
         fout_set=[]
         param_set=[]
+        start=np.inf
         for model_nm in model_names:
             model1= open_model(model_nm)
+            start=min(start,stim_onset(model1))
             model2 = update_model(model1, params) #xml with new parameters
             model_num=modelname_to_param(model_nm,model)
             param_set.append(model_num)
@@ -129,6 +143,8 @@ class NeurordSimulation(optimize.Simulation):
             fout = (modelfile[:-4] + '.h5' if modelfile.endswith('.xml')
                     else modelfile + '.h5')
             fout_set.append(fout)
+        self.stim_time=start #this assumes that each model file uses same stimulation onset
+        self._attributes={'stim_time':self.stim_time}
         #collect all the args into one tuple, similar to execute_for in optimize
         args=((mfile,fout,num) for mfile,fout,num in zip(model_set,fout_set,param_set))
 
@@ -144,7 +160,7 @@ class NeurordSimulation(optimize.Simulation):
         tag = os.path.join(self.tmpdir.name, '.complete')
         open(tag, 'w').close()
         
-        output=[nrd_output.Output(result[i]) for i in range(len(result))]
+        output=[nrd_output.Output(result[i],self.stim_time) for i in range(len(result))]
         output.sort(key=operator.attrgetter('injection'))
         self.output=np.array(output,dtype=object)
 

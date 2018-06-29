@@ -24,9 +24,22 @@ Fileinfo = namedtuple('fileinfo', 'group ident experiment protocol number extra'
 
 def _calculate_current(fileinfo, IV, IF):
     assert fileinfo.experiment == 1
-    start, inc = IV if fileinfo.protocol == 1 else IF
-    return start + inc * (fileinfo.number - 1)
-
+    tulength = len(IV)
+    if tulength ==3:
+        assert len(IF)==3 
+    #tulength will be the length of the tuple in IV, whether 2 or 3
+    if tulength == 2:
+        start, inc = IV if fileinfo.protocol == 1 else IF
+        return start + inc * (fileinfo.number - 1)
+    #tulength == 2 refers to OLD data files with 2 variables in tuple IV
+    elif tulength == 3:
+        startIV, inIV, IVnum = IV
+        start, inc,x = IV if fileinfo.protocol == IVnum else IF
+        return start + inc * (fileinfo.number - 1)
+    else:
+        print('ERROR: specify start, increment, and optionally protocol number')
+        assert tulength==2 or tulength==3
+        #tulength == 3 refers to NEW data files with 3 variables including trace number (usually 3 or 4) in tuple IV
 
 class Trace(object):
     def __init__(self, injection, x, y, features):
