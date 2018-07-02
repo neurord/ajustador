@@ -78,5 +78,5 @@ fit1.do_fit(generations, popsize=popsiz)
 drawing.plot_history(fit1, fit1.measurement)
 
 #Temporary directory cleanup #SRIRAM01022018
-#import shutil                      #SRIRAM02022018
-#shutil.rmtree(tmpdir)              #SRIRAM02022018
+import shutil                      #SRIRAM02022018
+shutil.rmtree(tmpdir)              #SRIRAM02022018
