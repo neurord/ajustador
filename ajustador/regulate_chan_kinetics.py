@@ -20,8 +20,8 @@ logger.setLevel(logging.DEBUG)
 
 def chan_setting(s):
     "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
-    logger.debug("logger in chan_settings!!!")
     lhs, rhs = s.split('=', 1)
+    logger.debug("lhs =  {}".format(lhs))
     rhs = float(rhs)
     chan, opt, gate= lhs.split(',', 2)
     return chan, opt, gate, rhs
@@ -30,73 +30,81 @@ def scale_xy_gate_taumul(gate_params_set, value):
     # TODO TEST
         if isinstance(gate_params_set, AlphaBetaChannelParams):
             # TODO Test
-            logger.debug("logger processing taumul for AlphaBetaChannelParams!!!")
+            logger.debug("taumul for AlphaBetaChannelParams!!! before {}".format(gate_params_set))
             gate_params_set.A_rate *= value
             gate_params_set.A_B *= value
             gate_params_set.B_rate *= value
             gate_params_set.B_B *= value
+            logger.debug("taumul for AlphaBetaChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
+            logger.debug("taumul for StandardMooseTauInfChannelParams before {}".format(gate_params_set))
             # TODO Test
-            logger.debug("logger processing taumul for StandardMooseTauInfChannelParams!!!")
             gate_params_set.T_rate *= value
             gate_params_set.T_B *= value
             gate_params_set.SS_rate *= value
             gate_params_set.SS_B *= value
+            logger.debug("taumul for StandardMooseTauInfChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO TEST
-            logger.debug("logger processing taumul for TauInfMinChannelParams!!!")
+            logger.debug("logger processing taumul for TauInfMinChannelParams before {}".format(gate_params_set))
             gate_params_set.T_min *= value
             gate_params_set.T_vdep *= value
+            logger.debug("logger processing taumul for TauInfMinChannelParams after {}".format(gate_params_set))
             pass
 
 def offset_xy_gate_vshift(gate_params_set, value):
     # TODO TEST
         if isinstance(gate_params_set, AlphaBetaChannelParams):
             # TODO TEST
-            logger.debug("logger processing vshift for AlphaBetaChannelParams!!!")
+            logger.debug("vshift for AlphaBetaChannelParams before {}".format(gate_params_set))
             gate_params_set.A_rate += value
             gate_params_set.A_vhalf += value
             gate_params_set.B_rate += value
             gate_params_set.B_vhalf += value
+            logger.debug("vshift for AlphaBetaChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
             # TODO TEST
-            logger.debug("logger processing vshift for StandardMooseTauInfChannelParams!!!")
+            logger.debug("vshift for StandardMooseTauInfChannelParams before {}".format(gate_params_set))
             gate_params_set.T_rate += value
             gate_params_set.T_vhalf += value
             gate_params_set.T_rate += value
             gate_params_set.T_vhalf += value
+            logger.debug("vshift for StandardMooseTauInfChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
             # TODO TEST
-            logger.debug("logger processing vshift for TauInfMinChannelParams!!!")
+            logger.debug("vshift for TauInfMinChannelParams before {}".format(gate_params_set))
             gate_params_set.SS_vhalf += value
             gate_params_set.T_vhalf += value
+            logger.debug("vshift for TauInfMinChannelParams after {}".format(gate_params_set))
             return
 
 def scale_z_gate_taumul(gate_params_set, value):
     # TODO TEST
-    logger.debug("logger processing taumul for z_gate!!!")
     if isinstance(gate_params_set, ZChannelParams): # Special case
-       logger.debug("logger processing special case Z gate")
+       logger.debug(" taumul special case Z gate before {}".format(gate_params_set))
        gate_params_set.tau *= value
        gate_params_set.taumax *= value
+       logger.debug(" taumul special case Z gate after {}".format(gate_params_set))
     else:
-       logger.debug("logger processing normal case Z gate")
+       logger.debug("taumul normal case Z gate before {}".format(gate_params_set))
        scale_xy_gate_taumul(gate_params_set, value) # Normal case
+       logger.debug("taumul normal case Z gate after {}".format(gate_params_set))
     return
 
 def offset_z_gate_Ca_shift(gate_params_set, value):
     # TODO TEST
-    logger.debug("logger processing offset for z_gate!!!")
     if isinstance(gate_params_set, ZChannelParams): # Special case
-       logger.debug("logger processing special case Z gate")
+       logger.debug("ca_shift special case Z gate before {}".format(gate_params_set))
        gate_params_set.Kd += value
+       logger.debug("ca_shift special case Z gate after {}".format(gate_params_set))
     else:
-       logger.debug("logger processing normal case Z gate")
+       logger.debug("ca_shift normal case Z gate before {}".format(gate_params_set))
        offset_xy_gate_vshift(gate_params_set, value) # Normal case
+       logger.debug("ca_shift normal case Z gate after {}".format(gate_params_set))
     return
 
 def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):

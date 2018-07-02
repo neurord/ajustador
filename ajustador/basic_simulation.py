@@ -190,10 +190,10 @@ def setup(param_sim, model):
 
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
-        if opt == 'vshift':
+        if opt == 'taumul':
            # TODO test
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
-        elif opt == 'taumul':
+        elif opt == 'vshift':
            # TODO test
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
 
