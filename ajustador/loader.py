@@ -110,7 +110,11 @@ class IVCurve(Trace):
     def load(cls, dirname, filename, IV, IF, time, features):
         path = os.path.join(dirname, filename)
         data = binarywave.load(path)['wave']['wData']
-        time = np.linspace(0, time, num=data.size, endpoint=False)
+        dt=binarywave.load(path)['wave']['wave_header']['hsA']
+        numpts=binarywave.load(path)['wave']['wave_header']['npnts']
+        tot_time=dt*numpts
+        #time = np.linspace(0, time, num=data.size, endpoint=False)
+        time = np.linspace(0, tot_time, num=numpts, endpoint=False)
 
         a, b, c, d, e, f = os.path.basename(filename)[:-4].split('_')
         fileinfo = Fileinfo(a, b, int(c), int(d), int(e), f)
