@@ -34,7 +34,7 @@ tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'F'
 P = aju.optimize.AjuParam
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=-0.005),
-    P('Chan_K_vshift_X', 0.001, min=-0.01, max=0.01),
+    P('Chan_K_vshift_X', 0, min=-0.1, max=0.1),
     P('morph_file', 'squid.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))
