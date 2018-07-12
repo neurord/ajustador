@@ -261,7 +261,7 @@ def parse_current(text):
     value = float(parts[0])
     return value * mult
 
-def parse_units(text):
+def parse_data_header(text):
     ''' input -> "100 pA"
         returns -> 100, 10e-15.
     '''
@@ -270,8 +270,8 @@ def parse_units(text):
     if len(parts) != 2:
         raise ValueError
     if parts[0].lower().startswith('t'):
-       return parts[0], get_units_scale_factor(parts[1].strip('(')[0])
-    return float(parts[0]) * get_units_scale_factor(parts[1].strip('(')[0])
+       return parts[0], get_units_scale_factor(parts[1])
+    return float(parts[0]) * get_units_scale_factor(parts[1])
 
 class CSVSeries(Measurement):
     """Load a series of measurements from a CSV file
@@ -284,8 +284,10 @@ class CSVSeries(Measurement):
 
     The time and injection values are extracted automatically.
     """
-    def __init__(self, dirname, params, *, features=None):
+    def __init__(self, dirname, params, *, features=None, voltage_units=None):
         super().__init__(dirname, params, features=features)
+        from ajustador.helpers.scaleing_factors import get_units_scale_factor
+        self.voltage_scale = get_units_scale_factor('mV') if voltage_units is None else get_units_scale_factor(voltage_units)
 
     def _waves(self):
         import pandas as pd
@@ -293,9 +295,9 @@ class CSVSeries(Measurement):
         csv = pd.read_csv(self.dirname, index_col=0)
         # FIXME: verify that units are really ms, mV
         # Header has Time is mS, current in pA and data in mV.
-        value, factor = parse_units(csv.index.name)
+        value, factor = parse_data_header(csv.index.name)
         if value.lower().startswith('t'):
            x = csv.index.values * factor # old case replace * factor by / 1000
-        waves = [Trace(parse_units(column), x, csv[column].values / 1000, self.features)
+        waves = [Trace(parse_data_header(column), x, csv[column].values * self.voltage_scale, self.features)
                  for column in csv.columns]
         return waves
