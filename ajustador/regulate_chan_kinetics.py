@@ -16,7 +16,7 @@ from moose_nerp.prototypes.chan_proto import ZChannelParams
 from moose_nerp.prototypes.chan_proto import BKChannelParams # Not used
 
 logger = getlogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def chan_setting(s):
     "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"
@@ -52,7 +52,7 @@ def scale_xy_gate_taumul(gate_params_set, value):
             gate_params_set.T_min *= value
             gate_params_set.T_vdep *= value
             logger.debug("logger processing taumul for TauInfMinChannelParams after {}".format(gate_params_set))
-            pass
+            return
 
 def offset_xy_gate_vshift(gate_params_set, value):
     # TODO TEST
@@ -112,6 +112,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
         which controls the time constants of the channel implicitly.
     '''
     # TODO TEST
+    logger.debug("Processing taumul on gate {}".format(gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
@@ -119,9 +120,11 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     specific_chan_set = getattr(chanset, chan_name)
     specific_chan_gate = getattr(specific_chan_set, gate)
     if gate in ('X','Y'):
+       logger.debug("gate {}".format(gate))
        scale_xy_gate_taumul(specific_chan_gate, value)
        return
     elif gate is 'Z':
+       logger.debug("gate {}".format(gate))
        scale_z_gate_taumul(specific_chan_gate, value)
        return
     else:
@@ -132,16 +135,22 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
     # TODO TEST
+    logger.debug("Processing vshift on gate {}".format(gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
        return
     specific_chan_set = getattr(chanset, chan_name)
+    logger.debug("specific_chan_set {}".format(specific_chan_set))
     specific_chan_gate = getattr(specific_chan_set, gate)
     if gate in ('X','Y'):
+       logger.debug("gate {}".format(gate))
+       logger.debug("specific_chan_gate {}".format(specific_chan_gate))
        offset_xy_gate_vshift(specific_chan_gate, value)
        return
     elif gate is 'Z':
+       logger.debug("gate {}".format(gate))
+       logger.debug("specific_chan_gate {}".format(specific_chan_gate))
        offset_z_gate_Ca_shift(specific_chan_gate, value)
        return
     else:
