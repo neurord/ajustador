@@ -293,11 +293,9 @@ class CSVSeries(Measurement):
         import pandas as pd
 
         csv = pd.read_csv(self.dirname, index_col=0)
-        # FIXME: verify that units are really ms, mV
-        # Header has Time is mS, current in pA and data in mV.
         value, factor = parse_data_header(csv.index.name)
         if value.lower().startswith('t'):
-           x = csv.index.values * factor # old case replace * factor by / 1000
+           x = csv.index.values * factor
         waves = [Trace(parse_data_header(column), x, csv[column].values * self.voltage_scale, self.features)
                  for column in csv.columns]
         return waves
