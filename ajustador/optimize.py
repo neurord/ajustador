@@ -18,10 +18,8 @@ import cma
 
 from . import loader, features as _features, fitnesses, utilities
 
-import logging #SRIRAM 02152018
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
 logger = getlogger(__name__) #SRIRAM 02152018
-logger.setLevel(logging.DEBUG) #SRIRAM 02152018
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
@@ -460,7 +458,6 @@ class Fit:
 
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
-        #add check here for existance of filename
         utilities.mkdir_p(dirname)
 
     def load(self, last=None):

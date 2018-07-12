@@ -5,6 +5,8 @@ import contextlib
 import numpy as np
 
 from .compat import TemporaryDirectory
+from ajustador.helpers.loggingsystem import getlogger
+logger = getlogger(__name__)
 
 @contextlib.contextmanager
 def chdir(dir):
@@ -94,7 +96,11 @@ def reorder_array(x, order):
     return x
 
 def mkdir_p(dirname):
+    "Make empty directory."
     try:
         os.mkdir(dirname)
     except OSError:
-        pass
+        logger.error("Previous Fit object data Exists in {}".format(dirname))
+        raise FileExistsError("Unable to create directory {}".format(dirname))
+        # TODO Ask Professor can system exit here or let to process, which will lead to
+        # Fixed error.
