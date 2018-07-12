@@ -12,4 +12,6 @@ def getlogger(name):
     """
     FORMAT = '%(asctime)s - %(process)d - %(filename)s - %(lineno)d - %(funcName)s - %(levelname)s - %(message)s'
     logging.basicConfig(format=FORMAT)
-    return(logging.getLogger(name))
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    return(logger)
