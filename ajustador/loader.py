@@ -246,21 +246,6 @@ class IVCurveSeries(Measurement):
         return [wave for wave in waves
                 if wave.fileinfo.extra not in self._bad_extra]
 
-# TODO delete after proper dependencies testing.
-_known_units = {
-    'pA':1e-12,
-    'A': 1 # TODO remove and make genric
-}
-
-# TODO delete after proper dependencies testing.
-def parse_current(text):
-    parts = text.split(' ')
-    if len(parts) != 2:
-        raise ValueError  # use units in the parts current.
-    mult = _known_units[parts[1]]
-    value = float(parts[0])
-    return value * mult
-
 def parse_data_header(text):
     ''' input -> "100 pA"
         returns -> 100, 10e-15.
