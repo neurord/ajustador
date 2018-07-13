@@ -12,8 +12,8 @@ from matplotlib import pyplot
 ########### Optimization of Squid 2 compartment neuron ##############
 ntype='squid' # neuron type.
 modeltype='squid' # Neuron model.
-generations=1 # 1 for test run and 250 for actual run.
-popsiz=3 # 3 for test run and 8 for actual run.
+generations=50 # 1 for test run and 250 for actual run.
+popsiz=8 # 3 for test run and 8 for actual run.
 
 ################## neuron /data specific specifications #############
 dataname='squid_experimental' # what should be the dataname???
@@ -32,9 +32,49 @@ tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'F'
 ######## setup parameters for fitness ############
 
 P = aju.optimize.AjuParam
+
+# without vshift and tau parameter changes
+'''
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=-0.005),
-    P('Chan_K_taumul_X', 1, min=0.05, max=4),
+    P('Cond_K_0', 360, min=100, max=400),
+    P('Cond_K_1', 560, min=200, max=600),
+    P('Cond_Na_0', 1200, min=100, max=1500),
+    P('Cond_Na_1', 1000, min=100, max=1500),
+    P('morph_file', 'squid_10C.p', fixed=1),
+    P('neuron_type',     ntype, fixed=1),
+    P('model',           modeltype,     fixed=1))
+
+'''
+
+'''
+# Exact parameter values of squid model.
+params1 = aju.optimize.ParamSet(
+    P('junction_potential', -0.012, min=-0.020, max=-0.005),
+    P('Chan_K_vshift', 0, min=-0.01, max=0.01),
+    P('Chan_Na_vshift', 0, min=-0.01, max=0.01),
+    P('Chan_K_taumul', 1, min=0.1, max=2),
+    P('Chan_Na_taumul', 1, min=0.1, max=2),
+    P('Cond_K_0', 360, min=100, max=400),
+    P('Cond_K_1', 560, min=200, max=600),
+    P('Cond_Na_0', 1200, min=100, max=1500),
+    P('Cond_Na_1', 1000, min=100, max=1500),
+    P('morph_file', 'squid_10C.p', fixed=1),
+    P('neuron_type',     ntype, fixed=1),
+    P('model',           modeltype,     fixed=1))
+'''
+
+# Added slight deviation from exact fit parameters.
+params1 = aju.optimize.ParamSet(
+    P('junction_potential', -0.012, min=-0.020, max=-0.005),
+    P('Chan_K_vshift', 0.005, min=-0.01, max=0.01),
+    P('Chan_Na_vshift', 0.005, min=-0.01, max=0.01),
+    P('Chan_K_taumul', 0.5, min=0.1, max=2),
+    P('Chan_Na_taumul', 0.5, min=0.1, max=2),
+    P('Cond_K_0', 370, min=100, max=400),
+    P('Cond_K_1', 570, min=200, max=600),
+    P('Cond_Na_0', 1210, min=100, max=1500),
+    P('Cond_Na_1', 1010, min=100, max=1500),
     P('morph_file', 'squid_10C.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))

@@ -34,11 +34,17 @@ tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'F'
 P = aju.optimize.AjuParam
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=-0.005),
-    P('Chan_K_taumul_X', 1, min=0.05, max=4),
+    P('Chan_K_vshift', 0.005, min=-0.01, max=0.01),
+    P('Chan_Na_vshift', 0.005, min=-0.01, max=0.01),
+    P('Chan_K_taumul', 0.5, min=0.1, max=2),
+    P('Chan_Na_taumul', 0.5, min=0.1, max=2),
+    P('Cond_K_0', 350, min=100, max=400),
+    P('Cond_K_1', 550, min=200, max=600),
+    P('Cond_Na_0', 1190, min=100, max=1500),
+    P('Cond_Na_1', 1050, min=100, max=1500),
     P('morph_file', 'squid_10C.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))
-
 
 fitness = aju.fitnesses.combined_fitness('empty',
                                          response=1,

@@ -36,7 +36,7 @@ P = aju.optimize.AjuParam
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=-0.005),
     P('Chan_K_taumul', 1, min=0.5, max=2),
-    P('morph_file', 'squid.p', fixed=1),
+    P('morph_file', 'squid_10C.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))
 
