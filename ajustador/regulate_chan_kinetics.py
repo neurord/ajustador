@@ -7,7 +7,6 @@
 """
 
 # TODO test the code.
-import logging
 from ajustador.helpers.loggingsystem import getlogger
 from moose_nerp.prototypes.chan_proto import AlphaBetaChannelParams
 from moose_nerp.prototypes.chan_proto import StandardMooseTauInfChannelParams
@@ -16,7 +15,6 @@ from moose_nerp.prototypes.chan_proto import ZChannelParams
 from moose_nerp.prototypes.chan_proto import BKChannelParams # Not used
 
 logger = getlogger(__name__)
-logger.setLevel(logging.INFO)
 
 def chan_setting(s):
     "'NaF, vshift, X=123.4' → ('NaF', 'vshift', 'X', 123.4)"

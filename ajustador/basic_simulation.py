@@ -40,10 +40,8 @@ from moose_nerp.graph import neuron_graph
 from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
-import logging
 from ajustador.helpers.loggingsystem import getlogger
 logger = getlogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
