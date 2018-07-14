@@ -177,10 +177,6 @@ def setup(param_sim, model):
     condset = getattr(model.Condset, param_sim.neuron_type) # Fetch reference for model condutances.
     chanset = model.Channels                                # Fetch reference for model channels.
 
-    if param_sim.Kir_offset is not None:
-        model.Channels.Kir.X.A_vhalf += param_sim.Kir_offset
-        model.Channels.Kir.X.B_vhalf += param_sim.Kir_offset
-
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
         print('cond:', name, comp, value)
