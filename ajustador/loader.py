@@ -26,7 +26,7 @@ def _calculate_current(fileinfo, IV, IF):
     assert fileinfo.experiment == 1
     tulength = len(IV)
     if tulength ==3:
-        assert len(IF)==3 
+        assert len(IF)==3
     #tulength will be the length of the tuple in IV, whether 2 or 3
     if tulength == 2:
         start, inc = IV if fileinfo.protocol == 1 else IF
@@ -271,7 +271,7 @@ class CSVSeries(Measurement):
     """
     def __init__(self, dirname, params, *, features=None, voltage_units=None):
         super().__init__(dirname, params, features=features)
-        from ajustador.helpers.scaleing_factors import get_units_scale_factor
+        from ajustador.helpers.scaling_factors import get_units_scale_factor
         self.voltage_scale = get_units_scale_factor('mV') if voltage_units is None else get_units_scale_factor(voltage_units)
 
     def _waves(self):
