@@ -25,9 +25,8 @@ def chan_setting(s):
     return chan, opt, gate, rhs
 
 def scale_xy_gate_taumul(gate_params_set, value):
-    # TODO TEST
+    # TODO Add doc string and comments.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
-            # TODO Test
             logger.debug("taumul for AlphaBetaChannelParams!!! before {}".format(gate_params_set))
             gate_params_set.A_rate *= value
             gate_params_set.A_B *= value
@@ -37,7 +36,6 @@ def scale_xy_gate_taumul(gate_params_set, value):
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams): # Can be merged with above branch after testing.
             logger.debug("taumul for StandardMooseTauInfChannelParams before {}".format(gate_params_set))
-            # TODO Test
             gate_params_set.T_rate *= value
             gate_params_set.T_B *= value
             gate_params_set.SS_rate *= value
@@ -45,7 +43,6 @@ def scale_xy_gate_taumul(gate_params_set, value):
             logger.debug("taumul for StandardMooseTauInfChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            # TODO TEST
             logger.debug("logger processing taumul for TauInfMinChannelParams before {}".format(gate_params_set))
             gate_params_set.T_min *= value
             gate_params_set.T_vdep *= value
@@ -53,9 +50,8 @@ def scale_xy_gate_taumul(gate_params_set, value):
             return
 
 def offset_xy_gate_vshift(gate_params_set, value):
-    # TODO TEST
+    # TODO Add doc string and comments.
         if isinstance(gate_params_set, AlphaBetaChannelParams):
-            # TODO TEST
             logger.debug("vshift for AlphaBetaChannelParams before {}".format(gate_params_set))
             gate_params_set.A_rate += value
             gate_params_set.A_vhalf += value
@@ -64,7 +60,6 @@ def offset_xy_gate_vshift(gate_params_set, value):
             logger.debug("vshift for AlphaBetaChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
-            # TODO TEST
             logger.debug("vshift for StandardMooseTauInfChannelParams before {}".format(gate_params_set))
             gate_params_set.T_rate += value
             gate_params_set.T_vhalf += value
@@ -73,7 +68,6 @@ def offset_xy_gate_vshift(gate_params_set, value):
             logger.debug("vshift for StandardMooseTauInfChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, TauInfMinChannelParams):
-            # TODO TEST
             logger.debug("vshift for TauInfMinChannelParams before {}".format(gate_params_set))
             gate_params_set.SS_vhalf += value
             gate_params_set.T_vhalf += value
@@ -81,7 +75,7 @@ def offset_xy_gate_vshift(gate_params_set, value):
             return
 
 def scale_z_gate_taumul(gate_params_set, value):
-    # TODO TEST
+    # TODO Add doc string and comments
     if isinstance(gate_params_set, ZChannelParams): # Special case
        logger.debug(" taumul special case Z gate before {}".format(gate_params_set))
        gate_params_set.tau *= value
@@ -94,7 +88,7 @@ def scale_z_gate_taumul(gate_params_set, value):
     return
 
 def offset_z_gate_Ca_shift(gate_params_set, value):
-    # TODO TEST
+    # TODO Add doc string and comments.
     if isinstance(gate_params_set, ZChannelParams): # Special case
        logger.debug("ca_shift special case Z gate before {}".format(gate_params_set))
        gate_params_set.Kd += value
@@ -109,7 +103,6 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
         which controls the time constants of the channel implicitly.
     '''
-    # TODO TEST
     logger.debug("Processing taumul on gate {}".format(gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
@@ -132,7 +125,6 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
-    # TODO TEST
     logger.debug("Processing vshift on gate {}".format(gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
