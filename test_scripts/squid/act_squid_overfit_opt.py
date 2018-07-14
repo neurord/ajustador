@@ -36,7 +36,7 @@ P = aju.optimize.AjuParam
 # without vshift and tau parameter changes
 '''
 params1 = aju.optimize.ParamSet(
-    P('junction_potential', -0.012, min=-0.020, max=-0.005),
+    P('junction_potential', 0, min=-0.020, max=0.020),
     P('Cond_K_0', 360, min=100, max=400),
     P('Cond_K_1', 560, min=200, max=600),
     P('Cond_Na_0', 1200, min=100, max=1500),
@@ -50,7 +50,7 @@ params1 = aju.optimize.ParamSet(
 '''
 # Exact parameter values of squid model.
 params1 = aju.optimize.ParamSet(
-    P('junction_potential', -0.012, min=-0.020, max=-0.005),
+    P('junction_potential', 0, min=-0.020, max=0.020),
     P('Chan_K_vshift', 0, min=-0.01, max=0.01),
     P('Chan_Na_vshift', 0, min=-0.01, max=0.01),
     P('Chan_K_taumul', 1, min=0.1, max=2),
@@ -66,7 +66,7 @@ params1 = aju.optimize.ParamSet(
 
 # Added slight deviation from exact fit parameters.
 params1 = aju.optimize.ParamSet(
-    P('junction_potential', -0.012, min=-0.020, max=-0.005),
+    P('junction_potential', -0.012, min=-0.020, max=0.020),
     P('Chan_K_vshift', 0.005, min=-0.01, max=0.01),
     P('Chan_Na_vshift', 0.005, min=-0.01, max=0.01),
     P('Chan_K_taumul', 0.5, min=0.1, max=2),
