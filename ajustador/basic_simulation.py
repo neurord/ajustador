@@ -185,10 +185,8 @@ def setup(param_sim, model):
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
         if opt == 'taumul':
-           # TODO test
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
         elif opt == 'vshift':
-           # TODO test
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
 
     new_file = morph_morph_file(model,
@@ -205,8 +203,8 @@ def setup(param_sim, model):
     tables.graphtables(model, neurons,
                        param_sim.plot_current,
                        param_sim.plot_current_message)
-    #writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename='d1d2_bs.h5')
-    writer = tables.setup_hdf5_output(model, neurons, compartments=['axon'], filename='squid.h5') # Squid model sim data creation.
+    writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename=param_sim.neuron_type+'.h5') # Data creation in temp dirs.
+    # Get soma name from Param_sim.NAME_SOMA something!!!
 
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
