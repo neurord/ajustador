@@ -203,8 +203,7 @@ def setup(param_sim, model):
     tables.graphtables(model, neurons,
                        param_sim.plot_current,
                        param_sim.plot_current_message)
-    writer = tables.setup_hdf5_output(model, neurons, compartments=['soma'], filename=param_sim.neuron_type+'.h5') # Data creation in temp dirs.
-    # Get soma name from Param_sim.NAME_SOMA something!!!
+    writer = tables.setup_hdf5_output(model, neurons, compartments=[model.param_cond.NAME_SOMA], filename=param_sim.neuron_type+'.h5') # Data creation in temp dirs.
 
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,

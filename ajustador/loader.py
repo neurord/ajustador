@@ -250,7 +250,7 @@ def parse_data_header(text):
     ''' input -> "100 pA"
         returns -> 100, 10e-15.
     '''
-    from ajustador.helpers.scaleing_factors import get_units_scale_factor
+    from ajustador.helpers.scaling_factors import get_units_scale_factor
     parts = text.split(' ')
     if len(parts) != 2:
         raise ValueError
