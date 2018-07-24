@@ -33,7 +33,7 @@ tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'F'
 
 P = aju.optimize.AjuParam
 
-# without vshift and tau parameter changes
+# without vshift and tau parameter changes.
 '''
 params1 = aju.optimize.ParamSet(
     P('junction_potential', 0, min=-0.020, max=0.020),
@@ -48,7 +48,7 @@ params1 = aju.optimize.ParamSet(
 '''
 
 '''
-# Exact parameter values of squid model.
+# Start all parameters with exact parameter values of squid model.
 params1 = aju.optimize.ParamSet(
     P('junction_potential', 0, min=-0.020, max=0.020),
     P('Chan_K_vshift', 0, min=-0.01, max=0.01),
@@ -64,7 +64,7 @@ params1 = aju.optimize.ParamSet(
     P('model',           modeltype,     fixed=1))
 '''
 
-# Added slight deviation from exact fit parameters.
+# Start all parameters with slight deviation to approach exact fit parameters.
 params1 = aju.optimize.ParamSet(
     P('junction_potential', -0.012, min=-0.020, max=0.020),
     P('Chan_K_vshift', 0.005, min=-0.01, max=0.01),
@@ -109,5 +109,5 @@ fit1.do_fit(generations, popsize=popsiz)
 drawing.plot_history(fit1, fit1.measurement)
 
 #Temporary directory cleanup #SRIRAM01022018
-import shutil                      #SRIRAM02022018
-shutil.rmtree(tmpdir)              #SRIRAM02022018
+#import shutil                      #SRIRAM02022018
+#shutil.rmtree(tmpdir)              #SRIRAM02022018
