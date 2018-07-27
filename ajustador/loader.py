@@ -45,8 +45,7 @@ class Trace(object):
     def __init__(self, injection, x, y, features):
         self.injection = injection
 
-        wave = np.rec.fromarrays((x, y), names='x,y')
-        self.wave = wave
+        self.wave = np.rec.fromarrays((x, y), names='x,y')
 
         self._attributes = {'wave':self,
                             'injection':self}
