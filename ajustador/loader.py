@@ -235,7 +235,7 @@ class IVCurveSeries(Measurement):
     def __init__(self, dirname, params, *, IV, IF, time, bad_extra=(), features=None):
         super().__init__(dirname, params, features=features)
 
-        self._load_args = dict(IV=IV, IF=IF, time=time)
+        self._load_args = dict(IV=IV, IF=IF, endtime=time)
         self._bad_extra = bad_extra
 
     def _waves(self):
