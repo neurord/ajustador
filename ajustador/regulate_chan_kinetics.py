@@ -6,7 +6,6 @@
 @Date: 20th JUN, 2018.
 """
 
-# TODO test the code.
 from ajustador.helpers.loggingsystem import getlogger
 from moose_nerp.prototypes.chan_proto import AlphaBetaChannelParams
 from moose_nerp.prototypes.chan_proto import StandardMooseTauInfChannelParams
@@ -103,7 +102,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
     ''' Scales the HH-channel model volatge dependents parametes with a factor
         which controls the time constants of the channel implicitly.
     '''
-    logger.debug("Processing taumul on gate {}".format(gate))
+    logger.debug("Processing taumul on chan_name {} gate {}".format(chan_name, gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
@@ -125,7 +124,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
 def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     ''' Offsets the HH-channel model volatge dependents parametes with vshift.
     '''
-    logger.debug("Processing vshift on gate {}".format(gate))
+    logger.debug("Processing vshift on chan_name {} gate {}".format(chan_name, gate))
     if gate is ':':
        for gate in ('X', 'Y', 'Z'):
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
