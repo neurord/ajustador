@@ -62,7 +62,7 @@ def offset_xy_gate_vshift(gate_params_set, value):
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
             logger.debug("vshift for StandardMooseTauInfChannelParams before {}".format(gate_params_set))
-            gate_params_set.T_vhalf += value
+            gate_params_set.SS_vhalf += value
             gate_params_set.T_vhalf += value
             logger.debug("vshift for StandardMooseTauInfChannelParams after {}".format(gate_params_set))
             return
