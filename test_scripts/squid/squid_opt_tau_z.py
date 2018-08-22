@@ -12,7 +12,7 @@ from matplotlib import pyplot
 ########### Optimization of Squid 2 compartment neuron ##############
 ntype='squid' # neuron type.
 modeltype='squid' # Neuron model.
-generations=250 # 1 for test run and 250 for actual run.
+generations=200 # 1 for test run and 250 for actual run.
 popsiz=8 # 3 for test run and 8 for actual run.
 
 ################## neuron /data specific specifications #############
@@ -112,7 +112,3 @@ fit1.do_fit(generations, popsize=popsiz)
 
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
-
-#Temporary directory cleanup #SRIRAM01022018
-#import shutil                      #SRIRAM02022018
-#shutil.rmtree(tmpdir)              #SRIRAM02022018
