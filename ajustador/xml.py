@@ -41,6 +41,8 @@ def do_replacements(model, paramset):
         mech = param.mech
         if isinstance(mech, XMLParamMechanism):
             elems = model.xpath(mech.xpath)
+            if len(elems) != 1:
+                raise ValueError('xpath matched {} elements - wrong Reaction id specified'.format(len(elems)))
             #concentration (and surface density) sets have different format.
             #they have values and attrib, not text. May need to enhance this for region specific sets
             if elems[0].text==None:
@@ -171,7 +173,7 @@ class NeurordSimulation(optimize.Simulation):
 def execute(p):
     modelfile, outfile, num = p
 
-    cmdline = ['neurord', modelfile, outfile]
+    cmdline = ['java', '-jar', '/home/nadia/neurord-3.2.4-all-deps.jar', modelfile, outfile]
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     subprocess.check_call(cmdline)
 

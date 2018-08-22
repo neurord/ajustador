@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 
 from . import vartype
+from ajustador.helpers.loggingsystem import getlogger
+logger = getlogger(__name__)
 
 class ErrorCalc(enum.IntEnum):
     normal = 1
@@ -17,6 +19,7 @@ RELATIVE_MAX_RATIO = 10
 NAN_REPLACEMENT = 1.5
 
 def sub_mes_dev(reca, recb):
+    logger.debug("{} {}".format(type(reca), type(recb)))
     if isinstance(reca, vartype.vartype):
         assert reca == vartype.vartype.nan
         return vartype.vartype.nan
@@ -358,6 +361,7 @@ def spike_range_y_histogram_fitness(sim, measurement, full=False, error=ErrorCal
     else:
         return (diffs**2).mean()**0.5
 
+# Not used in ajustador fitment.
 def parametrized_fitness(response=1, baseline=0.3, rectification=1,
                          falling_curve_param=1,
                          mean_isi=1, spike_latency=1,
@@ -460,6 +464,8 @@ class combined_fitness:
 
     @staticmethod
     def fitness_by_name(name):
+    ''' Gets '_fitness' postfix functions using name.
+        returns a function object.'''
         return globals()[name + '_fitness']
 
     def __init__(self,
@@ -494,9 +500,9 @@ class combined_fitness:
         weights = self.presets[preset].copy()
         weights.update(kwargs)
 
-        pairs1 = [(w, self.fitness_by_name(k))
-                  for k, w in weights.items()]
-        pairs2 = [(w, k) for k, w in extra.items()] if extra else []
+        pairs1 = [(w, self.fitness_by_name(k)) # w -> (weight, function_object)
+                  for k, w in weights.items()] # Computes initial feature fitness value pairs.
+        pairs2 = [(w, k) for k, w in extra.items()] if extra else [] #Do we ever give extra items??
         if set(f for w,f in pairs1).intersection(set(f for w,f in pairs2)):
             raise ValueError('"known" function specified in extra')
         self.pairs = pairs1 + pairs2
@@ -506,13 +512,19 @@ class combined_fitness:
             if w or full:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
-    def __call__(self, sim, measurement, full=False):
+    def __call__(self, sim, measurement, full=False): #What is full flag?
         parts = [w*r for w, r, name in self._parts(sim, measurement)]
+        parts = [(w*r, name) for w, r, name in self._parts(sim, measurement)] #here we can find featurename!!!
+        temp = zip(parts)
+        parts= list(temp[2])
         arr = np.array(parts)
+        arr.dtype.names = temp[0]
         if full:
             return arr
         else:
-            return (arr**2).mean()**0.5
+            # Calculates RMS across feature. (fitness metrics.)
+            logger.debug("name: {}\nmean: {}".format(arr.dtype.names, arr))
+            return (arr**2).mean()**0.5 # Possibility of code break due to NaN. 
 
     @property
     def __name__(self):

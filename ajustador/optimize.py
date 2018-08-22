@@ -16,7 +16,8 @@ import multiprocessing
 import numpy as np
 import cma
 
-from . import loader, features as _features, fitnesses, utilities
+# _features holds all feature classes.
+from . import loader, features as _features, fitnesses, utilities 
 
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
 logger = getlogger(__name__) #SRIRAM 02152018
@@ -495,6 +496,7 @@ class Fit:
         return sim
 
     def sim_fitness(self, sim, full=False, max_fitness=None):
+        # combined_fitness is a decorate for fitnesses (i.e) fitnesses function in combined_fitnesss is execute here.
         fitness = self.fitness_func(sim, self.measurement, full=full)
         if full and max_fitness is not None:
             for i in range(len(fitness)):
@@ -557,6 +559,7 @@ class Fit:
         return values
 
     def do_fit(self, count, params=None, sigma=1, popsize=8, seed=123):
+        # what is the order of params which position represents which params?
         if self.optimizer is None:
             if params is None:
                 params = self.params.scaled
@@ -568,7 +571,7 @@ class Fit:
             if self.optimizer.stop():
                 break
             points = self.optimizer.ask()
-            values = self.fitness_multi(points)
+            values = self.fitness_multi(points) # computes total fitness across featuers.
             self.optimizer.tell(points, values)
-            self.optimizer.logger.add()  # write data to disc to be plotted
+            self.optimizer.logger.add()  # write plottable data to disc.
             self.optimizer.disp()
