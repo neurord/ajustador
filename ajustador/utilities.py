@@ -102,5 +102,3 @@ def mkdir_p(dirname):
     except OSError:
         logger.error("Previous Fit object data Exists in {}".format(dirname))
         raise FileExistsError("Unable to create directory {}".format(dirname))
-        # TODO Ask Professor can system exit here or let to process, which will lead to
-        # Fixed error.
