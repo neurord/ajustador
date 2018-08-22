@@ -12,12 +12,12 @@ from matplotlib import pyplot
 ########### Optimization of Squid 2 compartment neuron ##############
 ntype='squid' # neuron type.
 modeltype='squid' # Neuron model.
-generations=250 # 1 for test run and 250 for actual run.
-popsiz=8 # 3 for test run and 8 for actual run.
+generations=1 # 1 for test run and 250 for actual run.
+popsiz=3 # 3 for test run and 8 for actual run.
 
 ################## neuron /data specific specifications #############
 dataname='squid_experimental' # what should be the dataname???
-neuron_file_loc = '/home/Sriramsagar/neural_prj/outputs/squid_opt/'+dataname+'tau_z'
+neuron_file_loc = '/home/Sriramsagar/neural_prj/outputs/squid_opt/'+dataname+'tau_z_temp'
 #Change directory so that outcomes*.dat will be saved to different directories
 if not os.path.exists(neuron_file_loc):
     os.mkdir(neuron_file_loc)
@@ -27,7 +27,7 @@ os.chdir(neuron_file_loc)
 print("squid data keys:", squid_exp.data.keys())
 exp_to_fit = squid_exp.data[dataname] # TODO check for data!!! get professors help.
 
-tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'tau_z'
+tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'tau_z_temp'
 
 ######## setup parameters for fitness ############
 

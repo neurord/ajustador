@@ -107,7 +107,7 @@ def scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value):
        for gate in ('X', 'Y', 'Z'):
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
        return
-    specific_chan_set = getattr(chanset, chan_name)
+    specific_chan_set = get_chanset(chanset, chan_name)
     specific_chan_gate = getattr(specific_chan_set, gate)
     if gate in ('X','Y'):
        logger.debug("gate {}".format(gate))
@@ -129,7 +129,7 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
        for gate in ('X', 'Y', 'Z'):
            offset_voltage_dependents_vshift(chanset, chan_name, gate, value)
        return
-    specific_chan_set = getattr(chanset, chan_name)
+    specific_chan_set = get_chanset(chanset, chan_name)
     logger.debug("specific_chan_set {}".format(specific_chan_set))
     specific_chan_gate = getattr(specific_chan_set, gate)
     if gate in ('X','Y'):
@@ -145,3 +145,9 @@ def offset_voltage_dependents_vshift(chanset, chan_name, gate, value):
     else:
        logger.info("Channel gate other than X, Y and Z!!!")
        return
+
+def get_chanset(chanset, chan_name):
+    try:
+        return getattr(chanset, chan_name)
+    except KeyError:
+        logger.error("Tried to adjust a channel param which is not defined on model: channel name:{}".format(chan_name))
