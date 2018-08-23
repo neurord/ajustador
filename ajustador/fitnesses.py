@@ -7,7 +7,9 @@ import pandas as pd
 
 from . import vartype
 from ajustador.helpers.loggingsystem import getlogger
+import logging
 logger = getlogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class ErrorCalc(enum.IntEnum):
     normal = 1
@@ -39,6 +41,7 @@ def sub_mes_dev(reca, recb):
         return reca - recb
 
 def _select(a, b, which=None):
+    ''' a -> sim, b -> measurments and which -> filter condition'''
     if which is not None:
         bsel = b[which]
     else:
@@ -464,8 +467,7 @@ class combined_fitness:
 
     @staticmethod
     def fitness_by_name(name):
-    ''' Gets '_fitness' postfix functions using name.
-        returns a function object.'''
+        ''' Gets "_fitness" postfix functions using name. Returns a function object.'''
         return globals()[name + '_fitness']
 
     def __init__(self,
@@ -513,12 +515,12 @@ class combined_fitness:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
     def __call__(self, sim, measurement, full=False): #What is full flag?
-        parts = [w*r for w, r, name in self._parts(sim, measurement)]
+        #parts = [w*r for w, r, name in self._parts(sim, measurement)]
         parts = [(w*r, name) for w, r, name in self._parts(sim, measurement)] #here we can find featurename!!!
-        temp = zip(parts)
-        parts= list(temp[2])
+        parts = [x for x,y in zip(parts)]
+        names = [x for x,y in zip(parts)]
         arr = np.array(parts)
-        arr.dtype.names = temp[0]
+        arr.dtype.names = names
         if full:
             return arr
         else:

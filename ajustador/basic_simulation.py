@@ -41,7 +41,9 @@ from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 from ajustador.helpers.loggingsystem import getlogger
+import logging
 logger = getlogger(__name__)
+logger.setLevel(logging.INFO)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
@@ -184,6 +186,7 @@ def setup(param_sim, model):
 
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
+        print('chan:', chan_name, opt, gate, value)
         if opt == 'taumul':
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
         elif opt == 'vshift':

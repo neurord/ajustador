@@ -20,7 +20,9 @@ import cma
 from . import loader, features as _features, fitnesses, utilities 
 
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
+import logging
 logger = getlogger(__name__) #SRIRAM 02152018
+logger.setLevel(logging.DEBUG)
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
@@ -62,8 +64,8 @@ def execute(p):
                '--save-vm={}'.format(result),
     ] + params
     #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
-    logger.debug("Logger in execute function!!!")
-    logger.debug("Seralized params:\n {}".format(params)) #SRIRAM 02192018
+    #logger.debug("Logger in execute function!!!")
+    #logger.debug("Seralized params:\n {}".format(params)) #SRIRAM 02192018
     logger.debug("Basic_simulation command:\n {}".format(cmdline)) #SRIRAM 02192018
     with utilities.chdir(dirname):
         subprocess.check_call(cmdline)
@@ -74,12 +76,12 @@ def execute(p):
     return iv
 
 def load_simulation(ivfile, simtime, junction_potential, features):
-    logger.info("Logger in load simulation function!!!")
+    #logger.info("Logger in load simulation function!!!")
     injection_current = iv_filename_to_current(ivfile)
     voltage = np.load(ivfile)
     x = np.linspace(0, float(simtime), voltage.size)
-    logger.debug("type of voltage {} type of junction_potential {}".format(type(voltage),
-                                                                           type(junction_potential)))
+    #logger.debug("type of voltage {} type of junction_potential {}".format(type(voltage),
+    #                                                                       type(junction_potential)))
     iv = loader.IVCurve(None, None,
                         injection=injection_current,
                         x=x, y=voltage - float(junction_potential),
@@ -169,7 +171,7 @@ class MooseSimulation(Simulation):
         injection_delay=measurement.features[0].injection_start,    #SRIRAM 02192018
         injection_width=measurement.features[0].injection_interval,  #SRIRAM 02192018
         baseline = measurement.mean_baseline.x
-        logger.debug("Logger in MooseSimulation.make!!!") #SRIRAM
+        #logger.debug("Logger in MooseSimulation.make!!!") #SRIRAM
         logger.debug("Params \n {}".format(params))
 
         return cls(dir=dir,
