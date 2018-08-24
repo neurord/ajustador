@@ -21,6 +21,8 @@ RELATIVE_MAX_RATIO = 10
 NAN_REPLACEMENT = 1.5
 
 def sub_mes_dev(reca, recb):
+    ''' Calculates difference and root over sum of squares of deviation of raca and racb.
+    '''
     logger.debug("{} {}".format(type(reca), type(recb)))
     if isinstance(reca, vartype.vartype):
         assert reca == vartype.vartype.nan
@@ -41,13 +43,17 @@ def sub_mes_dev(reca, recb):
         return reca - recb
 
 def _select(a, b, which=None):
-    ''' a -> sim, b -> measurments and which -> filter condition'''
+    ''' a -> sim, b -> measurments and which -> filter condition
+        Note:- If filter condtion is not satisfied by any of the value, when indexed
+               will return a nan.'''
     if which is not None:
         bsel = b[which]
     else:
         bsel = b
     fitting = np.abs(a.injection[:,None] - bsel.injection) < 1e-12
+    logger.debug("{}".format(fitting))
     ind1, ind2 = np.where(fitting)
+    logger.debug("{} {}".format(a[ind1], bsel[ind2]))
     return a[ind1], bsel[ind2]
 
 def relative_diff_single(a, b, extra=0):
@@ -76,6 +82,9 @@ def relative_diff(a, b):
     return relative_diff_single(a, b, extra=abs(n1 - n2))
 
 def _evaluate(a, b, error=ErrorCalc.relative):
+    ''' Calcuate RMS using anyone of the two types of difference selected by error flag.
+        Difference are calculated in between sim and measurements.
+    '''
     if error == ErrorCalc.normal:
         diff = sub_mes_dev(a, b)
         ans = vartype.array_rms(diff)
@@ -128,7 +137,7 @@ def rectification_fitness(sim, measurement, full=False, error=ErrorCalc.relative
 
 #This should be calculated for positive current injection, even if no spike.  Maybe only if no spike
 def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
-    m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)
+    m1, m2 = _select(sim, measurement, measurement.injection > 0)
     if len(m2) == 0:
         return vartype.vartype.nan
     return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight,
@@ -239,7 +248,7 @@ def ahp_curve_compare(cut1, cut2):
     return ((diff**2).sum()/diff.size)**0.5
 
 def _pick_spikes(wave1, wave2):
-    n = max(wave1.spike_count, wave2.spike_count)
+    n = min(wave1.spike_count, wave2.spike_count) # TODO Test run opt.
     # let's compare max 10 spikes
     if n <= 10:
         return range(n)
@@ -247,6 +256,8 @@ def _pick_spikes(wave1, wave2):
         return np.linspace(0, n-1, 10, dtype=int)
 
 def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    ''' Calculates
+    '''
     m1, m2 = _select(sim, measurement,
                      sim.spike_count + measurement.spike_count > 0)
 
@@ -502,9 +513,9 @@ class combined_fitness:
         weights = self.presets[preset].copy()
         weights.update(kwargs)
 
-        pairs1 = [(w, self.fitness_by_name(k)) # w -> (weight, function_object)
-                  for k, w in weights.items()] # Computes initial feature fitness value pairs.
-        pairs2 = [(w, k) for k, w in extra.items()] if extra else [] #Do we ever give extra items??
+        pairs1 = [(w, self.fitness_by_name(k)) # w -> (weight, function_object) gathers function names with postfix "_fitness"
+                  for k, w in weights.items()]
+        pairs2 = [(w, k) for k, w in extra.items()] if extra else []
         if set(f for w,f in pairs1).intersection(set(f for w,f in pairs2)):
             raise ValueError('"known" function specified in extra')
         self.pairs = pairs1 + pairs2
@@ -514,19 +525,22 @@ class combined_fitness:
             if w or full:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
-    def __call__(self, sim, measurement, full=False): #What is full flag?
+    def __call__(self, sim, measurement, full=False):
         #parts = [w*r for w, r, name in self._parts(sim, measurement)]
-        parts = [(w*r, name) for w, r, name in self._parts(sim, measurement)] #here we can find featurename!!!
-        parts = [x for x,y in zip(parts)]
-        names = [x for x,y in zip(parts)]
-        arr = np.array(parts)
-        arr.dtype.names = names
+        parts = [(w*r, name) for w, r, name in self._parts(sim, measurement)] # Computes feature fitnesses using _parts for one trace.
+        parts = {y : x for x,y in parts}
+        names = list(parts.keys())
+        arr = np.array(list(parts.values()))
+        for feature_name, value in zip(names, arr):
+            logger.debug("{} {}".format(feature_name, value))
+            if str(value) == str(np.nan):
+                logger.warning("Feature: {}  fitness: {} Check Feature declaration in 'combined_fitness'!!!".format(feature_name, value))
+
         if full:
             return arr
         else:
             # Calculates RMS across feature. (fitness metrics.)
-            logger.debug("name: {}\nmean: {}".format(arr.dtype.names, arr))
-            return (arr**2).mean()**0.5 # Possibility of code break due to NaN. 
+            return (np.nanmean(arr**2))**0.5
 
     @property
     def __name__(self):

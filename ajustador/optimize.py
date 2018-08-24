@@ -22,7 +22,7 @@ from . import loader, features as _features, fitnesses, utilities
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
 import logging
 logger = getlogger(__name__) #SRIRAM 02152018
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def filtereddict(**kwargs):
     return dict((k,v) for (k,v) in kwargs.items() if v is not None)
@@ -64,9 +64,8 @@ def execute(p):
                '--save-vm={}'.format(result),
     ] + params
     #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
-    #logger.debug("Logger in execute function!!!")
-    #logger.debug("Seralized params:\n {}".format(params)) #SRIRAM 02192018
-    logger.debug("Basic_simulation command:\n {}".format(cmdline)) #SRIRAM 02192018
+    #logger.debug("Seralized params:\n {}".format(params))
+    logger.debug("Basic_simulation command:\n {}".format(cmdline))
     with utilities.chdir(dirname):
         subprocess.check_call(cmdline)
         iv = load_simulation(result,
@@ -76,12 +75,11 @@ def execute(p):
     return iv
 
 def load_simulation(ivfile, simtime, junction_potential, features):
-    #logger.info("Logger in load simulation function!!!")
     injection_current = iv_filename_to_current(ivfile)
     voltage = np.load(ivfile)
     x = np.linspace(0, float(simtime), voltage.size)
-    #logger.debug("type of voltage {} type of junction_potential {}".format(type(voltage),
-    #                                                                       type(junction_potential)))
+    logger.debug("type of voltage {} type of junction_potential {}".format(type(voltage),
+                                                                           type(junction_potential)))
     iv = loader.IVCurve(None, None,
                         injection=injection_current,
                         x=x, y=voltage - float(junction_potential),
@@ -498,7 +496,6 @@ class Fit:
         return sim
 
     def sim_fitness(self, sim, full=False, max_fitness=None):
-        # combined_fitness is a decorate for fitnesses (i.e) fitnesses function in combined_fitnesss is execute here.
         fitness = self.fitness_func(sim, self.measurement, full=full)
         if full and max_fitness is not None:
             for i in range(len(fitness)):

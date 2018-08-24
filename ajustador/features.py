@@ -6,6 +6,10 @@ from scipy import optimize
 
 from . import utilities, detect, vartype
 from .signal_smooth import smooth
+from ajustador.helpers.loggingsystem import getlogger
+import logging
+logger = getlogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 def _plot_line(ax, ranges, value, label, color, zorder=3):
     for (a,b) in ranges:

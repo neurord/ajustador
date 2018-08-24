@@ -12,13 +12,9 @@ from matplotlib import pyplot
 ########### Optimization of Squid 2 compartment neuron ##############
 ntype='squid' # neuron type.
 modeltype='squid' # Neuron model.
-<<<<<<< HEAD
+
 generations=1 # 1 for test run and 250 for actual run.
 popsiz=3 # 3 for test run and 8 for actual run.
-=======
-generations=200 # 1 for test run and 250 for actual run.
-popsiz=8 # 3 for test run and 8 for actual run.
->>>>>>> 92ff80f0ba4918f932dd2cab7f1f64b7cad4bce8
 
 ################## neuron /data specific specifications #############
 dataname='squid_experimental' # what should be the dataname???
@@ -81,10 +77,10 @@ params1 = aju.optimize.ParamSet(
     P('Cond_K_1', 570, min=200, max=600),
     P('Cond_Na_0', 1210, min=100, max=1500),
     P('Cond_Na_1', 1010, min=100, max=1500),
-    P('Chan_Krp_taumul', 0.9, min=0.5, max=2),
-    P('Chan_Krp_vshift', 0.001, min=-0.05, max=0.05),
-    P('Chan_SKCa_taumul', 0.9, min=0.5, max=2),
-    P('Chan_SKCa_vshift', 0.001, min=-0.05, max=0.05),
+    #P('Chan_Krp_taumul', 0.9, min=0.5, max=2),
+    #P('Chan_Krp_vshift', 0.001, min=-0.05, max=0.05),
+    #P('Chan_SKCa_taumul', 0.9, min=0.5, max=2),
+    #P('Chan_SKCa_vshift', 0.001, min=-0.05, max=0.05),
     P('morph_file', 'squid_10C.p', fixed=1),
     P('neuron_type',     ntype, fixed=1),
     P('model',           modeltype,     fixed=1))
