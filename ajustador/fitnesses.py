@@ -53,7 +53,7 @@ def _select(a, b, which=None):
     fitting = np.abs(a.injection[:,None] - bsel.injection) < 1e-12
     logger.debug("{}".format(fitting))
     ind1, ind2 = np.where(fitting)
-    logger.debug("{} {}".format(a[ind1], bsel[ind2]))
+    logger.debug("{} {}".format(ind1, ind2))
     return a[ind1], bsel[ind2]
 
 def relative_diff_single(a, b, extra=0):
@@ -247,8 +247,8 @@ def ahp_curve_compare(cut1, cut2):
     diff[np.isnan(diff)] = np.nanmax(diff)
     return ((diff**2).sum()/diff.size)**0.5
 
-def _pick_spikes(wave1, wave2):
-    n = min(wave1.spike_count, wave2.spike_count) # TODO Test run opt.
+def _pick_spikes(wave1, wave2)
+    n = max(wave1.spike_count, wave2.spike_count)
     # let's compare max 10 spikes
     if n <= 10:
         return range(n)
@@ -375,33 +375,7 @@ def spike_range_y_histogram_fitness(sim, measurement, full=False, error=ErrorCal
     else:
         return (diffs**2).mean()**0.5
 
-# Not used in ajustador fitment.
-def parametrized_fitness(response=1, baseline=0.3, rectification=1,
-                         falling_curve_param=1,
-                         mean_isi=1, spike_latency=1,
-                         spike_height=1, spike_width=1, spike_ahp=1,
-                         error=ErrorCalc.relative):
-    def fitness(sim, measurement):
-        f1 = response_fitness(sim, measurement, error=error) if response else 0
-        f2 = baseline_fitness(sim, measurement, error=error) if baseline else 0
-        f3 = rectification_fitness(sim, measurement, error=error) if rectification else 0
-        f4 = falling_curve_time_fitness(sim, measurement, error=error) if falling_curve_param else 0
-        f5 = mean_isi_fitness(sim, measurement, error=error) if mean_isi else 0
-        f6 = spike_latency_fitness(sim, measurement, error=error) if spike_latency else 0
-        f7 = spike_height_fitness(sim, measurement, error=error) if spike_height else 0
-        f8 = spike_width_fitness(sim, measurement, error=error) if spike_width else 0
-        f9 = spike_ahp_fitness(sim, measurement, error=error) if spike_ahp else 0
-        return (response * f1 / 16 +
-                baseline * f2 / 35 +
-                rectification * f3 / 3 +
-                falling_curve_param * f4 / 0.70 +
-                mean_isi * f5 / 5 +
-                spike_latency * f6 / 0.10 +
-                spike_height * f7 / 20 +
-                spike_width * f8 / 10 +
-                spike_ahp * f9 / 8)
-    return fitness
-
+# Used in work-aju.py somebody might use this.
 def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     a = response_fitness(sim, measurement, error=error)
     b1 = baseline_pre_fitness(sim, measurement, error=error)
