@@ -247,7 +247,7 @@ def ahp_curve_compare(cut1, cut2):
     diff[np.isnan(diff)] = np.nanmax(diff)
     return ((diff**2).sum()/diff.size)**0.5
 
-def _pick_spikes(wave1, wave2)
+def _pick_spikes(wave1, wave2):
     n = max(wave1.spike_count, wave2.spike_count)
     # let's compare max 10 spikes
     if n <= 10:
@@ -390,9 +390,9 @@ def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return (arr**2).mean()**0.5
+        return nan_handled_rms(arr)
 
-def spike_fitness_0(sim, measurement, full=False, error=ErrorCalc.relative):
+def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     a = mean_isi_fitness(sim, measurement, error=error)
     b = spike_latency_fitness(sim, measurement, error=error)
     c = spike_width_fitness(sim, measurement, error=error)
@@ -403,18 +403,7 @@ def spike_fitness_0(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return (arr**2).mean()**0.5
-
-def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
-    a = spike_time_fitness(sim, measurement, error=error)
-    b = spike_width_fitness(sim, measurement, error=error)
-    c = spike_height_fitness(sim, measurement, error=error)
-    d = spike_ahp_fitness(sim, measurement, error=error)
-    arr = np.array([a, b, c, d])
-    if full:
-        return arr
-    else:
-        return (arr**2).mean()**0.5
+        return nan_handled_rms(arr)
 
 class combined_fitness:
     """Basic weighted combinations of fitness functions
@@ -500,21 +489,18 @@ class combined_fitness:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
     def __call__(self, sim, measurement, full=False):
-        #parts = [w*r for w, r, name in self._parts(sim, measurement)]
-        parts = [(w*r, name) for w, r, name in self._parts(sim, measurement)] # Computes feature fitnesses using _parts for one trace.
-        parts = {y : x for x,y in parts}
-        names = list(parts.keys())
-        arr = np.array(list(parts.values()))
-        for feature_name, value in zip(names, arr):
+        parts = {feature_name: w*r for w, r, feature_name in self._parts(sim, measurement)} # Computes feature fitnesses using _parts for one trace.
+        for feature_name, value in parts.items():
             logger.debug("{} {}".format(feature_name, value))
             if str(value) == str(np.nan):
                 logger.warning("Feature: {}  fitness: {} Check Feature declaration in 'combined_fitness'!!!".format(feature_name, value))
 
         if full:
-            return arr
+            return np.array(list(parts.values()))
         else:
+            arr = np.array(list(parts.values()))
             # Calculates RMS across feature. (fitness metrics.)
-            return (np.nanmean(arr**2))**0.5
+            return (np.nanmean(arr**2))**0.5 # Make changes to return nan with replacement not nanmean.
 
     @property
     def __name__(self):
@@ -635,3 +621,9 @@ def find_nonsimilar(group, measurement, fitness,
             duplicate[i + 1:] |= diff < similarity
 
     return find_nonsimilar_result(group[-duplicate], scores[-duplicate], params[-duplicate])
+
+def nan_handled_rms(arr:np.array) -> float:
+    ''' Numpy array with nans are replaced with NAN_REPLACEMENT and returns RMS value.
+    '''
+    arr[np.isnan(arr)] = NAN_REPLACEMENT
+    return np.sqrt(np.mean(arr**2))
