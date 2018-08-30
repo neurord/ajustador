@@ -179,7 +179,7 @@ def array_sub(reca, recb):
     xy = (reca.x - recb.x, (reca.dev**2 + recb.dev**2)**0.5)
     return np.rec.fromarrays(xy, names='x,dev')
 
-def array_rms(rec):
+def array_rms(rec, nan_replacement=1.5):
     """Return the rms of an array
 
     .. math::
@@ -191,4 +191,5 @@ def array_rms(rec):
     if hasattr(rec, 'x'):
         return ((rec.x / rec.dev)**2).mean()**0.5
     else:
+        rec[np.isnan(rec)] = nan_replacement
         return (rec ** 2).mean()**0.5

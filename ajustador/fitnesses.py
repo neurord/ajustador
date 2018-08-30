@@ -94,7 +94,7 @@ def _evaluate(a, b, error=ErrorCalc.relative):
         ans = vartype.array_rms(diff)
     else:
         assert False, error
-    if np.isnan(ans):
+    if np.isnan(ans): # Is this check really needed?
         return NAN_REPLACEMENT
     else:
         return ans
@@ -373,7 +373,7 @@ def spike_range_y_histogram_fitness(sim, measurement, full=False, error=ErrorCal
     if full:
         return diffs
     else:
-        return (diffs**2).mean()**0.5
+        return vartype.array_rms(diffs)
 
 # Used in work-aju.py somebody might use this.
 def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
@@ -390,7 +390,7 @@ def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return nan_handled_rms(arr)
+        return vartype.array_rms(arr)
 
 def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     a = mean_isi_fitness(sim, measurement, error=error)
@@ -403,7 +403,7 @@ def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return nan_handled_rms(arr)
+        return vartype.array_rms(arr)
 
 class combined_fitness:
     """Basic weighted combinations of fitness functions
@@ -500,7 +500,7 @@ class combined_fitness:
         else:
             arr = np.array(list(parts.values()))
             # Calculates RMS across feature. (fitness metrics.)
-            return (np.nanmean(arr**2))**0.5 # Make changes to return nan with replacement not nanmean.
+            return vartype.array_rms(arr)
 
     @property
     def __name__(self):
@@ -621,9 +621,3 @@ def find_nonsimilar(group, measurement, fitness,
             duplicate[i + 1:] |= diff < similarity
 
     return find_nonsimilar_result(group[-duplicate], scores[-duplicate], params[-duplicate])
-
-def nan_handled_rms(arr:np.array) -> float:
-    ''' Numpy array with nans are replaced with NAN_REPLACEMENT and returns RMS value.
-    '''
-    arr[np.isnan(arr)] = NAN_REPLACEMENT
-    return np.sqrt(np.mean(arr**2))
