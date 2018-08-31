@@ -23,6 +23,5 @@ def get_units_scale_factor(eng_units):
         prefix = eng_units.strip('(')[0]
         return units_prefix[prefix]
     except (KeyError, IndexError):
-        logger.warn("Provided units {}! please check your input units in csv.".format(eng_units))
-        logger.warn("Assuming SI units! Using scaling factor 1.0!")
+        logger.warn("Provided units {}! Using scaling factor 1.0! Check your input units in csv.".format(eng_units))
         return 1.0

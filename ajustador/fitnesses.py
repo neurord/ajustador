@@ -87,10 +87,10 @@ def _evaluate(a, b, error=ErrorCalc.relative):
     '''
     if error == ErrorCalc.normal:
         diff = sub_mes_dev(a, b)
-        ans = vartype.array_rms(diff)
+        ans = vartype.array_rms(diff, nan_replacement=NAN_REPLACEMENT)
     elif error == ErrorCalc.relative:
         diff = relative_diff(a, b)
-        ans = vartype.array_rms(diff)
+        ans = vartype.array_rms(diff, nan_replacement=NAN_REPLACEMENT)
     else:
         assert False, error
     if np.isnan(ans): # Is this check really needed?
@@ -243,8 +243,7 @@ def ahp_curve_compare(cut1, cut2):
 
     cut1i = interpolate(cut1, cut2)
     diff = np.tanh((cut1i.y - cut2.y) / cut2.y)
-    diff[np.isnan(diff)] = np.nanmax(diff)
-    return ((diff**2).sum()/diff.size)**0.5
+    return vartype.array_rms(diff, nan_replacement=np.nanmax(diff))
 
 def _pick_spikes(wave1, wave2):
     n = max(wave1.spike_count, wave2.spike_count)
@@ -274,7 +273,7 @@ def ahp_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return diffs
     else:
-        return ((diffs**2).sum()/diffs.size)**0.5
+        return vartype.array_rms(diffs, nan_replacement=NAN_REPLACEMENT)
 
 class WaveHistogram:
     """Compute the difference between cumulative histograms of two waves
@@ -372,7 +371,7 @@ def spike_range_y_histogram_fitness(sim, measurement, full=False, error=ErrorCal
     if full:
         return diffs
     else:
-        return vartype.array_rms(diffs)
+        return vartype.array_rms(diffs, nan_replacement=NAN_REPLACEMENT)
 
 # Used in work-aju.py somebody might use this.
 def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
@@ -389,7 +388,7 @@ def hyperpol_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return vartype.array_rms(arr)
+        return vartype.array_rms(arr, nan_replacement=NAN_REPLACEMENT)
 
 def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     a = mean_isi_fitness(sim, measurement, error=error)
@@ -402,7 +401,7 @@ def spike_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if full:
         return arr
     else:
-        return vartype.array_rms(arr)
+        return vartype.array_rms(arr, nan_replacement=NAN_REPLACEMENT)
 
 class combined_fitness:
     """Basic weighted combinations of fitness functions
@@ -499,7 +498,7 @@ class combined_fitness:
         else:
             arr = np.array(list(parts.values()))
             # Calculates RMS across feature. (fitness metrics.)
-            return vartype.array_rms(arr)
+            return vartype.array_rms(arr, nan_replacement=NAN_REPLACEMENT)
 
     @property
     def __name__(self):
