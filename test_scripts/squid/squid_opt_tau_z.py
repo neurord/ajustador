@@ -13,8 +13,8 @@ from matplotlib import pyplot
 ntype='squid' # neuron type.
 modeltype='squid' # Neuron model.
 
-generations=1 # 1 for test run and 250 for actual run.
-popsiz=3 # 3 for test run and 8 for actual run.
+generations = 1 # 1 for test run and 250 for actual run.
+popsiz = 3 # 3 for test run and 8 for actual run.
 
 ################## neuron /data specific specifications #############
 dataname='squid_experimental' # what should be the dataname???
