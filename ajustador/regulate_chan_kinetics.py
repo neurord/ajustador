@@ -56,9 +56,9 @@ def offset_xy_gate_vshift(gate_params_set, value):
             gate_params_set.A_vhalf += value
             gate_params_set.B_vhalf += value
             if (gate_params_set.A_C == -1): # Case3: HH model is discontinues at Vm= -Vhalf.
-                gate_params_set.A_rate += gate_params_set.A_B * value
+                gate_params_set.A_rate = gate_params_set.A_B * gate_params_set.A_vhalf 
             if (gate_params_set.B_C == -1):
-                gate_params_set.B_rate += gate_params_set.B_B * value
+                gate_params_set.B_rate = gate_params_set.B_B * gate_params_set.A_vhalf
             logger.debug("vshift for AlphaBetaChannelParams after {}".format(gate_params_set))
             return
         elif isinstance(gate_params_set, StandardMooseTauInfChannelParams):
