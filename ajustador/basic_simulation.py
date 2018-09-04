@@ -197,6 +197,7 @@ def setup(param_sim, model):
                                 param_sim.morph_file,
                                 RA=param_sim.RA, RM=param_sim.RM, CM=param_sim.CM,
                                 Erest=param_sim.Erest, Eleak=param_sim.Eleak)
+    logger.info('morph_file: {}'.format(new_file.name))
     model.morph_file[param_sim.neuron_type] = new_file.name
 
     MSNsyn, neurons = cell_proto.neuronclasses(model)

@@ -9,7 +9,7 @@ from . import vartype
 from ajustador.helpers.loggingsystem import getlogger
 import logging
 logger = getlogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class ErrorCalc(enum.IntEnum):
     normal = 1
