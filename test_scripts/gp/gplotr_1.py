@@ -30,7 +30,7 @@ os.chdir(neuron_file_loc)
 # 0,2,4 are injection currents indexs to get the data related to nueron injection value.
 exp_to_fit = gpe.data[dataname][[0,2,4]]
 
-tmpdir='/tmp/Sriramsagar/'+modeltype+'-'+ntype+'-'+dataname+'temp'
+tmpdir='/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dataname+'temp'
 
 ######## set up parameters and fitness to be used for all opts  ############
 

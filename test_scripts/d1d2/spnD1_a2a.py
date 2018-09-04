@@ -15,8 +15,8 @@ from fit_commands import test_coverage
 ghkkluge=1
 
 modeltype='d1d2'
-rootdir='/home/Sriramsagar/neural_prj/outputs/snp_opt/'
-tmpdirroot='/tmp/Sriramsagar/'
+rootdir='/home/Sriramsagar/neural_prj/outputs/spn_opt/'
+tmpdirroot='/tmp/Sriramsagar'
 #use 1 and 3 for testing, 250 and 8 for optimization
 generations=2
 popsiz=8
