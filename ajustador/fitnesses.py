@@ -487,7 +487,8 @@ class combined_fitness:
                 yield (w, func(sim, measurement, error=self.error), func.__name__)
 
     def __call__(self, sim, measurement, full=False):
-        parts = {feature_name: w*r for w, r, feature_name in self._parts(sim, measurement)} # Computes feature fitnesses using _parts for one trace.
+        # Computes feature fitnesses using _parts for one trace.
+        parts = {feature_name: w*NAN_REPLACEMENT if r == vartype.vartype.nan else w*r for w, r, feature_name in self._parts(sim, measurement)}
         for feature_name, value in parts.items():
             logger.debug("{} {}".format(feature_name, value))
             if str(value) == str(np.nan):
