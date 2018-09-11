@@ -22,7 +22,7 @@ This module is not automatically imported as a child of ajustador.
 An explicit import is needed:
 >>> import ajustador.basic_simulation
 """
-
+import os
 import sys
 import tempfile
 import re
@@ -135,7 +135,7 @@ def morph_morph_file(model, ntype, morph_file, new_file=None,
     t = open(morph_file).read()
 
     if new_file is None:
-        new_file = tempfile.NamedTemporaryFile('wt', prefix='morphology-', suffix='.p')
+        new_file = tempfile.NamedTemporaryFile('wt', prefix='morphology-', suffix='.p',dir=os.getcwd(), delete=False)
 
     for param, value in (('RA', RA),
                          ('RM', RM),

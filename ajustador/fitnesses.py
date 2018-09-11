@@ -506,7 +506,7 @@ class combined_fitness:
         return self.__class__.__name__
 
     def report(self, sim, measurement, *, full=False):
-        parts = list(self._parts(sim, measurement, full=full))
+        parts = [(w, NAN_REPLACEMENT if r is vartype.vartype.nan else r, name) for w, r, name in self._parts(sim, measurement, full=full)]
         desc = '\n'.join('{}={}*{:.2g}={:.2g}'.format(name, w, r, w*r)
                          for w, r, name in parts)
         total = desc + '\n' + 'total: {:.02g}'.format(self.__call__(sim, measurement))
