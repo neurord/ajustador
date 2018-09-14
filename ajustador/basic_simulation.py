@@ -41,9 +41,10 @@ from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 from ajustador.helpers.loggingsystem import getlogger
+from ajustador.helpers.moose_ele_printer import print_moose_ele, print_moose_zele
 import logging
 logger = getlogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
@@ -55,7 +56,6 @@ def real(s):
 
 def cond_setting(s):
     "Splits 'NaF,0=123.4' → ('NaF', 0, 123.4)"
-    logger.debug("logger in cond_settings!!!")
     lhs, rhs = s.split('=', 1)
     rhs = float(rhs)
     chan, comp = lhs.split(',', 1)
@@ -201,6 +201,7 @@ def setup(param_sim, model):
     model.morph_file[param_sim.neuron_type] = new_file.name
 
     MSNsyn, neurons = cell_proto.neuronclasses(model)
+    logger.debug('neurons: {}'.format(neurons))
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
@@ -212,7 +213,9 @@ def setup(param_sim, model):
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
-
+    print("After clock assignment")
+    print_moose_ele(neurons)
+    print_moose_zele(neurons)
     if param_sim.hsolve and model.calYN:
         calcium.fix_calcium(util.neurontypes(model.param_cond), model)
 
@@ -231,6 +234,7 @@ def reset_baseline(neuron, baseline, Cond_Kir):
 
 def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
+    print("################## moose verions: ", moose.__version__)
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
