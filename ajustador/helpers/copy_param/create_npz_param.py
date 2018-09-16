@@ -1,6 +1,7 @@
 """
 @Description: Primary execution module to generate modified param_cond.py and
               morph_file.p based on the conductance parameters present in npz file.
+@NOTE: DONOT USE 'E' NOTATION IN PARAM_COND.PY.
 @Author: Sri Ram Sagar Kappagantula
 @e-mail: skappag@masonlive.gmu.edu
 @Date: 5th Mar, 2018.

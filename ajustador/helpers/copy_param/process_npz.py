@@ -22,6 +22,7 @@ def get_conds_non_conds(param_data_list):
     non_conds = {item[1]:item[0] for item in param_data_list if not item[1].startswith('Cond_')}
     conds = {item[1]:item[0] for item in param_data_list if item[1].startswith('Cond_')}
     logger.debug( '{}'.format(non_conds))
+    logger.debug('{}'.format(conds))
     return(conds, non_conds)
 
 def check_key_in_npz_data(npz_data, key):

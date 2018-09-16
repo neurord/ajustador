@@ -15,7 +15,7 @@ def save_params(fitX, start,threshold):
     paramcols=len(fitX.param_names())
     paramvals=np.zeros((rows,paramcols))
     param_subset=[]  #this only saves a subset of simulation parameters
-    
+
     #full=1 will print fitness of each feature, full=0 prints only overall fitness
     for i in range(len(fitX)):
         if isinstance(fitX[0],xml.NeurordSimulation):
@@ -25,7 +25,8 @@ def save_params(fitX, start,threshold):
         else:
             fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
         fitnessX[i,-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=0)
-        paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()]
+        #paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()] # Here we are rounding to 5 decimal places.wa
+        paramvals[i]=[fitX[i].params[j].value for j in fitX.param_names()]
         line=list(paramvals[i])
         line.insert(0,i)
         if fitnessX[i,-1]<threshold and i>=start:
@@ -60,7 +61,7 @@ def save_params(fitX, start,threshold):
 #dat=np.load(fname)
 #if np.save:
 #data=dat.item()
-#if np.savez: 
+#if np.savez:
 #dat.keys(), then data['key'].item
 
 def persist (fitX,path):
