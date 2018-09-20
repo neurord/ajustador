@@ -41,7 +41,7 @@ from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 from ajustador.helpers.loggingsystem import getlogger
-from ajustador.helpers.moose_ele_printer import print_moose_ele, print_moose_zele
+from ajustador.helpers.moose_ele_printer import print_moose_ele
 import logging
 logger = getlogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -164,7 +164,7 @@ def setup_conductance(condset, name, index, value):
     distance dependent conductances.
     '''
     attr = getattr(condset, name)
-    keys = sorted(attr.keys())
+    keys = list(attr.keys())
     if index == ':':
         for k in keys:
             attr[k] = value
@@ -214,8 +214,7 @@ def setup(param_sim, model):
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
     print("After clock assignment")
-    print_moose_ele(neurons)
-    print_moose_zele(neurons)
+    print_moose_ele(model, neurons)
     if param_sim.hsolve and model.calYN:
         calcium.fix_calcium(util.neurontypes(model.param_cond), model)
 
@@ -245,7 +244,7 @@ def run_simulation(injection_current, simtime, param_sim, model):
         except KeyError:
             pass
         else:
-            keys = sorted(attr.keys())
+            keys = sorted(attr.keys())  #Check is this effecting cond Kir when 'axon' in dist, med param_cond?
             Cond_Kir = attr[keys[0]]
             reset_baseline(param_sim.neuron_type, param_sim.baseline, Cond_Kir)
     moose.start(simtime)
