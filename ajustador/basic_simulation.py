@@ -44,7 +44,7 @@ from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.moose_ele_printer import print_moose_ele
 import logging
 logger = getlogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
@@ -213,8 +213,9 @@ def setup(param_sim, model):
     simpaths=['/'+param_sim.neuron_type]
     clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
                          model.param_cond.NAME_SOMA)
-    print("After clock assignment")
-    print_moose_ele(model, neurons)
+
+    if logger.level==logging.DEBUG:
+        print_moose_ele(model, neurons)
     if param_sim.hsolve and model.calYN:
         calcium.fix_calcium(util.neurontypes(model.param_cond), model)
 
