@@ -14,7 +14,6 @@ from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.copy_param.process_common import create_path
 from ajustador.helpers.copy_param.process_npz import get_least_fitness_params
 from ajustador.helpers.copy_param.process_npz import get_conds_non_conds
-from ajustador.helpers.copy_param.process_common import get_file_abs_path
 from ajustador.helpers.copy_param.process_npz import make_cond_file_name
 from ajustador.helpers.copy_param.process_common import process_modification
 
