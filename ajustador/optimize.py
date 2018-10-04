@@ -63,7 +63,7 @@ def execute(p):
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
-    #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
+    print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     #logger.debug("Seralized params:\n {}".format(params))
     logger.debug("Basic_simulation command:\n {}".format(cmdline))
     with utilities.chdir(dirname):
@@ -570,7 +570,7 @@ class Fit:
             if self.optimizer.stop():
                 break
             points = self.optimizer.ask()
-            values = self.fitness_multi(points) # computes total fitness across featuers.
+            values = self.fitness_multi(points) # runs simulation and computes total fitness across featuers.
             self.optimizer.tell(points, values)
             self.optimizer.logger.add()  # write plottable data to disc.
             self.optimizer.disp()
