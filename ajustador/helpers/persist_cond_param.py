@@ -1,7 +1,10 @@
-# TODO add descriptor and explain.
+# Top level file for updating param_cond and morphology file from ajustador optimization
+# presently only works with the npz file generated using save_params
+#ToDo: add code to update param_cond directly from the fit object
+#ToDo: add code to update param_chan
 
-from ajustador.helpers.save_param.create_fit_param import create_fit_param
-from ajustador.helpers.save_param.create_npz_param import create_npz_param
+#from ajustador.helpers.copy_param.create_fit_param import create_fit_param
+from ajustador.helpers.copy_param.create_npz_param import create_npz_param
 
 def persist_cond_param(object_type, model, neuron_type, **kwargs):
     if object_type == "fit":
