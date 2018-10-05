@@ -48,7 +48,7 @@ def save_params(fitX, start,threshold):
         feature_list=["".join(mol+' '+cond) for mol in mols for cond in conditions]
     else:
         header.insert(0,'cell iteration')
-        header.append('Init: cal='+str(model_params.calYN)+' spines='+str(model_params.spineYN))
+        header.append('Init: cal='+str(model_params.calYN)+' spines='+str(model_params.spineYN)+' syn='+str(model_params.synYN)+' ghk='+str(model_params.ghkYN)+'plas='+str(model_params.plasYN))
         feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
     feature_list.append('model='+fitX.model)
     if fitX.neuron_type is not None:
