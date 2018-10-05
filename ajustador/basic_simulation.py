@@ -29,19 +29,22 @@ import re
 import importlib
 import numpy as np
 import moose
-from moose_nerp.prototypes import (cell_proto,
+from moose_nerp.prototypes import (create_model_sim,
+                                   cell_proto,
                                    calcium,
                                    clocks,
                                    inject_func,
                                    tables,
                                    util,
-                                   standard_options)
+                                   standard_options
+)
 from moose_nerp.graph import neuron_graph
+from moose_nerp.prototypes import print_params
 from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 from ajustador.helpers.loggingsystem import getlogger
-from ajustador.helpers.moose_ele_printer import print_moose_ele
+
 import logging
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
@@ -171,17 +174,27 @@ def setup_conductance(condset, name, index, value):
     else:
         attr[keys[index]] = value
 def setup(param_sim, model):
+    #these next two overrides are not used in optimization as they are not passed in from optimize
+    #they could be used if running basic_simulation directly
     if param_sim.calcium is not None:
         model.calYN = param_sim.calcium
     if param_sim.spines is not None:
         model.spineYN = param_sim.spines
-
+    
+    '''
+    if model.type = nml:
+        this block of code updates neuroml files
+        write a bunch of new  code
+    else:
+        #this block of code updates moose_nerp foramt files
+    '''
     condset = getattr(model.Condset, param_sim.neuron_type) # Fetch reference for model condutances.
     chanset = model.Channels                                # Fetch reference for model channels.
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
-        print('cond:', name, comp, value)
+        if logger.level==logging.DEBUG:
+            print('cond:', name, comp, value)
         setup_conductance(condset, name, comp, value)
 
     for chan in param_sim.chan:
@@ -199,26 +212,21 @@ def setup(param_sim, model):
                                 Erest=param_sim.Erest, Eleak=param_sim.Eleak)
     logger.info('morph_file: {}'.format(new_file.name))
     model.morph_file[param_sim.neuron_type] = new_file.name
+    #end of code that updates moose_nerp files
 
-    MSNsyn, neurons = cell_proto.neuronclasses(model)
-    logger.debug('neurons: {}'.format(neurons))
+    plotcomps=[model.param_cond.NAME_SOMA]
+    fname=param_sim.neuron_type+'.h5'
+    param_sim.save=1
+    #create neuron model and set up output
+    syn,neurons,writer,tables=create_model_sim.create_model_sim(model,fname,param_sim,plotcomps)
+    
+    #set up current injection
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    tables.graphtables(model, neurons,
-                       param_sim.plot_current,
-                       param_sim.plot_current_message)
-    writer = tables.setup_hdf5_output(model, neurons, compartments=[model.param_cond.NAME_SOMA], filename=param_sim.neuron_type+'.h5') # Data creation in temp dirs.
-
-    simpaths=['/'+param_sim.neuron_type]
-    clocks.assign_clocks(simpaths, param_sim.simdt, param_sim.plotdt, param_sim.hsolve,
-                         model.param_cond.NAME_SOMA)
-
+    
     if logger.level==logging.DEBUG:
-        print_moose_ele(model, neurons)
-    if param_sim.hsolve and model.calYN:
-        calcium.fix_calcium(util.neurontypes(model.param_cond), model)
-
+        print_params.print_elem_params(model,param_sim.neuron_type,param_sim)
     return pg, writer
 
 def reset_baseline(neuron, baseline, Cond_Kir):
@@ -234,7 +242,8 @@ def reset_baseline(neuron, baseline, Cond_Kir):
 
 def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
-    print("################## moose verions: ", moose.__version__)
+    if logger.level==logging.DEBUG:
+        print("################## moose versions: ", moose.__version__)
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
