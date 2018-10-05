@@ -1,5 +1,6 @@
 import numpy as np
 from ajustador import xml
+import importlib
 
 def save_params(fitX, start,threshold):
 
@@ -9,6 +10,7 @@ def save_params(fitX, start,threshold):
         conditions=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1)[mols[0]].keys())
         cols=len(mols)*len(conditions)
     else:
+        model_params = importlib.import_module('moose_nerp.' + fitX.model)
         cols=len(fitX.fitness_func.report(fitX[0],fitX.measurement).split('\n'))
     rows=len(fitX)
     fitnessX=np.zeros((rows,cols))
@@ -46,6 +48,7 @@ def save_params(fitX, start,threshold):
         feature_list=["".join(mol+' '+cond) for mol in mols for cond in conditions]
     else:
         header.insert(0,'cell iteration')
+        header.append('Init: cal='+str(model_params.calYN)+' spines='+str(model_params.spineYN)+' syn='+str(model_params.synYN)+' ghk='+str(model_params.ghkYN)+'plas='+str(model_params.plasYN))
         feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
     feature_list.append('model='+fitX.model)
     if fitX.neuron_type is not None:
