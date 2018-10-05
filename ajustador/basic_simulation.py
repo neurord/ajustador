@@ -44,7 +44,7 @@ from ajustador.regulate_chan_kinetics import chan_setting
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 from ajustador.helpers.loggingsystem import getlogger
-from ajustador.helpers.moose_ele_printer import print_moose_ele
+
 import logging
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
@@ -193,7 +193,8 @@ def setup(param_sim, model):
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
-        print('cond:', name, comp, value)
+        if logger.level==logging.DEBUG:
+            print('cond:', name, comp, value)
         setup_conductance(condset, name, comp, value)
 
     for chan in param_sim.chan:
@@ -241,7 +242,8 @@ def reset_baseline(neuron, baseline, Cond_Kir):
 
 def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
-    print("################## moose verions: ", moose.__version__)
+    if logger.level==logging.DEBUG:
+        print("################## moose versions: ", moose.__version__)
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
