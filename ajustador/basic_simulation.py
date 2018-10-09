@@ -172,7 +172,11 @@ def setup_conductance(condset, name, index, value):
         for k in keys:
             attr[k] = value
     else:
-        attr[keys[index]] = value
+        try:
+            attr[keys[index]] = value
+        except IndexError: # This exception gives an idea, where to check for the error.
+            raise IndexError("Please check definitions of {} param conductances in param_cond.py conductances!!!".format(name))
+
 def setup(param_sim, model):
     #these next two overrides are not used in optimization as they are not passed in from optimize
     #they could be used if running basic_simulation directly
@@ -180,7 +184,7 @@ def setup(param_sim, model):
         model.calYN = param_sim.calcium
     if param_sim.spines is not None:
         model.spineYN = param_sim.spines
-    
+
     '''
     if model.type = nml:
         this block of code updates neuroml files
@@ -219,12 +223,12 @@ def setup(param_sim, model):
     param_sim.save=1
     #create neuron model and set up output
     syn,neurons,writer,tables=create_model_sim.create_model_sim(model,fname,param_sim,plotcomps)
-    
+
     #set up current injection
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    
+
     if logger.level==logging.DEBUG:
         print_params.print_elem_params(model,param_sim.neuron_type,param_sim)
     return pg, writer

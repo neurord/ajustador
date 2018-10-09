@@ -21,7 +21,7 @@ from ajustador.helpers.copy_param.process_param_cond import update_morph_file_na
 
 from ajustador.helpers.copy_param.process_npz import get_least_fitness_params
 from ajustador.helpers.copy_param.process_npz import make_cond_file_name
-from ajustador.helpers.copy_param.process_npz import get_conds_non_conds
+from ajustador.helpers.copy_param.process_npz import get_params
 
 from ajustador.helpers.copy_param.process_morph import clone_and_change_morph_file
 
@@ -152,7 +152,8 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                   npz_file.rpartition('/')[2], fit_number)
 
     logger.debug("Param_data: {}".format(param_data_list))
-    conds, non_conds = get_conds_non_conds(param_data_list)
+    conds = get_params(param_data_list, 'Cond_')
+    non_conds = get_params(param_data_list, 'Cond_', exclude_flag=True)
 
     # Create new path to save param_cond.py and *.p
     new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
