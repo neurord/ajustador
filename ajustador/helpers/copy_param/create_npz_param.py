@@ -21,8 +21,8 @@ from ajustador.helpers.copy_param.process_morph import clone_and_change_morph_fi
 from ajustador.helpers.copy_param.process_npz import get_least_fitness_params
 from ajustador.helpers.copy_param.process_npz import make_new_file_name_from_npz
 from ajustador.helpers.copy_param.process_npz import get_params
-from ajustador.helpers.copy_param.process_param_cond import get_conductance_block_start
-from ajustador.helpers.copy_param.process_param_cond import get_conductance_block_end
+from ajustador.helpers.copy_param.process_param_cond import get_namedict_block_start
+from ajustador.helpers.copy_param.process_param_cond import get_block_end
 from ajustador.helpers.copy_param.process_param_cond import update_morph_file_name_in_cond
 from ajustador.helpers.copy_param.process_param_cond import update_conductance_param
 
@@ -34,15 +34,34 @@ def reshape_conds_to_dict(conds):
     conds_dict = defaultdict(dict)
     for key, value in conds.items():
         if key.count('_') == 1:
-           conds_dict[key.split('_')[1]] = value
+           chan_name = key.split('_')[1]
+           conds_dict[chan_name] = value
         elif key.count('_') == 2:
-             if not isinstance(conds_dict[key.split('_')[1]], defaultdict):
-                conds_dict[key.split('_')[1]] = defaultdict(dict)
-             conds_dict[key.split('_')[1]][key.split('_')[2]] = value
+            chan_name, distance_index = key.split('_')[1], key.split('_')[2]
+             if not isinstance(conds_dict[chan_name], defaultdict):
+                conds_dict[chan_name] = defaultdict(dict)
+             conds_dict[chan_name][distance_index] = value
+    return conds_dict
+
+def reshape_chans_to_dict(conds):
+    """ Re structure conductance."""
+    chans_dict = defaultdict(dict)
+    for key, value in conds.items():
+        if key.count('_') == 2:
+            chan_name, attribute = key.split('_')[1], key_split('_')[2]
+            if not isinstance(chan_name], defaultdict)
+           conds_dict[chan_name][attribute] = value
+       elif key.count('_') == 3:
+             chan_name, attribute, gate = key.split('_')[1], key_split('_')[2], key_split('_')[3]
+             if not isinstance(conds_dict[chan_name], defaultdict):
+                conds_dict[chan_name] = defaultdict(dict)
+             if not isinstance(conds_dict[chan_name], defaultdict):
+                 conds_dict[chan_name][attribute] = defaultdict(dict)
+             conds_dict[chan_name][attribute][gate] = value
     return conds_dict
 
 def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
-                     fitnum=None, cond_file= None):
+                     fitnum=None, cond_file= None, chan_file=None):
     """Main function to be executed to generate parameter file from npz_file.
        Inputs => npz_file          -> *.npz file;
                  model             -> 'gp', 'd1d2', 'ep' or 'ca1' soon;
@@ -73,10 +92,8 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     if cond_file is None:
         cond_file = 'param_cond.py'
-
     new_param_cond = make_new_file_name_from_npz(data, npz_file,
                          str(new_param_path), neuron_type, cond_file)
-
     new_cond_file_name = check_version_build_file_path(str(new_param_cond), neuron_type, fit_number)
     logger.info("START STEP 3!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,cond_file), new_cond_file_name))
     new_param_cond = clone_file(src_path=model_path, src_file=cond_file, dest_file=new_cond_file_name)
@@ -94,9 +111,27 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     update_morph_file_name_in_cond(new_cond_file_name, neuron_type, new_morph_file_name.rpartition('/')[2])
 
     write_header(header_line, new_param_cond)
-    start_param_cond_block = get_conductance_block_start(new_param_cond, neuron_type)
-    end_param_cond_block = get_conductance_block_end(new_param_cond, start_param_cond_block)
+    start_param_cond_block = get_namedict_block_start(new_param_cond, neuron_type)
+    end_param_cond_block = get_block_end(new_param_cond, start_param_cond_block, r"\)")
     conds_dict = reshape_conds_to_dict(conds)
     update_conductance_param(new_param_cond, conds_dict, start_param_cond_block, end_param_cond_block)
 
     logger.info("STEP 7!!! New files names \n morph: {1} \n param_cond files: {0}".format(new_cond_file_name, new_morph_file_name))
+
+    logger.info("STEP 8!!! start channel processing.")
+    chans = get_params(param_data_list, 'Chan_')
+
+    if chan_file is None:
+        chan_file = 'param_chan.py'
+    new_param_chan = make_new_file_name_from_npz(data, npz_file,
+                         str(new_param_path), neuron_type, cond_file)
+    new_chan_file_name = check_version_build_file_path(str(new_param_chan), neuron_type, fit_number)
+
+    logger.info("START STEP 9!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,chan_file), new_chan_file_name))
+    new_param_chan = clone_file(src_path=model_path, src_file=chan_file, dest_file=new_chan_file_name)
+
+    write_header(header_line, new_param_chan)
+    start_param_chan_block = get_namedict_block_start(new_param_chan, 'Channels')
+    end_param_chan_block = get_block_end(new_param_chan, start_param_chan_block, r"^(\s*\))")
+    import pdb; pdb.set_trace()
+    chans_dict = reshape_conds_to_dict(chans)

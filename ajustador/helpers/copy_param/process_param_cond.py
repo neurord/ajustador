@@ -35,9 +35,9 @@ def update_morph_file_name_in_cond(cond_file, neuron_type, morph_file_name):
 def test_line_comment(line):
     return True if re.match('^\s*#.*$', line) else False
 
-def get_conductance_block_start(new_param_cond, neuron_type):
-    c_line_pattern = '.*=\s*_util.NamedDict\(.*$'
-    n_line_pattern = '^\s*\'{}\'\s*,\s*$'.format(neuron_type)
+def get_namedict_block_start(file_in, dict_name):
+    c_line_pattern = '.*=\s*(_util.)?NamedDict\(.*$'
+    n_line_pattern = '^\s*\'{}\'\s*,\s*$'.format(dict_name)
     flag_in_block_comment = False
     def test_block_comment(line):
         if re.match("^\s*'''.*$", line):
@@ -45,7 +45,7 @@ def get_conductance_block_start(new_param_cond, neuron_type):
             return flag_in_block_comment
 
     #print(c_line_pattern, n_line_pattern)
-    with fileinput.input(files=(new_param_cond)) as f_obj:
+    with fileinput.input(files=(file_in)) as f_obj:
         c_line = next(f_obj)
         test_block_comment(c_line)
         for n_line in f_obj:
@@ -59,9 +59,8 @@ def get_conductance_block_start(new_param_cond, neuron_type):
                 return f_obj.lineno()
             c_line = n_line
 
-def get_conductance_block_end(new_param_cond, start_block_line_no):
-    block_end_pattern = r"\)"
-    with fileinput.input(files=(new_param_cond)) as f_obj:
+def get_block_end(file_in, start_block_line_no, block_end_pattern):
+    with fileinput.input(files=(file_in)) as f_obj:
         for line in f_obj:
             if f_obj.lineno() <= start_block_line_no:
                 continue
