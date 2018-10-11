@@ -14,23 +14,14 @@ from ajustador.helpers.loggingsystem import getlogger
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
 
-class MorphRegexPatterns(object):
-     " Regex patterns to idenfiy the morph_file name in param_cond file."
-     MORPH_FILE = r"morph_file\s+=\s+\{"
-     NEURON_P_FILE = r"\s*'([a-zA-Z0-9]+)'\s*:\s*'([A-Z0-9.a-z_\-]+)'\s*"
-
-class ReObjects(object):
-     " Regex compile objects to discern morph and neuron file in param_cond.py"
-     re_obj_morph_file = re.compile(MorphRegexPatterns.MORPH_FILE, re.I)
-     re_obj_neuron_p_file = re.compile(MorphRegexPatterns.NEURON_P_FILE, re.I)
-
 def find_morph_file(line):
     "Finds the 'morph_file =' is in the given input line"
-    return True if ReObjects.re_obj_morph_file.match(line) else False
+    re_obj = re.compile(r"morph_file\s+=\s+\{", re.I)
+    return True if re_obj.match(line) else False
 
 def get_morph_file_name(line, neuron_type):
     "Get morph file name from the the line if it matches with pattern in re_obj."
-    re_obj = ReObjects.re_obj_neuron_p_file
+    re_obj = re.compile(r"\s*'([a-zA-Z0-9]+)'\s*:\s*'([A-Z0-9.a-z_\-]+)'\s*", re.I)
     if re_obj.search(line):
         return dict(re_obj.findall(line)).get(neuron_type, None)
     return None
@@ -54,7 +45,7 @@ def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type,
     morph_features = ('RM', 'Eleak', 'RA', 'CM')
     model_obj = make_model_path_obj(model_path, model)
     logger.debug("\n{} \n{}".format(param_cond_file, neuron_type))
-    morph_file = extract_morph_file_from_cond(param_cond_file, neuron_type) #PROBLEM HERE.  NOT RETURNING CORRECT FILE FOR D2
+    morph_file = extract_morph_file_from_cond(param_cond_file, neuron_type) #PROBLEM HERE.  NOT RETURNING CORRECT FILE FOR D2?
     logger.debug('\n{} \n{}'.format(model_path, morph_file))
     src_morph_file_path = get_file_abs_path(model_path, morph_file)
     if 'conductance_save' in src_morph_file_path:

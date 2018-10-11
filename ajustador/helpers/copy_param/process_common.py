@@ -7,7 +7,10 @@
 """
 
 import re
+import shutil
+import sys
 import logging
+import fileinput
 
 from pathlib import Path
 
@@ -59,3 +62,27 @@ def check_version_build_file_path(file_, neuron_type, fit_number):
 def make_model_path_obj(model_path, model):
     Object = lambda **kwargs: type("Object", (), kwargs)
     return Object(__file__ = str(model_path), value = model)
+
+def clone_file(src_path, src_file, dest_file):
+    ''' Inputs param_cond_file == string => Absolute path of cond_file.
+    model_path == Path objects => model Path objects.
+    model == string => model name.
+    neuron_type == string => Neuron model.
+    '''
+
+    src_abs_path = get_file_abs_path(src_path, src_file)
+    if Path(dest_file).is_file(): # Creates a version file of destination file.
+        dest_file = get_file_name_with_version(dest_file)
+        shutil.copy(src_abs_path, dest_file)
+        return dest_file
+    shutil.copy(src_abs_path, dest_file)
+    return dest_file
+
+def write_header(header_line, file_in):
+    header_not_written = True
+    with fileinput.input(files=(file_in), inplace=True) as f_obj:
+        for line in f_obj:
+            if header_not_written:
+                sys.stdout.write(header_line)
+                header_not_written = False
+            sys.stdout.write(line)
