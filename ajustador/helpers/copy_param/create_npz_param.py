@@ -38,9 +38,9 @@ def reshape_conds_to_dict(conds):
            conds_dict[chan_name] = value
         elif key.count('_') == 2:
             chan_name, distance_index = key.split('_')[1], key.split('_')[2]
-             if not isinstance(conds_dict[chan_name], defaultdict):
+            if not isinstance(conds_dict[chan_name], defaultdict):
                 conds_dict[chan_name] = defaultdict(dict)
-             conds_dict[chan_name][distance_index] = value
+            conds_dict[chan_name][distance_index] = value
     return conds_dict
 
 def reshape_chans_to_dict(conds):
@@ -49,9 +49,10 @@ def reshape_chans_to_dict(conds):
     for key, value in conds.items():
         if key.count('_') == 2:
             chan_name, attribute = key.split('_')[1], key_split('_')[2]
-            if not isinstance(chan_name], defaultdict)
-           conds_dict[chan_name][attribute] = value
-       elif key.count('_') == 3:
+            if not isinstance(conds_dict[chan_name], defaultdict):
+                conds_dict[chan_name] = defaultdict(dict)
+            conds_dict[chan_name][attribute] = value
+        elif key.count('_') == 3:
              chan_name, attribute, gate = key.split('_')[1], key_split('_')[2], key_split('_')[3]
              if not isinstance(conds_dict[chan_name], defaultdict):
                 conds_dict[chan_name] = defaultdict(dict)
@@ -120,18 +121,19 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     logger.info("STEP 8!!! start channel processing.")
     chans = get_params(param_data_list, 'Chan_')
+    import pdb; pdb.set_trace()
 
     if chan_file is None:
         chan_file = 'param_chan.py'
     new_param_chan = make_new_file_name_from_npz(data, npz_file,
-                         str(new_param_path), neuron_type, cond_file)
+                         str(new_param_path), neuron_type, chan_file)
     new_chan_file_name = check_version_build_file_path(str(new_param_chan), neuron_type, fit_number)
 
     logger.info("START STEP 9!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,chan_file), new_chan_file_name))
     new_param_chan = clone_file(src_path=model_path, src_file=chan_file, dest_file=new_chan_file_name)
 
     write_header(header_line, new_param_chan)
+    logger.info("START STEP 10!!! Preparing channel and gateparams relations.")
     start_param_chan_block = get_namedict_block_start(new_param_chan, 'Channels')
     end_param_chan_block = get_block_end(new_param_chan, start_param_chan_block, r"^(\s*\))")
-    import pdb; pdb.set_trace()
     chans_dict = reshape_conds_to_dict(chans)
