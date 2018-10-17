@@ -69,12 +69,9 @@ def clone_file(src_path, src_file, dest_file):
     model == string => model name.
     neuron_type == string => Neuron model.
     '''
-
     src_abs_path = get_file_abs_path(src_path, src_file)
     if Path(dest_file).is_file(): # Creates a version file of destination file.
         dest_file = get_file_name_with_version(dest_file)
-        shutil.copy(src_abs_path, dest_file)
-        return dest_file
     shutil.copy(src_abs_path, dest_file)
     return dest_file
 

@@ -11,7 +11,6 @@ import moose_nerp
 from pathlib import Path
 from collections import defaultdict
 from ajustador.helpers.loggingsystem import getlogger
-
 from ajustador.helpers.copy_param.process_common import create_path
 from ajustador.helpers.copy_param.process_common import check_version_build_file_path
 from ajustador.helpers.copy_param.process_common import get_file_abs_path
@@ -25,41 +24,16 @@ from ajustador.helpers.copy_param.process_param_cond import get_namedict_block_s
 from ajustador.helpers.copy_param.process_param_cond import get_block_end
 from ajustador.helpers.copy_param.process_param_cond import update_morph_file_name_in_cond
 from ajustador.helpers.copy_param.process_param_cond import update_conductance_param
+from ajustador.helpers.copy_param.process_param_cond import reshape_conds_to_dict
+from ajustador.helpers.copy_param.process_param_chan import create_chan_param_relation
+from ajustador.helpers.copy_param.process_param_chan import reshape_chans_to_dict
+from ajustador.helpers.copy_param.process_param_chan import import_param_chan
+from ajustador.helpers.copy_param.process_param_chan import chan_param_locator
+from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
+from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 
 logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
-
-def reshape_conds_to_dict(conds):
-    """ Re structure conductance."""
-    conds_dict = defaultdict(dict)
-    for key, value in conds.items():
-        if key.count('_') == 1:
-           chan_name = key.split('_')[1]
-           conds_dict[chan_name] = value
-        elif key.count('_') == 2:
-            chan_name, distance_index = key.split('_')[1], key.split('_')[2]
-            if not isinstance(conds_dict[chan_name], defaultdict):
-                conds_dict[chan_name] = defaultdict(dict)
-            conds_dict[chan_name][distance_index] = value
-    return conds_dict
-
-def reshape_chans_to_dict(conds):
-    """ Re structure conductance."""
-    chans_dict = defaultdict(dict)
-    for key, value in conds.items():
-        if key.count('_') == 2:
-            chan_name, attribute = key.split('_')[1], key_split('_')[2]
-            if not isinstance(conds_dict[chan_name], defaultdict):
-                conds_dict[chan_name] = defaultdict(dict)
-            conds_dict[chan_name][attribute] = value
-        elif key.count('_') == 3:
-             chan_name, attribute, gate = key.split('_')[1], key_split('_')[2], key_split('_')[3]
-             if not isinstance(conds_dict[chan_name], defaultdict):
-                conds_dict[chan_name] = defaultdict(dict)
-             if not isinstance(conds_dict[chan_name], defaultdict):
-                 conds_dict[chan_name][attribute] = defaultdict(dict)
-             conds_dict[chan_name][attribute][gate] = value
-    return conds_dict
 
 def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                      fitnum=None, cond_file= None, chan_file=None):
@@ -121,7 +95,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     logger.info("STEP 8!!! start channel processing.")
     chans = get_params(param_data_list, 'Chan_')
-    import pdb; pdb.set_trace()
+    logger.debug('{}'.format(chans))
 
     if chan_file is None:
         chan_file = 'param_chan.py'
@@ -136,4 +110,26 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     logger.info("START STEP 10!!! Preparing channel and gateparams relations.")
     start_param_chan_block = get_namedict_block_start(new_param_chan, 'Channels')
     end_param_chan_block = get_block_end(new_param_chan, start_param_chan_block, r"^(\s*\))")
-    chans_dict = reshape_conds_to_dict(chans)
+    chans_dict = reshape_chans_to_dict(chans)
+    py_param_chan = import_param_chan(model)
+    chanset = py_param_chan.Channels
+    print(chanset)
+    for key,value in chans_dict.items():
+        chan_name, opt, gate = key
+        if opt == 'taumul':
+           scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, np.float(value))
+        elif opt == 'vshift':
+           offset_voltage_dependents_vshift(chanset, chan_name, gate, np.float(value))
+    print(chanset)
+    import sys
+    sys.exit()
+    # TODO think mechanics to update the updated chan set back to param_chan.py
+    chan_param_relation = create_chan_param_relation(new_param_chan, start_param_chan_block, end_param_chan_block)
+    param_locator = chan_param_locator(new_param_chan, chan_param_relation)
+
+
+    logger.info("START STEP 11!!! import parameters from param_cond.py.")
+'''
+    for chan, param_list in param_locator.items():
+        for param in param_list:
+'''

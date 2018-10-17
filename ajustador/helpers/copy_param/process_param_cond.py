@@ -10,6 +10,7 @@ import re
 import sys
 import fileinput
 from pathlib import Path
+from collections import defaultdict
 from ajustador.helpers.loggingsystem import getlogger
 from ajustador.helpers.copy_param.process_morph import find_morph_file
 from ajustador.helpers.copy_param.process_morph import get_morph_file_name
@@ -108,3 +109,17 @@ def update_conductance_param(new_param_cond, conds, start_block_lineno, end_bloc
                         chunks[index] = mod
                     line = ''.join(chunks)
             sys.stdout.write(line)
+
+def reshape_conds_to_dict(conds):
+    """ Re structure conductance."""
+    conds_dict = defaultdict(dict)
+    for key, value in conds.items():
+        if key.count('_') == 1:
+           chan_name = key.split('_')[1]
+           conds_dict[chan_name] = value
+        elif key.count('_') == 2:
+            chan_name, distance_index = key.split('_')[1], key.split('_')[2]
+            if not isinstance(conds_dict[chan_name], defaultdict):
+                conds_dict[chan_name] = defaultdict(dict)
+            conds_dict[chan_name][distance_index] = value
+    return conds_dict
