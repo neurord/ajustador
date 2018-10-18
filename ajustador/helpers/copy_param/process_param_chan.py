@@ -41,10 +41,16 @@ def import_param_chan(model):
 
 def chan_param_locator(new_param_chan, chan_param_relation):
     structure = defaultdict(lambda : {'start': None,'end': None, 'type': None})
+    invalid_key_formats = (False, 'None', True, '[]')
     # TODO:  change the channel structure based on new dict format.
     for _list in chan_param_relation.values():
         for param in _list[1:]:
-            structure[param]
+            try:
+                if (isinstance(param, str) and '=' in param) or param == False or param == 'None' or param == '[]':
+                    continue
+                structure[param]
+            except TypeError:
+                continue
 
     valid_start_line_pattern = "^(?P<paramname>\w+)\s*=\s*(?P<paramtype>\w+)\(.*$"
     valid_end_line_pattern = "\s*[a-zA-Z=0-9_\.]*\)\s*$"
@@ -66,3 +72,32 @@ def chan_param_locator(new_param_chan, chan_param_relation):
                     if not structure.get(param_name).get('end'):
                        structure.get(param_name)['end'] = lineno
     return structure
+
+def get_chan_name_data_index(param_name, chan_param_name_relation):
+    data_index = None
+    for chan_name in chan_param_name_relation.keys():
+        try:
+            data_index = chan_param_name_relation[chan_name].index(param_name)
+            return (chan_name, data_index)
+        except ValueError:
+            continue
+    raise ValueError('Unable to find {} in param_chan.py!!!!'.format(param_name))
+
+def update_chan_param(new_param_chan, chan_param_name_relation, chan_param_data_relation, param_location):
+    valid_start_line_pattern = "^(?P<paramname>\w+)\s*=\s*(?P<paramtype>\w+)\(.*,$"
+    valid_line_pattern = valid_start_line_pattern
+    start_lineno, end_lineno = (0, 0)
+
+    with fileinput.input(files=(new_param_chan,)) as f_obj:
+        for lineno, line in enumerate(f_obj):
+                re_obj = re.search(valid_line_pattern, line)
+                if re_obj:
+                    param_name, param_type = re_obj.group('paramname'), re_obj.group('paramtype')
+                    chan_name, index = get_chan_name_data_index(param_name, chan_param_name_relation)
+                    data_chunk = chan_param_data_relation[chan_name][index]
+                    print(param_name, '=', data_chunk)
+                    start_lineno, end_lineno = param_location.get(param_name).get('start'), param_location.get(param_name).get('end')
+                elif start_lineno < lineno <= end_lineno:
+                     continue
+                else:
+                    print(line)

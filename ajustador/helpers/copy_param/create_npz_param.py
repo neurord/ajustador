@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 '''
-By using this model we canrun and execute new models with ease.
+Create_npz_param can run and execute new models with ease.
 '''
 
 import logging
@@ -16,10 +17,13 @@ from ajustador.helpers.copy_param.process_common import check_version_build_file
 from ajustador.helpers.copy_param.process_common import get_file_abs_path
 from ajustador.helpers.copy_param.process_common import clone_file
 from ajustador.helpers.copy_param.process_common import  write_header
+
 from ajustador.helpers.copy_param.process_morph import clone_and_change_morph_file
+
 from ajustador.helpers.copy_param.process_npz import get_least_fitness_params
 from ajustador.helpers.copy_param.process_npz import make_new_file_name_from_npz
 from ajustador.helpers.copy_param.process_npz import get_params
+
 from ajustador.helpers.copy_param.process_param_cond import get_namedict_block_start
 from ajustador.helpers.copy_param.process_param_cond import get_block_end
 from ajustador.helpers.copy_param.process_param_cond import update_morph_file_name_in_cond
@@ -28,7 +32,9 @@ from ajustador.helpers.copy_param.process_param_cond import reshape_conds_to_dic
 from ajustador.helpers.copy_param.process_param_chan import create_chan_param_relation
 from ajustador.helpers.copy_param.process_param_chan import reshape_chans_to_dict
 from ajustador.helpers.copy_param.process_param_chan import import_param_chan
+from ajustador.helpers.copy_param.process_param_chan import update_chan_param
 from ajustador.helpers.copy_param.process_param_chan import chan_param_locator
+
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 
@@ -113,23 +119,14 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     chans_dict = reshape_chans_to_dict(chans)
     py_param_chan = import_param_chan(model)
     chanset = py_param_chan.Channels
-    print(chanset)
     for key,value in chans_dict.items():
         chan_name, opt, gate = key
         if opt == 'taumul':
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, np.float(value))
         elif opt == 'vshift':
            offset_voltage_dependents_vshift(chanset, chan_name, gate, np.float(value))
-    print(chanset)
-    import sys
-    sys.exit()
-    # TODO think mechanics to update the updated chan set back to param_chan.py
-    chan_param_relation = create_chan_param_relation(new_param_chan, start_param_chan_block, end_param_chan_block)
-    param_locator = chan_param_locator(new_param_chan, chan_param_relation)
+    chan_param_name_relation = create_chan_param_relation(new_param_chan, start_param_chan_block, end_param_chan_block)
+    param_location = chan_param_locator(new_param_chan, chan_param_name_relation)
 
-
+    update_chan_param(new_param_chan, chan_param_name_relation, chanset, param_location)
     logger.info("START STEP 11!!! import parameters from param_cond.py.")
-'''
-    for chan, param_list in param_locator.items():
-        for param in param_list:
-'''
