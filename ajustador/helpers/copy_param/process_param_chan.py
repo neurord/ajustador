@@ -88,7 +88,7 @@ def update_chan_param(new_param_chan, chan_param_name_relation, chan_param_data_
     valid_line_pattern = valid_start_line_pattern
     start_lineno, end_lineno = (0, 0)
 
-    with fileinput.input(files=(new_param_chan,)) as f_obj:
+    with fileinput.input(files=(new_param_chan), inplace=True) as f_obj:
         for lineno, line in enumerate(f_obj):
                 re_obj = re.search(valid_line_pattern, line)
                 if re_obj:
