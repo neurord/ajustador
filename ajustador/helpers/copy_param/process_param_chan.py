@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 import re
+import sys
 import fileinput
 import importlib
 from collections import defaultdict
@@ -95,9 +96,9 @@ def update_chan_param(new_param_chan, chan_param_name_relation, chan_param_data_
                     param_name, param_type = re_obj.group('paramname'), re_obj.group('paramtype')
                     chan_name, index = get_chan_name_data_index(param_name, chan_param_name_relation)
                     data_chunk = chan_param_data_relation[chan_name][index]
-                    print(param_name, '=', data_chunk)
+                    print(param_name, '=', str(data_chunk).replace(',',',\n'))
                     start_lineno, end_lineno = param_location.get(param_name).get('start'), param_location.get(param_name).get('end')
                 elif start_lineno < lineno <= end_lineno:
                      continue
                 else:
-                    print(line)
+                    sys.stdout.write(line)
