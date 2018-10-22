@@ -33,24 +33,19 @@ def update_morph_file_name_in_cond(cond_file, neuron_type, morph_file_name):
               line = update_morph_file_name(line, neuron_type, morph_file_name)
            sys.stdout.write(line)
 
-def test_line_comment(line):
-    return True if re.match('^\s*#.*$', line) else False
-
 def get_namedict_block_start(file_in, dict_name):
     c_line_pattern = '.*=\s*(_util.)?NamedDict\(.*$'
     n_line_pattern = '^\s*\'{}\'\s*,\s*$'.format(dict_name)
-    flag_in_block_comment = False
-    def test_block_comment(line):
-        if re.match("^\s*'''.*$", line):
-            flag_in_block_comment = not(flag_in_block_comment)
-            return flag_in_block_comment
+    from ajustador.helpers.copy_param.process_common import test_block_comment
+    from ajustador.helpers.copy_param.process_common import test_line_comment
 
     #print(c_line_pattern, n_line_pattern)
     with fileinput.input(files=(file_in)) as f_obj:
         c_line = next(f_obj)
-        test_block_comment(c_line)
+        flag_in_block_comment=test_block_comment(c_line, flag_in_block_comment=False)
         for n_line in f_obj:
-            if test_block_comment(n_line):
+            flag_in_block_comment=test_block_comment(n_line, flag_in_block_comment)
+            if flag_in_block_comment:
                 c_line = n_line
                 continue
             if test_line_comment(n_line):
@@ -61,6 +56,7 @@ def get_namedict_block_start(file_in, dict_name):
             c_line = n_line
 
 def get_block_end(file_in, start_block_line_no, block_end_pattern):
+    from ajustador.helpers.copy_param.process_common import test_line_comment
     with fileinput.input(files=(file_in)) as f_obj:
         for line in f_obj:
             if f_obj.lineno() <= start_block_line_no:

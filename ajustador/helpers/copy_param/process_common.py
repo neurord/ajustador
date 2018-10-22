@@ -83,3 +83,11 @@ def write_header(header_line, file_in):
                 sys.stdout.write(header_line)
                 header_not_written = False
             sys.stdout.write(line)
+
+def test_block_comment(line, flag_in_block_comment=False):
+    if re.match("^\s*'''.*$", line):
+        return not(flag_in_block_comment)
+    return flag_in_block_comment
+
+def test_line_comment(line):
+    return True if re.match('^\s*#.*$', line) else False

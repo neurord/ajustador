@@ -7,6 +7,7 @@ import importlib
 from collections import defaultdict
 from moose_nerp.prototypes.chan_proto import TypicalOneD
 from moose_nerp.prototypes.chan_proto import TwoD
+from ajustador.helpers.copy_param.process_common import test_block_comment
 
 def create_chan_param_relation(new_param_chan, start_block_lineno, end_block_lineno):
     ''' Creates a dictionary whose key is channel (eg: Na) and values are set of parameters names which can be
@@ -54,10 +55,15 @@ def chan_param_locator(new_param_chan, chan_param_relation):
                 continue
 
     valid_start_line_pattern = "^(?P<paramname>\w+)\s*=\s*(?P<paramtype>\w+)\(.*$"
-    valid_end_line_pattern = "\s*[a-zA-Z=0-9_\.]*\)\s*$"
+    valid_end_line_pattern = "\s*([a-zA-Z_]+\s*=\s*[\-0-9\.]+e?-?[0-9]*)?\)$"
     valid_line_pattern = valid_start_line_pattern
     with fileinput.input(files=(new_param_chan)) as f_obj:
-        for lineno, line in enumerate(f_obj):
+        line = next(f_obj)
+        flag_block_comment = test_block_comment(line)
+        for lineno, line in enumerate(f_obj, 1):
+            flag_block_comment = test_block_comment(line, flag_block_comment)
+            if flag_block_comment:
+                continue
             re_obj = re.search(valid_line_pattern, line)
             if re_obj and valid_line_pattern == valid_start_line_pattern:
                 param_name, param_type = re_obj.group('paramname'), re_obj.group('paramtype')
@@ -90,13 +96,19 @@ def update_chan_param(new_param_chan, chan_param_name_relation, chan_param_data_
     start_lineno, end_lineno = (0, 0)
 
     with fileinput.input(files=(new_param_chan), inplace=True) as f_obj:
-        for lineno, line in enumerate(f_obj):
+        line = next(f_obj)
+        flag_block_comment = test_block_comment(line)
+        for lineno, line in enumerate(f_obj, 1):
+                flag_block_comment = test_block_comment(line, flag_block_comment)
+                if flag_block_comment:
+                    sys.stdout.write(line)
+                    continue
                 re_obj = re.search(valid_line_pattern, line)
                 if re_obj:
                     param_name, param_type = re_obj.group('paramname'), re_obj.group('paramtype')
                     chan_name, index = get_chan_name_data_index(param_name, chan_param_name_relation)
                     data_chunk = chan_param_data_relation[chan_name][index]
-                    print(param_name, '=', str(data_chunk).replace(',',',\n'))
+                    print(param_name, '=', str(data_chunk).replace(',', ',\n'))
                     start_lineno, end_lineno = param_location.get(param_name).get('start'), param_location.get(param_name).get('end')
                 elif start_lineno < lineno <= end_lineno:
                      continue
