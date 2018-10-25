@@ -17,13 +17,10 @@ from ajustador.helpers.copy_param.process_common import check_version_build_file
 from ajustador.helpers.copy_param.process_common import get_file_abs_path
 from ajustador.helpers.copy_param.process_common import clone_file
 from ajustador.helpers.copy_param.process_common import  write_header
-
 from ajustador.helpers.copy_param.process_morph import clone_and_change_morph_file
-
 from ajustador.helpers.copy_param.process_npz import get_least_fitness_params
 from ajustador.helpers.copy_param.process_npz import make_new_file_name_from_npz
 from ajustador.helpers.copy_param.process_npz import get_params
-
 from ajustador.helpers.copy_param.process_param_cond import get_namedict_block_start
 from ajustador.helpers.copy_param.process_param_cond import get_block_end
 from ajustador.helpers.copy_param.process_param_cond import update_morph_file_name_in_cond
@@ -34,7 +31,6 @@ from ajustador.helpers.copy_param.process_param_chan import reshape_chans_to_dic
 from ajustador.helpers.copy_param.process_param_chan import import_param_chan
 from ajustador.helpers.copy_param.process_param_chan import update_chan_param
 from ajustador.helpers.copy_param.process_param_chan import chan_param_locator
-
 from ajustador.regulate_chan_kinetics import scale_voltage_dependents_tau_muliplier
 from ajustador.regulate_chan_kinetics import offset_voltage_dependents_vshift
 
@@ -97,8 +93,6 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     conds_dict = reshape_conds_to_dict(conds)
     update_conductance_param(new_param_cond, conds_dict, start_param_cond_block, end_param_cond_block)
 
-    logger.info("STEP 7!!! New files names \n morph: {1} \n param_cond files: {0}".format(new_cond_file_name, new_morph_file_name))
-
     logger.info("STEP 8!!! start channel processing.")
     chans = get_params(param_data_list, 'Chan_')
     logger.debug('{}'.format(chans))
@@ -112,13 +106,13 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     logger.info("START STEP 9!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,chan_file), new_chan_file_name))
     new_param_chan = clone_file(src_path=model_path, src_file=chan_file, dest_file=new_chan_file_name)
 
-    write_header(header_line, new_param_chan)
     logger.info("START STEP 10!!! Preparing channel and gateparams relations.")
     start_param_chan_block = get_namedict_block_start(new_param_chan, 'Channels')
     end_param_chan_block = get_block_end(new_param_chan, start_param_chan_block, r"^(\s*\))")
     chans_dict = reshape_chans_to_dict(chans)
-    py_param_chan = import_param_chan(model)
-    chanset = py_param_chan.Channels
+    logger.info("START STEP 11!!! import parameters from param_chan.py. and apply scale Tau and delay SS")
+    py_param_chan = import_param_chan(model) # import param_chan.py file from model.
+    chanset = py_param_chan.Channels # Get Channels set from the imported param_chan.py.
     for key,value in chans_dict.items():
         chan_name, opt, gate = key
         if opt == 'taumul':
@@ -127,6 +121,6 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
            offset_voltage_dependents_vshift(chanset, chan_name, gate, np.float(value))
     chan_param_name_relation = create_chan_param_relation(new_param_chan, start_param_chan_block, end_param_chan_block)
     param_location = chan_param_locator(new_param_chan, chan_param_name_relation)
-
-    update_chan_param(new_param_chan, chan_param_name_relation, chanset, param_location)
-    logger.info("START STEP 11!!! import parameters from param_cond.py.")
+    update_chan_param(new_param_chan, chan_param_name_relation, chanset, param_location) #Update new param_chan files with new channel params.
+    write_header(header_line, new_param_chan) # Write header to the new param_chan.py
+    logger.info("THE END!!! New files names \n morph: {1} \n param_cond file: {0} \n param_chan file: {2}".format(new_cond_file_name, new_morph_file_name, new_chan_file_name))
