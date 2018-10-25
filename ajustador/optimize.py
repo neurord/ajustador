@@ -29,14 +29,14 @@ def filtereddict(**kwargs):
 
 
 _exe = None
-def exe_map(single=False, async=False):
-    if single and not async:
+def exe_map(single=False, do_async=False):
+    if single and not do_async:
         return map
     else:
         global _exe
         if _exe is None:
             _exe = multiprocessing.Pool(multiprocessing.cpu_count() * 1)
-        if async:
+        if do_async:
             return _exe.map_async
         else:
             return _exe.map
@@ -127,7 +127,7 @@ class MooseSimulation(Simulation):
                  injection_width,  #SRIRMA add injection_interval
                  morph_file=None,
                  single=False,
-                 async=False,
+                 do_async=False,
                  features=None,
                  params):
 
@@ -141,19 +141,19 @@ class MooseSimulation(Simulation):
         if currents is None:
             self.waves = np.array([], dtype=object)
         else:
-            print("Simulating{} at {} points".format(" asynchronously" if async else "", len(currents)))
-            self.execute_for(currents, junction_potential, single, async=async)
+            print("Simulating{} at {} points".format(" asynchronously" if do_async else "", len(currents)))
+            self.execute_for(currents, junction_potential, single, do_async=do_async)
 
-    def execute_for(self, injection_currents, junction_potential, single, async):
+    def execute_for(self, injection_currents, junction_potential, single, do_async):
         params = ((self.tmpdir.name, inj, junction_potential, self.params, self.features)
                   for inj in injection_currents)
-        if async:
+        if do_async:
             logger.debug("MooseSimulation, Params in execute_for \n {}".format(params)) #SRIRAM
-            self._result = exe_map(single=False, async=True)(execute, params, callback=self._set_result)
+            self._result = exe_map(single=False, do_async=True)(execute, params, callback=self._set_result)
         else:
             self._result = None
             logger.debug("MooseSimulation, Params in execute_for \n {} featues {}".format(self.params, self.features)) #SRIRAM
-            result = exe_map(single=single, async=False)(execute, params)
+            result = exe_map(single=single, do_async=False)(execute, params)
             self._set_result(result)
 
     def _set_result(self, result):

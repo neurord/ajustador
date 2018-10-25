@@ -120,7 +120,7 @@ class NeurordSimulation(optimize.Simulation):
                  features=None,
                  params,
                  single=False,
-                 async=True):
+                 do_async=True):
 
         super().__init__(dir,
                          params=params,
@@ -150,12 +150,12 @@ class NeurordSimulation(optimize.Simulation):
         #collect all the args into one tuple, similar to execute_for in optimize
         args=((mfile,fout,num) for mfile,fout,num in zip(model_set,fout_set,param_set))
 
-        if async:
-            func = optimize.exe_map(single=False, async=True)
+        if do_async:
+            func = optimize.exe_map(single=False, do_async=True)
             self._result = func(execute, args, callback=self._set_result)
         else:
             self._result = None
-            result = optimize.exe_map(single=single, async=False)(execute, args)
+            result = optimize.exe_map(single=single, do_async=False)(execute, args)
             self._set_result(result)
 
     def _set_result(self, result):
