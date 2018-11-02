@@ -2,7 +2,7 @@ import numpy as np
 from ajustador import xml
 import importlib
 
-def save_params(fitX, start,threshold):
+def save_params(fitX, start = 0,threshold = np.inf):
 
     #initialized arrays and lists for feature fitnesses and param values
     if isinstance(fitX[0],xml.NeurordSimulation):

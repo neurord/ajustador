@@ -277,7 +277,7 @@ def main(args):
     hdf5writer.close()
 
     if param_sim.plot_vm:
-        neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
+        neuron_graph.graphs(model,model.vmtab, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save_vm:
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)

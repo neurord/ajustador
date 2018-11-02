@@ -15,7 +15,7 @@ rootdir='/home/dandorman/ajustadorTest/SPN_opt/'
 #use 1 and 3 for testing, 250 and 8 for optimization
 generations=1
 popsiz=3
-seed=12345
+seed=1234567
 #after generations, do 25 more at a time and test for convergence
 test_size=0
 
@@ -31,7 +31,9 @@ os.chdir(rootdir+dirname)
 
 #tmpdir='/tmp/fit'+modeltype+'-'+ntype+'-'+dirname
 tmpdir=rootdir+'fit'+modeltype+'-'+ntype+'-'+dirname
-
+if os.path.isdir(tmpdir):
+    import shutil
+    shutil.rmtree(tmpdir)
 ######## set up parameters and fitness
 P = aju.optimize.AjuParam
 params1 = aju.optimize.ParamSet(
@@ -99,7 +101,7 @@ fit1 = aju.optimize.Fit(tmpdir,
 fit1.load()
 
 fit1.do_fit(generations, popsize=popsiz,seed=seed)
-mean_dict,std_dict,CV=converge.iterate_fit(fit1,test_size,popsiz)
+#mean_dict,std_dict,CV=converge.iterate_fit(fit1,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit1, fit1.measurement)
@@ -107,7 +109,7 @@ drawing.plot_history(fit1, fit1.measurement)
 #Save parameters of good results from end of optimization, and all fitness values
 startgood=1000  #set to 0 to print all
 threshold=0.8  #set to large number to print all
-save_params.save_params(fit1, startgood, threshold)
+#save_params.save_params(fit1, startgood, threshold)
 
 #to save the fit object
 #save_params.persist(fit1,'.')
