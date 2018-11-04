@@ -91,6 +91,32 @@ def get_chan_name_data_index(param_name, chan_param_name_relation):
     raise ValueError('Unable to find {} in param_chan.py!!!!'.format(param_name))
 
 def update_chan_param(new_param_chan, chan_param_name_relation, chan_param_data_relation, param_location):
+    ''' Replaces channel parameter code block with updated channel parameter code block in file.
+        old_code block =
+        Na_h_params = AlphaBetaChannelParams(A_rate=80.02882110535691,
+                                             A_B=0.0,
+                                             A_C=0.0,
+                                             A_vhalf=0.07442075789034752,
+                                             A_vslope=0.02,
+                                             B_rate=1143.26887293367,
+                                             B_B=0.0,
+                                             B_C=1.0,
+                                             B_vhalf=0.04442075789034753,
+                                             B_vslope=-0.01)
+
+        new_code block =
+        Na_h_params = AlphaBetaChannelParams(A_rate=<updated_value>,
+                                             A_B=<updated_value>,
+                                             A_C=<updated_value>,
+                                             A_vhalf=<updated_value>,
+                                             A_vslope=<updated_value>,
+                                             B_rate=<updated_value>,
+                                             B_B=<updated_value>,
+                                             B_C=<updated_value>,
+                                             B_vhalf=<updated_value>,
+                                             B_vslope=<updated_value>)
+
+    '''
     valid_start_line_pattern = "^(?P<paramname>\w+)\s*=\s*(?P<paramtype>\w+)\(.*,$"
     valid_line_pattern = valid_start_line_pattern
     start_lineno, end_lineno = (0, 0)

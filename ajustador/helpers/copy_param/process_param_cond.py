@@ -20,6 +20,10 @@ logger = getlogger(__name__)
 logger.setLevel(logging.INFO)
 
 def extract_morph_file_from_cond(cond_file_path, neuron_type):
+    ''' From conductance file line of form
+        morph_file = {'squid':'squid_10C_squid_1_squid_14.p'}
+        gets and returns 'squid_10C_squid_1_squid_14.p'
+    '''
     with fileinput.input(files=(cond_file_path)) as f_obj:
        for line in f_obj:
            if find_morph_file(line):
@@ -93,6 +97,14 @@ def get_modified_sub_string(sub_str, chan, conds):
     return sub_str
 
 def update_conductance_param(new_param_cond, conds, start_block_lineno, end_block_lineno):
+    ''' Writes updated conductances values in param_cond file based on conds dictionary.
+
+    Old_string_value -> _util.NamedDict(    'squid',
+    K={prox: 265.76655651387455, dist: 529.5344981384296})
+    Updated_string_value -> _util.NamedDict(    'squid',
+    K={prox: <updated_value>, dist: <updated_value>})
+
+    '''
     with fileinput.input(files=(new_param_cond), inplace=True) as f_obj:
         for line in f_obj:
             if start_block_lineno < f_obj.lineno() < end_block_lineno:
