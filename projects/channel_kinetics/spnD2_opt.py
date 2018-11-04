@@ -21,7 +21,7 @@ generations = 250  # 1 for test run and 250 for actual run.
 popsiz = 8  # 3 for test run and 8 for actual run.
 
 morph_file= 'MScelltaperspines.p'
-dataname= 'non05Jan2015_SLH004'
+dataname= 'LR06Jan2015_SLH004'
 rootdir = '/home/Sriramsagar/neural_prj/outputs/spn_opt/'  # Checkthis
 seed=10172018
 #after generations, do 25 more at a time and test for convergence
@@ -33,7 +33,7 @@ if not dirname in os.listdir(rootdir):
 os.chdir(rootdir+dirname)
 
 ################## neuron /data specific specifications #############
-exp_to_fit = a2a.alldata[dataname][[0, 8, 16, 20]]
+exp_to_fit = a2a.alldata[dataname][[1, 15, 18, 20]]
 
 tmpdir = '/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dirname
 
@@ -45,19 +45,19 @@ params = aju.optimize.ParamSet(
     P('RM',                2.78,   min=0.1,      max=10),
     P('CM',                 0.010, min=0.001,      max=0.03),
     P('Cond_Kir',      9.5,      min=0, max=20),
-    #P('Chan_Kir_taumul',      1,      min=0.5, max=2),
-    #P('Chan_Kir_vshift',      0,      min=-0.005, max=0.005),
+    P('Chan_Kir_taumul',      1,      min=0.5, max=2),
+    P('Chan_Kir_vshift',      0,      min=-10E-3, max=10E-3),
     P('Eleak', -0.08, min=-0.080, max=-0.030),
     P('Cond_NaF_0',      219e3,      min=0, max=600e3),
     P('Cond_NaF_1',      1878,      min=0, max=10000),
     P('Cond_NaF_2',      878,      min=0, max=10000),
-    #P('Chan_KaS_vshift',  0,      min=-0.005, max=0.005),
-    #P('Chan_KaS_taumul',  1,        min=0.5, max=2),
+    P('Chan_KaS_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_KaS_taumul',  1,        min=0.5, max=2),
     P('Cond_KaS_0',      599,        min=0, max=2000),
     P('Cond_KaS_1',      372,        min=0, max=2000),
     P('Cond_KaS_2',      37.2,        min=0, max=200),
-    #P('Chan_KaF_vshift',  0,      min=-0.005, max=0.005),
-    #P('Chan_KaF_taumul',  1,        min=0.5, max=2),
+    P('Chan_KaF_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_KaF_taumul',  1,        min=0.5, max=2),
     P('Cond_KaF_0',      887,        min=0, max=2000),
     P('Cond_KaF_1',      641,        min=0, max=2000),
     P('Cond_KaF_2',      641,        min=0, max=2000),

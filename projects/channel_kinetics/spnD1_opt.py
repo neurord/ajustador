@@ -45,19 +45,19 @@ params = aju.optimize.ParamSet(
     P('RM',                2.78,   min=0.1,      max=10),
     P('CM',                 0.010, min=0.001,      max=0.03),
     P('Cond_Kir',      9.5,      min=0, max=20),
-    #P('Chan_Kir_taumul',      1,      min=0.5, max=2),
-    #P('Chan_Kir_vshift',      0,      min=-0.005, max=0.005),
+    P('Chan_Kir_taumul',      1,      min=0.5, max=2),
+    P('Chan_Kir_vshift',      0,      min=-10E-3, max=10E-3),
     P('Eleak', -0.08, min=-0.080, max=-0.030),
     P('Cond_NaF_0',      219e3,      min=0, max=600e3),
     P('Cond_NaF_1',      1878,      min=0, max=10000),
     P('Cond_NaF_2',      878,      min=0, max=10000),
-    #P('Chan_KaS_vshift',  0,      min=-0.005, max=0.005),
-    #P('Chan_KaS_taumul',  1,        min=0.5, max=2),
+    P('Chan_KaS_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_KaS_taumul',  1,        min=0.5, max=2),
     P('Cond_KaS_0',      599,        min=0, max=2000),
     P('Cond_KaS_1',      372,        min=0, max=2000),
     P('Cond_KaS_2',      37.2,        min=0, max=200),
-    #P('Chan_KaF_vshift',  0,      min=-0.005, max=0.005),
-    #P('Chan_KaF_taumul',  1,        min=0.5, max=2),
+    P('Chan_KaF_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_KaF_taumul',  1,        min=0.5, max=2),
     P('Cond_KaF_0',      887,        min=0, max=2000),
     P('Cond_KaF_1',      641,        min=0, max=2000),
     P('Cond_KaF_2',      641,        min=0, max=2000),
@@ -111,7 +111,7 @@ fit = aju.optimize.Fit(tmpdir,
 fit.load()
 
 fit.do_fit(generations, popsize=popsiz, seed=seed)
-#mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
+mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
 
 #look at results
 drawing.plot_history(fit, fit.measurement)
