@@ -19,3 +19,17 @@ create_npz_param(npz_file, model, neuron_type, fitnum=1) # Give a fitnumber of y
 
 # Varation
 create_npz_param(npz_file, model, neuron_type) # process best fit out of .npz file.
+
+
+# Input arguments in detail:
+Inputs => npz_file          -> *.npz file;
+             model             -> 'gp', 'd1d2', 'ep' or 'ca1' soon;
+             neuron_type       -> 'proto', 'D1' or 'D2' soon;
+             store_param_spath -> User intended path to store neuron parameter files;
+             fitnum            -> user desired fitnumber to extract from npz file;
+             cond_file         -> Pure file name no path prefixes,
+
+# Assumptions and Limitations
+Note** Program searches for cond_file in model folder and conductance_save in-order.
+Note** *.p file in cond_file should be present in the same directory for proper execution.
+Note** Avoid scientifc notation (12E-3) in param_cond.py.
