@@ -1,0 +1,2 @@
+﻿ntype,modeltype,generations,popsiz,morph_file,dataname,rootdir,seed,trace_array,tmp_dir_prefix,optimization_parmas_finess_weights,data_wave_module,datasection
+D1,d1d2,250,8,MScelltaperspines.p,non05Jan2015_SLH004,/home/Sriramsagar/neural_prj/outputs/spn_opt/,1234,"[0, 8, 16, 20]",/tmp/Sriramsagar,aju_param_fitness.py,A2Acre,allData
