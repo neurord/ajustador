@@ -27,7 +27,7 @@ seed= {seed}
 #after generations, do 25 more at a time and test for convergence
 test_size= 25
 
-dirname=dataname+'_pas2_'+str(seed)
+dirname=dataname+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
