@@ -6,7 +6,7 @@ import os
 import shutil
 
 def peon(work_item):
-    currentdir, backupdir, tmpdir, opt_script_path _python= work_item
+    currentdir, backupdir, tmpdir, opt_script_path, _python = work_item
     shutil.os.chdir(currentdir)
     setup(tmpdir, backupdir)
     sp.call([_python, opt_script_path])
