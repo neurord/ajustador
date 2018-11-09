@@ -15,7 +15,8 @@ def peon(work_item):
 def setup(tmpdir, backupdir):
     try:
         create_backupdir(backupdir)
-        shutil.copytree(tmpdir, backupdir)
+        versioned_backup_path = create_backupdir_name(tmpdir, backupdir)
+        shutil.copytree(tmpdir, versioned_backup_path)
     except:
          pass
     try:
@@ -28,6 +29,15 @@ def create_backupdir(backupdir):
         shutil.os.mkdir(backupdir)
     except:
         pass
+
+def create_backupdir_name(tmpdir, backupdir):
+    dirname = tmpdir.split('/')[-1]
+    max_version = [0]
+    version_dirs = [dir_ for dir_ in os.listdir(backupdir) if dirname in dir_]
+    version = max(max_version + [int(dir_.split('#')[-1]) for dir_ in version_dirs if "#" in dir_])
+    version = int(version) + 1
+    new_bkp_path = os.path.join(backupdir,dirname+'#{}'.format(version))
+    return new_bkp_path
 
 if __name__ == '__main__':
     template = sys.argv[1]      # template.py
