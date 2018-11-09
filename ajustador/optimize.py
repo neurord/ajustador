@@ -63,7 +63,7 @@ def execute(p):
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
-    print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
+    #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)  # shell command print for debug use.
     #logger.debug("Seralized params:\n {}".format(params))
     logger.debug("Basic_simulation command:\n {}".format(cmdline))
     with utilities.chdir(dirname):
@@ -96,7 +96,6 @@ class Simulation(loader.Attributable):
 
         self.name = (', '.join('{}={}'.format(k,v) for k,v in self.params.items())
                      if self.params else 'unmodified')
-        logger.debug("Logger in Simulation!!!") #SRIRAM 02192018
         logger.debug("Params of simulation\n {}".format(self.name)) #SRIRAM 02192018
 
         self.tmpdir = utilities.TemporaryDirectory(dir=dir)
@@ -169,7 +168,6 @@ class MooseSimulation(Simulation):
         injection_delay=measurement.features[0].injection_start,    #SRIRAM 02192018
         injection_width=measurement.features[0].injection_interval,  #SRIRAM 02192018
         baseline = measurement.mean_baseline.x
-        #logger.debug("Logger in MooseSimulation.make!!!") #SRIRAM
         logger.debug("Params \n {}".format(params))
 
         return cls(dir=dir,

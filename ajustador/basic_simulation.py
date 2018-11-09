@@ -47,7 +47,8 @@ from ajustador.helpers.loggingsystem import getlogger
 
 import logging
 logger = getlogger(__name__)
-logger.setLevel(logging.INFO)
+level = logging.INFO
+logger.setLevel(level)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
@@ -196,13 +197,14 @@ def setup(param_sim, model):
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
-        if logger.level==logging.DEBUG:
+        if level==logging.DEBUG:
             print('cond:', name, comp, value)
         setup_conductance(condset, name, comp, value)
 
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
-        print('chan:', chan_name, opt, gate, value)
+        if level==logging.DEBUG:
+            print('chan:', chan_name, opt, gate, value)
         if opt == 'taumul':
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
         elif opt == 'vshift':
@@ -227,7 +229,7 @@ def setup(param_sim, model):
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    if logger.level==logging.DEBUG:
+    if level==logging.DEBUG:
         print_params.print_elem_params(model,param_sim.neuron_type,param_sim)
     return pg, writer
 
@@ -244,7 +246,7 @@ def reset_baseline(neuron, baseline, Cond_Kir):
 
 def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
-    if logger.level==logging.DEBUG:
+    if level==logging.DEBUG:
         print("################## moose versions: ", moose.__version__)
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
