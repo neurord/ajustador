@@ -17,17 +17,17 @@ ghkkluge=1
 ntype='D1'
 modeltype='d1d2'
 
-generations = 250  # 1 for test run and 250 for actual run.
-popsiz = 8  # 3 for test run and 8 for actual run.
+generations = 1  # 1 for test run and 250 for actual run.
+popsiz = 3  # 3 for test run and 8 for actual run.
 
 morph_file= 'MScelltaperspines.p'
 dataname= 'non05Jan2015_SLH004'
 rootdir = '/home/Sriramsagar/neural_prj/outputs/spn_opt/'  # Checkthis
-seed=10172018
+seed=111111
 #after generations, do 25 more at a time and test for convergence
 test_size=25
 
-dirname=dataname+'_pas2_'+str(seed)
+dirname=dataname+'_man_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -82,7 +82,6 @@ params = aju.optimize.ParamSet(
     P('neuron_type', ntype,                     fixed=1),
     P('model',           modeltype,     fixed=1))
 
-#fitness=aju.fitnesses.combined_fitness('new_combined_fitness')
 
 fitness = aju.fitnesses.combined_fitness('empty',
                                          response=1,
@@ -111,15 +110,25 @@ fit = aju.optimize.Fit(tmpdir,
 fit.load()
 
 fit.do_fit(generations, popsize=popsiz, seed=seed)
-mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
 
-#look at results
-drawing.plot_history(fit, fit.measurement)
+startgood=1000  #set to 0 to print all
+threshold=0.8  #set to large number to print all
+s_crt = 2E-3
+max_eval = 5000
+
+while(True):
+    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval) # Repeated untill convergence.
+    drawing.plot_history(fit, fit.measurement)
+    save_params.save_params(fit, startgood, threshold)
+    char = input("Continue opt:")
+    if char.upper() == 'N':
+        break
+    else:
+        s_crt = np.float32(input("slope_criteria ?"))
+        max_eval = np.long(input("Maximum evaluations must be >{} ?".format(max_eval)))
+        continue
 
 #Save parameters of good results from end of optimization, and all fitness values
-#startgood=1000  #set to 0 to print all
-#threshold=0.8  #set to large number to print all
-#save_params.save_params(fit, startgood, threshold)
 
 #to save the fit object
 #save_params.persist(fit3,'.')

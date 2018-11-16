@@ -1,6 +1,10 @@
 import pandas as pd
 import os
 from collections import namedtuple
+import multiprocessing as mp
+import subprocess as sp
+import sys
+import shutil
 
 file_info_record = namedtuple('file_info_record', "tempdir opt_script")
 
@@ -57,3 +61,23 @@ def generate_opt_script(template_file, replacement_set):
     print('Genearted optimization script:', cwd + '/' + output_script_name)
 
     return cwd + '/' + output_script_name
+
+def peon(work_item):
+    currentdir, tmpdir, opt_script_path, _python = work_item
+    shutil.os.chdir(currentdir)
+    sp.call([_python, opt_script_path])
+    return 0
+
+if __name__ == '__main__':
+    template = sys.argv[1]      # template.py
+    settings_csv = sys.argv[2]  # opt_settings.csv
+    which_python = sys.argv[3]  # /usr/bin/python3
+    current_dir = os.getcwd()
+    parallel_count = 2
+
+    opt_script_paths = generate_opt_scripts(settings_csv, template)
+    exec_inputs = [(current_dir, tempdir, script_path, which_python) for tempdir, script_path in opt_script_paths]
+    with mp.Pool(processes = parallel_count) as pool:
+        pool.map(peon, exec_inputs)
+
+# python3 opt_script_generator.py template.py opt_script_settings.csv /usr/bin/python3

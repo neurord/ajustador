@@ -58,9 +58,9 @@ mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
 #drawing.plot_history(fit, fit.measurement)
 
 #Save parameters of good results from end of optimization, and all fitness values
-#startgood=1000  #set to 0 to print all
-#threshold=0.8  #set to large number to print all
-#save_params.save_params(fit, startgood, threshold)
+startgood=1000  #set to 0 to print all
+threshold=0.8  #set to large number to print all
+save_params.save_params(fit, startgood, threshold)
 
 #to save the fit object
-#save_params.persist(fit3,'.')
+save_params.persist(fit3,'.')
