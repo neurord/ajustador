@@ -7,6 +7,7 @@ import A2Acre as a2a
 
 from ajustador import drawing
 from matplotlib import pyplot
+pyplot.ion()
 from ajustador.helpers import save_params,converge
 
 # a. simplest approach is to use CAPOOL (vs CASHELL, and CASLAB for spines)
@@ -23,11 +24,11 @@ popsiz = 3  # 3 for test run and 8 for actual run.
 morph_file= 'MScelltaperspines.p'
 dataname= 'non05Jan2015_SLH004'
 rootdir = '/home/Sriramsagar/neural_prj/outputs/spn_opt/'  # Checkthis
-seed=111111
+seed=999999999
 #after generations, do 25 more at a time and test for convergence
 test_size=25
 
-dirname=dataname+'_man_'+str(seed)
+dirname=dataname+'_labmanual_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -48,6 +49,8 @@ params = aju.optimize.ParamSet(
     P('Chan_Kir_taumul',      1,      min=0.5, max=2),
     P('Chan_Kir_vshift',      0,      min=-10E-3, max=10E-3),
     P('Eleak', -0.08, min=-0.080, max=-0.030),
+    P('Chan_NaF_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_NaF_taumul',  1,        min=0.5, max=2),
     P('Cond_NaF_0',      219e3,      min=0, max=600e3),
     P('Cond_NaF_1',      1878,      min=0, max=10000),
     P('Cond_NaF_2',      878,      min=0, max=10000),
@@ -61,6 +64,8 @@ params = aju.optimize.ParamSet(
     P('Cond_KaF_0',      887,        min=0, max=2000),
     P('Cond_KaF_1',      641,        min=0, max=2000),
     P('Cond_KaF_2',      641,        min=0, max=2000),
+    P('Chan_Krp_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_Krp_taumul',  1,        min=0.5, max=2),
     P('Cond_Krp_0',      0.05,        min=0, max=60),
     P('Cond_Krp_1',      0.05,        min=0, max=60),
     P('Cond_Krp_2',      0.05,        min=0, max=60),
@@ -118,14 +123,16 @@ max_eval = 5000
 
 while(True):
     mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval) # Repeated untill convergence.
-    drawing.plot_history(fit, fit.measurement)
     save_params.save_params(fit, startgood, threshold)
-    char = input("Continue opt:")
+    char = input("plot_history opt (Y/N):")
+    if char.upper() == 'Y':
+        drawing.plot_history(fit, fit.measurement)
+    char = input("Continue opt (Y/N):")
     if char.upper() == 'N':
         break
     else:
-        s_crt = np.float32(input("slope_criteria ?"))
-        max_eval = np.long(input("Maximum evaluations must be >{} ?".format(max_eval)))
+        s_crt = np.float32(input("slope_criteria old_cirterial is {}?".format(s_crt)))
+        max_eval = np.long(input("Maximum evaluations must be > {}?".format(max_eval)))
         continue
 
 #Save parameters of good results from end of optimization, and all fitness values

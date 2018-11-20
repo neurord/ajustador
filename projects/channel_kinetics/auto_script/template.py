@@ -52,15 +52,15 @@ fit = aju.optimize.Fit(tmpdir,
 fit.load()
 
 fit.do_fit(generations, popsize=popsiz, seed=seed)
-mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
+mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, max_evals=7000)
 
 #look at results
 #drawing.plot_history(fit, fit.measurement)
 
 #Save parameters of good results from end of optimization, and all fitness values
-startgood=1000  #set to 0 to print all
-threshold=0.8  #set to large number to print all
+startgood=0  #set to 0 to print all
+threshold=1000  #set to large number to print all
 save_params.save_params(fit, startgood, threshold)
 
 #to save the fit object
-save_params.persist(fit3,'.')
+save_params.persist(fit,'.')
