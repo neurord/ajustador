@@ -23,11 +23,11 @@ popsiz = 8  # 3 for test run and 8 for actual run.
 morph_file= 'MScelltaperspines.p'
 dataname= 'LR06Jan2015_SLH004'
 rootdir = '/home/Sriramsagar/neural_prj/outputs/spn_opt/'  # Checkthis
-seed=10172018
+seed=20112018
 #after generations, do 25 more at a time and test for convergence
 test_size=25
 
-dirname=dataname+'_pas2_'+str(seed)
+dirname=dataname+'_labmanual_'+str(seed)
 if not dirname in os.listdir(rootdir):
     os.mkdir(rootdir+dirname)
 os.chdir(rootdir+dirname)
@@ -37,7 +37,6 @@ exp_to_fit = a2a.alldata[dataname][[1, 15, 18, 20]]
 
 tmpdir = '/tmp/Sriramsagar'+modeltype+'-'+ntype+'-'+dirname
 
-######## set up parameters and fitness
 P = aju.optimize.AjuParam
 params = aju.optimize.ParamSet(
     P('junction_potential', -.013,       fixed=1),
@@ -48,6 +47,8 @@ params = aju.optimize.ParamSet(
     P('Chan_Kir_taumul',      1,      min=0.5, max=2),
     P('Chan_Kir_vshift',      0,      min=-10E-3, max=10E-3),
     P('Eleak', -0.08, min=-0.080, max=-0.030),
+    P('Chan_NaF_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_NaF_taumul',  1,        min=0.5, max=2),
     P('Cond_NaF_0',      219e3,      min=0, max=600e3),
     P('Cond_NaF_1',      1878,      min=0, max=10000),
     P('Cond_NaF_2',      878,      min=0, max=10000),
@@ -61,6 +62,8 @@ params = aju.optimize.ParamSet(
     P('Cond_KaF_0',      887,        min=0, max=2000),
     P('Cond_KaF_1',      641,        min=0, max=2000),
     P('Cond_KaF_2',      641,        min=0, max=2000),
+    P('Chan_Krp_vshift',  0,      min=-10E-3, max=10E-3),
+    P('Chan_Krp_taumul',  1,        min=0.5, max=2),
     P('Cond_Krp_0',      0.05,        min=0, max=60),
     P('Cond_Krp_1',      0.05,        min=0, max=60),
     P('Cond_Krp_2',      0.05,        min=0, max=60),
@@ -82,7 +85,7 @@ params = aju.optimize.ParamSet(
     P('neuron_type', ntype,                     fixed=1),
     P('model',           modeltype,     fixed=1))
 
-#fitness=aju.fitnesses.combined_fitness('new_combined_fitness')
+
 fitness = aju.fitnesses.combined_fitness('empty',
                                          response=1,
                                          baseline_pre=1,
@@ -99,6 +102,7 @@ fitness = aju.fitnesses.combined_fitness('empty',
                                          charging_curve=1,
                                          spike_range_y_histogram=1)
 ########### Neuron and fit specific commands ############
+
 fit = aju.optimize.Fit(tmpdir,
                         exp_to_fit,
                         modeltype, ntype,
@@ -109,11 +113,25 @@ fit = aju.optimize.Fit(tmpdir,
 fit.load()
 
 fit.do_fit(generations, popsize=popsiz, seed=seed)
-#mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz)
 
-#look at results
-drawing.plot_history(fit, fit.measurement)
+startgood=1000  #set to 0 to print all
+threshold=0.8  #set to large number to print all
+s_crt = 2E-3
+max_eval = 5000
 
+while(True):
+    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval) # Repeated untill convergence.
+    save_params.save_params(fit, startgood, threshold)
+    char = input("plot_history opt (Y/N):")
+    if char.upper() == 'Y':
+        drawing.plot_history(fit, fit.measurement)
+    char = input("Continue opt (Y/N):")
+    if char.upper() == 'N':
+        break
+    else:
+        s_crt = np.float32(input("slope_criteria old_cirterial is {}?".format(s_crt)))
+        max_eval = np.long(input("Maximum evaluations must be > {}?".format(max_eval)))
+        continue
 #Save parameters of good results from end of optimization, and all fitness values
 #startgood=1000  #set to 0 to print all
 #threshold=0.8  #set to large number to print all
