@@ -118,9 +118,10 @@ startgood=1000  #set to 0 to print all
 threshold=0.8  #set to large number to print all
 s_crt = 2E-3
 max_eval = 5000
+fitness=[fit.fitness_func(fit[i], fit.measurement, full=0) for i in range(len(fit))]
 
 while(True):
-    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval) # Repeated untill convergence.
+    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval, fitness=fitness)
     save_params.save_params(fit, startgood, threshold)
     char = input("plot_history opt (Y/N):")
     if char.upper() == 'Y':
@@ -130,7 +131,7 @@ while(True):
         break
     else:
         s_crt = np.float32(input("slope_criteria old_cirterial is {}?".format(s_crt)))
-        max_eval = np.long(input("Maximum evaluations must be > {}?".format(max_eval)))
+        max_eval = np.long(input("Maximum evaluations must be > {}?".format(len(fit))))
         continue
 #Save parameters of good results from end of optimization, and all fitness values
 #startgood=1000  #set to 0 to print all
