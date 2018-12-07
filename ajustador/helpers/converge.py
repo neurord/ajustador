@@ -31,12 +31,14 @@ def converge_dict(fit_values,test_size,popsiz):
             slope_test_size=int(np.round(generations/test_size))
             mean_dict=calc_mean_slopes(means,slope_test_size,test_size)
             std_dict=calc_mean_slopes(stdev,slope_test_size,test_size)
-    else: 
+    else:
             mean_dict={'mean':means,'std':np.zeros(len(means)),'slope':np.zeros(len(means))}
             std_dict={'mean':stdev,'std':np.zeros(len(stdev)),'slope':np.zeros(len(stdev))}
     return mean_dict,std_dict,CV
-    
+
 def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5000):
+    # 0.04 criteria looked better for GPE, even .02; Might need as many as 10000 evals
+    #
     converge=False
     fitness=[fitX.fitness_func(fitX[i], fitX.measurement, full=0) for i in range(len(fitX))]
     last_j=0
@@ -49,7 +51,7 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5
             for i in range(len(fitX)-test_size*popsiz,len(fitX)):  #append fitness values
                 fitness.append(fitX.fitness_func(fitX[i], fitX.measurement, full=0))
             mean_dict,std_dict,CV=converge_dict(fitness,test_size,popsiz) #calculate mean and std of the fitness values
-            for j in range(last_j,len(mean_dict['mean'])):  
+            for j in range(last_j,len(mean_dict['mean'])):
                 line=str(j)+'  '   #write the latest fitness values to the file
                 for key in mean_dict.keys():
                         line=line+'   '+str(np.round(mean_dict[key][j],5))
