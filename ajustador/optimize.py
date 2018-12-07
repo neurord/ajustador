@@ -17,7 +17,7 @@ import numpy as np
 import cma
 
 # _features holds all feature classes.
-from . import loader, features as _features, fitnesses, utilities 
+from . import loader, features as _features, fitnesses, utilities
 
 from ajustador.helpers.loggingsystem import getlogger #SRIRAM 02152018
 import logging
@@ -127,7 +127,7 @@ class MooseSimulation(Simulation):
                  injection_width,  #SRIRMA add injection_interval
                  morph_file=None,
                  single=False,
-                 do_async=False,
+                 do_async=True,
                  features=None,
                  params):
 
