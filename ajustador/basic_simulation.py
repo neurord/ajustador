@@ -165,15 +165,15 @@ def morph_morph_file(model, ntype, morph_file, new_file=None,
 
 
 def setup_CaPool(param_sim, model):
-    if not any(hasattr(param_sim, k) for k in ['CaPoolTauDend', 'CaPoolTauSoma', 'CaPoolBDend', 'CaPoolBSoma'])
+    if not any(getattr(param_sim, k, None) for k in ['CaPoolTauDend', 'CaPoolTauSoma', 'CaPoolBDend', 'CaPoolBSoma']):
         return
-    if hasattr(param_sim,'CaPoolTauDend'):
+    if getattr(param_sim,'CaPoolTauDend',None):
         model.param_ca_plas.Taus[model.param_ca_plas.dend]=param_sim.CaPoolTauDend
-    if hasattr(param_sim,'CaPoolTauSoma'):
+    if getattr(param_sim,'CaPoolTauSoma',None):
         model.param_ca_plas.Taus[model.param_ca_plas.soma]=param_sim.CaPoolTauSoma
-    if hasattr(param_sim,'CaPoolBDend'):
+    if getattr(param_sim,'CaPoolBDend',None):
         model.param_ca_plas.BufferCapacityDensity[model.param_ca_plas.dend]=param_sim.CaPoolBDend
-    if hasattr(param_sim,'CaPoolBSoma'):
+    if getattr(param_sim,'CaPoolBSoma',None):
         model.param_ca_plas.BufferCapacityDensity[model.param_ca_plas.dend]=param_sim.CaPoolBSoma
     for k,v in model.param_ca_plas.CaShellModeDensity.items():
         model.param_ca_plas.CaShellModeDensity[k] = model.param_ca_plas.CAPOOL
