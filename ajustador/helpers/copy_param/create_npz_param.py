@@ -48,6 +48,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                  cond_file         -> Pure file name no path prefixes,
        Note** Program searches for cond_file in model folder and conductance_save in-order.
        Note** If *.p file in cond_file should be present in the same directory for proper execution.
+       Note** Block comments in param_chan.py and param_cond.py must be of <'''>.
     """
 
     model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
