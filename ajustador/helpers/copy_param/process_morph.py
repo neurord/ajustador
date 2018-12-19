@@ -50,6 +50,7 @@ def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type,
     src_morph_file_path = get_file_abs_path(model_path, morph_file)
     if 'conductance_save' in src_morph_file_path:
         new_morph_file_path = get_file_name_with_version(src_morph_file_path)
+        import pdb; pdb.set_trace()
         morph_morph_file(model_obj, neuron_type, src_morph_file_path, new_file = open(new_morph_file_path,'w'),
         **{k:v for k,v in non_conds.items() if k in morph_features})
         return new_morph_file_path
