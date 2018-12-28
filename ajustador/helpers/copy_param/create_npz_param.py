@@ -60,6 +60,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
     header_line = "# Generated from npzfile: {} of fit number: {}\n".format(
                   npz_file.rpartition('/')[2], fit_number)
+    sample_label = npz_file.rpartition('/')[2].rstrip('.npz').split('_')[-1]
 
     logger.debug("Param_data: {}".format(param_data_list))
     conds = get_params(param_data_list, 'Cond_')
@@ -77,7 +78,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     new_param_cond = clone_file(src_path=model_path, src_file=cond_file, dest_file=new_cond_file_name)
 
     logger.info("START STEP 4!!! Extract and modify morph_file from {}".format(new_param_cond))
-    morph_file = clone_and_change_morph_file(new_param_cond, model_path, model, neuron_type, non_conds)
+    morph_file = clone_and_change_morph_file(new_param_cond, model_path, model, neuron_type, non_conds, sample_label)
     #NOTE: created param_cond.py file in conductance_save directory of moose_nerp squid model.
     #NOTE: created and updated morph file.
 

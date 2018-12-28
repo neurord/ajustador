@@ -27,11 +27,12 @@ def get_morph_file_name(line, neuron_type):
     return None
 
 def update_morph_file_name(line, neuron_type, file_name):
+    " Update morph file name into in param_cond.py file based on neuron type"
     pattern = r"\'{}\'\s*:\s*\'[0-9a-zA-Z\.\-_]+\'".format(neuron_type)
     repl = "'{}':'{}'".format(neuron_type, file_name)
     return re.sub(pattern, repl, line)
 
-def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type, non_conds):
+def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type, non_conds, sample_name=''):
     ''' Inputs param_cond_file == string => Absolute path of cond_file.
                model_path == Path objects => model Path objects.
                model == string => model name.
@@ -50,10 +51,10 @@ def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type,
     src_morph_file_path = get_file_abs_path(model_path, morph_file)
     if 'conductance_save' in src_morph_file_path:
         new_morph_file_path = get_file_name_with_version(src_morph_file_path)
-        import pdb; pdb.set_trace()
         morph_morph_file(model_obj, neuron_type, src_morph_file_path, new_file = open(new_morph_file_path,'w'),
         **{k:v for k,v in non_conds.items() if k in morph_features})
         return new_morph_file_path
-    morph_morph_file(model_obj, neuron_type, src_morph_file_path, new_file = open(str(model_path/'conductance_save'/morph_file),'w'),
+    new_morph_file_path = str(model_path/'conductance_save'/morph_file)[:-2]+'_'+sample_name+'.p'
+    morph_morph_file(model_obj, neuron_type, src_morph_file_path, new_file = open(new_morph_file_path, 'w'),
     **{k:v for k,v in non_conds.items() if k in morph_features})
-    return str(model_path/'conductance_save'/morph_file)
+    return new_morph_file_path
