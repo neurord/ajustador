@@ -47,8 +47,7 @@ from ajustador.helpers.loggingsystem import getlogger
 
 import logging
 logger = getlogger(__name__)
-level = logging.INFO
-logger.setLevel(level)
+logger.setLevel(logging.WARNING)
 
 def real(s):
     ''' Function to convert a value into float and raises ValueError if it is NAN.
@@ -71,7 +70,7 @@ def option_parser():
     ''' Extends moose_nerp.prototypes.standard_options by defining additional
         console arguments simulation.
     '''
-    p = standard_options.standard_options(
+    p, _ = standard_options.standard_options(
         default_injection_delay=0.2,
         default_injection_width=0.4,
         default_injection_current=[-0.15e-9, 0.15e-9, 0.35e-9],
@@ -94,6 +93,11 @@ def option_parser():
     p.add_argument('--cond', default=[], nargs='+', type=cond_setting, action=standard_options.AppendFlat)
     p.add_argument('--save-vm')
     p.add_argument('--chan', default=[], nargs='+', type=chan_setting, action=standard_options.AppendFlat)
+    p.add_argument('--CaPoolTauDend', type=real)
+    p.add_argument('--CaPoolTauSoma', type=real)
+    p.add_argument('--CaPoolBDend', type=real)
+    p.add_argument('--CaPoolBSoma', type=real)
+
     return p
 
 @util.listize
@@ -159,6 +163,22 @@ def morph_morph_file(model, ntype, morph_file, new_file=None,
 
     return new_file
 
+
+def setup_CaPool(param_sim, model):
+    if not any(getattr(param_sim, k, None) for k in ['CaPoolTauDend', 'CaPoolTauSoma', 'CaPoolBDend', 'CaPoolBSoma']):
+        return
+    if getattr(param_sim,'CaPoolTauDend',None):
+        model.param_ca_plas.Taus[model.param_ca_plas.dend]=param_sim.CaPoolTauDend
+    if getattr(param_sim,'CaPoolTauSoma',None):
+        model.param_ca_plas.Taus[model.param_ca_plas.soma]=param_sim.CaPoolTauSoma
+    if getattr(param_sim,'CaPoolBDend',None):
+        model.param_ca_plas.BufferCapacityDensity[model.param_ca_plas.dend]=param_sim.CaPoolBDend
+    if getattr(param_sim,'CaPoolBSoma',None):
+        model.param_ca_plas.BufferCapacityDensity[model.param_ca_plas.dend]=param_sim.CaPoolBSoma
+    for k,v in model.param_ca_plas.CaShellModeDensity.items():
+        model.param_ca_plas.CaShellModeDensity[k] = model.param_ca_plas.CAPOOL
+
+
 def setup_conductance(condset, name, index, value):
     ''' Updates condset object's attribute with name.
         index == ':' -> Sets all child members values of condset.name
@@ -181,10 +201,13 @@ def setup_conductance(condset, name, index, value):
 def setup(param_sim, model):
     #these next two overrides are not used in optimization as they are not passed in from optimize
     #they could be used if running basic_simulation directly
+    '''
     if param_sim.calcium is not None:
         model.calYN = param_sim.calcium
     if param_sim.spines is not None:
         model.spineYN = param_sim.spines
+     '''
+
     '''
     if model.type = nml:
         this block of code updates neuroml files
@@ -223,13 +246,20 @@ def setup(param_sim, model):
     fname=param_sim.neuron_type+'.h5'
     param_sim.save=1
     #create neuron model and set up output
-    syn,neurons,writer,tables=create_model_sim.create_model_sim(model,fname,param_sim,plotcomps)
-
+    model.param_sim = param_sim
+    setup_CaPool(param_sim, model)
+    #syn,neurons,writer,tables=create_model_sim.create_model_sim(model,fname,param_sim,plotcomps)
+    create_model_sim.setupNeurons(model)
     #set up current injection
     neuron_paths = {ntype:[neuron.path]
-                    for ntype, neuron in neurons.items()}
+                    for ntype, neuron in model.neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    if level==logging.DEBUG:
+    writer=tables.setup_hdf5_output(model, model.neurons, filename=fname,
+                                    compartments=plotcomps)
+    tables.graphtables(model, model.neurons, model.param_sim.plot_current,
+                       model.param_sim.plot_current_message, model.plas,
+                       plotcomps)
+    if logger.level==logging.DEBUG:
         print_params.print_elem_params(model,param_sim.neuron_type,param_sim)
     return pg, writer
 
@@ -274,7 +304,7 @@ def main(args):
     hdf5writer.close()
 
     if param_sim.plot_vm:
-        neuron_graph.graphs(model, param_sim.plot_current, param_sim.simtime, compartments=[0])
+        neuron_graph.graphs(model,model.vmtab, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save_vm:
         elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
