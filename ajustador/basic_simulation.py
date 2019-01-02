@@ -220,13 +220,13 @@ def setup(param_sim, model):
 
     for cond in sorted(param_sim.cond):
         name, comp, value = cond
-        if level==logging.DEBUG:
+        if logger.level == logging.DEBUG:
             print('cond:', name, comp, value)
         setup_conductance(condset, name, comp, value)
 
     for chan in param_sim.chan:
         chan_name, opt, gate, value  = chan
-        if level==logging.DEBUG:
+        if logger.level == logging.DEBUG:
             print('chan:', chan_name, opt, gate, value)
         if opt == 'taumul':
            scale_voltage_dependents_tau_muliplier(chanset, chan_name, gate, value)
@@ -276,7 +276,7 @@ def reset_baseline(neuron, baseline, Cond_Kir):
 
 def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
-    if level==logging.DEBUG:
+    if logger.level == logging.DEBUG:
         print("################## moose versions: ", moose.__version__)
     print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
     pulse_gen.firstLevel = injection_current
