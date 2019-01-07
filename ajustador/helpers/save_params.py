@@ -40,8 +40,8 @@ def save_params(fitX, start = 0,threshold = np.inf):
         fname=fitX.model
     header=[nm+'='+'%.5g'%(val)+'+/-'+'%.5g'%(stdev)
             for nm,val,stdev in zip(fitX.param_names(),
-                                    fitX.params.unscale(fitX.optimizer.result[0]),
-                                    fitX.params.unscale(fitX.optimizer.result[6]))]
+                                    fitX.params.unscale(fitX.optimizer.result()[0]),
+                                    fitX.params.unscale(fitX.optimizer.result()[6]))]
     header.append('fitness')
     if isinstance(fitX[0],xml.NeurordSimulation):
         header.insert(0,'iteration')
