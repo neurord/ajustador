@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 def find_morph_file(line):
     "Finds the 'morph_file =' is in the given input line"
-    re_obj = re.compile(r"morph_file\s+=\s+\{", re.I)
+    re_obj = re.compile(r"morph_file\s*=\s*\{", re.I)
     return True if re_obj.match(line) else False
 
 def get_morph_file_name(line, neuron_type):
