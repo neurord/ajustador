@@ -10,9 +10,9 @@ from ajustador.helpers.save_params import save_params
 save_params(fit1,0,20)
 
 STEP-3 : Generate conductance parameters(param_cond.py ), channel kinetics(param_chan.py) and morph_file.
-npz_file = "/home/Sriramsagar/neural_prj/outputs/squid_opt/squid_experimentaltau_z/Sriramsagarsquid-squid-squid_experimentaltau_z.npz"
+
 from ajustador.helpers.copy_param.create_npz_param import create_npz_param
-npz_file = "/home/Sriramsagar/neural_prj/outputs/squid_opt/squid_experimentaltau_z_ns/Sriramsagarsquid-squid-squid_experimentaltau_z_ns.npz"
+npz_file = "/abs_path_to_file/squid-squid_experimentaltau_z_ns.npz"
 model='squid'
 neuron_type='squid'
 create_npz_param(npz_file, model, neuron_type, fitnum=1) # Give a fitnumber of your choice.
@@ -20,16 +20,16 @@ create_npz_param(npz_file, model, neuron_type, fitnum=1) # Give a fitnumber of y
 # Varation
 create_npz_param(npz_file, model, neuron_type) # process best fit out of .npz file.
 
-
 # Input arguments in detail:
 Inputs => npz_file          -> *.npz file;
              model             -> 'gp', 'd1d2', 'ep' or 'ca1' soon;
              neuron_type       -> 'proto', 'D1' or 'D2' soon;
              store_param_spath -> User intended path to store neuron parameter files;
              fitnum            -> user desired fitnumber to extract from npz file;
-             cond_file         -> Pure file name no path prefixes,
+             cond_file         -> Pure file name no path prefixes, [NOTE-1]
+             chan_file         -> Pure file name no path prefixes, [NOTE-1]
 
 # Assumptions and Limitations
-Note** Program searches for cond_file in model folder and conductance_save in-order.
-Note** *.p file in cond_file should be present in the same directory for proper execution.
-Note** Avoid scientifc notation (12E-3) in param_cond.py.
+Note-1** Program searches for cond_file in model folder and conductance_save in-order.
+Note-2** *.p file in cond_file should be present in the same directory for proper execution.
+Note-3** Avoid scientifc notation (12E-3) in param_cond.py.
