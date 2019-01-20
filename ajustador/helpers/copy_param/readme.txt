@@ -26,8 +26,8 @@ Inputs => npz_file          -> *.npz file;
              neuron_type       -> 'proto', 'D1' or 'D2' soon;
              store_param_spath -> User intended path to store neuron parameter files;
              fitnum            -> user desired fitnumber to extract from npz file;
-             cond_file         -> Pure file name no path prefixes, [NOTE-1]
-             chan_file         -> Pure file name no path prefixes, [NOTE-1]
+             cond_file         -> Pure file name no path prefixes, [NOTE-1] (if cond_file is None uses param_cond.py).
+             chan_file         -> Pure file name no path prefixes, [NOTE-1] (if chan_file is None uses param_chan.py).
 
 # Assumptions and Limitations
 Note-1** Program searches for cond_file in model folder and conductance_save in-order.
