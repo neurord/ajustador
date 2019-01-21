@@ -26,7 +26,7 @@ def save_params(fitX, start = 0,threshold = np.inf):
                 fitnessX[i,j]=fitness_tmp[j]
         else:
             fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
-        fitnessX[i,-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=0)
+        fitnessX[i,-1]=fitX._history[i]
         #paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()] # Here we are rounding to 5 decimal places.wa
         paramvals[i]=[fitX[i].params[j].value for j in fitX.param_names()]
         line=list(paramvals[i])
