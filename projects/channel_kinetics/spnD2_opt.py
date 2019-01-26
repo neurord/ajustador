@@ -17,13 +17,13 @@ ghkkluge=1
 ntype='D2'
 modeltype='d1d2'
 
-generations = 250  # 1 for test run and 250 for actual run.
+generations = 10  # 1 for test run and 250 for actual run.
 popsiz = 8  # 3 for test run and 8 for actual run.
 
 morph_file= 'MScelltaperspines.p'
 dataname= 'LR06Jan2015_SLH004'
 rootdir = '/home/Sriramsagar/neural_prj/outputs/spn_opt/'  # Checkthis
-seed=20112018
+seed=26012019
 #after generations, do 25 more at a time and test for convergence
 test_size=25
 
@@ -118,10 +118,9 @@ startgood=1000  #set to 0 to print all
 threshold=0.8  #set to large number to print all
 s_crt = 2E-3
 max_eval = 5000
-fitness=[fit.fitness_func(fit[i], fit.measurement, full=0) for i in range(len(fit))]
 
 while(True):
-    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval, fitness=fitness)
+    mean_dict,std_dict,CV=converge.iterate_fit(fit,test_size,popsiz, slope_crit=s_crt, max_evals=max_eval)
     save_params.save_params(fit, startgood, threshold)
     char = input("plot_history opt (Y/N):")
     if char.upper() == 'Y':
