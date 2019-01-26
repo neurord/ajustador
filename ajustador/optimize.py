@@ -63,7 +63,7 @@ def execute(p):
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
-    #print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)  # shell command print for debug use.
+    print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)  # shell command print for debug use.
     #logger.debug("Seralized params:\n {}".format(params))
     logger.debug("Basic_simulation command:\n {}".format(cmdline))
     with utilities.chdir(dirname):

@@ -40,17 +40,16 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5
     # 0.04 criteria looked better for GPE, even .02; Might need as many as 10000 evals
     #
     converge=False
-    fitness=[fitX.fitness_func(fitX[i], fitX.measurement, full=0) for i in range(len(fitX))]
     last_j=0
     #print('iterate_fit.py: len of fitness',len(fitX))
     with open("convergence.dat","w") as fitfile:
         fitfile.write("data name: "+str(fitX.name)+"  test_size: "+str(test_size)+"\n")
         fitfile.write("iter mean_mean std_mean slope_mean mean_std std_std slope_std \n")
-        while not converge and len(fitness)<max_evals:
+        while not converge and len(fitx) < max_evals:
             fitX.do_fit(test_size, popsize=popsiz,seed=last_j*last_j)  #OPTIMIZE FOR ANOTHER TEST_SIZE GENERATIONS
-            for i in range(len(fitX)-test_size*popsiz,len(fitX)):  #append fitness values
-                fitness.append(fitX.fitness_func(fitX[i], fitX.measurement, full=0))
-            mean_dict,std_dict,CV=converge_dict(fitness,test_size,popsiz) #calculate mean and std of the fitness values
+            # calculate mean and std of the fitness values
+            mean_dict, std_dict, CV = converge_dict(
+                fitx._history, test_size, popsiz)
             for j in range(last_j,len(mean_dict['mean'])):
                 line=str(j)+'  '   #write the latest fitness values to the file
                 for key in mean_dict.keys():
