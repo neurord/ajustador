@@ -45,7 +45,11 @@ params = aju.optimize.ParamSet(
     P('RA',                 5.3,  min=1,      max=200),
     P('RM',                2.78,   min=0.1,      max=10),
     P('CM',                 0.010, min=0.001,      max=0.03),
+<<<<<<< HEAD
     P('Cond_Kir',      9.5,      min=0, max=20),
+=======
+    P('Cond_KDr',      9.5,      min=0, max=20),
+>>>>>>> 9af73971b95f46f04eec93b1765dcffc976e4734
     P('Chan_KDr_taumul',      1,      min=0.5, max=2),
     P('Chan_KDr_vshift',      0,      min=-10E-3, max=10E-3),
     P('Eleak', -0.08, min=-0.080, max=-0.030),
