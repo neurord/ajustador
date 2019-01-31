@@ -2,7 +2,7 @@ import numpy as np
 from ajustador import xml
 import importlib
 
-def save_params(fitX, start = 0,threshold = np.inf):
+def save_params(fitX, start = 0,threshold = np.inf,fn=None):
 
     #initialized arrays and lists for feature fitnesses and param values
     if isinstance(fitX[0],xml.NeurordSimulation):
@@ -26,7 +26,7 @@ def save_params(fitX, start = 0,threshold = np.inf):
                 fitnessX[i,j]=fitness_tmp[j]
         else:
             fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
-        fitnessX[i,-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=0)
+        fitnessX[i,-1]=fitX._history[i]
         #paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()] # Here we are rounding to 5 decimal places.wa
         paramvals[i]=[fitX[i].params[j].value for j in fitX.param_names()]
         line=list(paramvals[i])
@@ -38,6 +38,10 @@ def save_params(fitX, start = 0,threshold = np.inf):
     fname=fitX.name
     if len(fitX.name)==0:
         fname=fitX.model
+        if fn==None:
+            fname=fname+fitX.measurement.name
+        else:
+            fname=fname+fn
     header=[nm+'='+'%.5g'%(val)+'+/-'+'%.5g'%(stdev)
             for nm,val,stdev in zip(fitX.param_names(),
                                     fitX.params.unscale(fitX.optimizer.result[0]),
