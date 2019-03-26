@@ -58,6 +58,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     logger.info("START STEP 2!!! Prepare param conductances.")
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
+    logger.info("*******Data directory for fit: {}".format(data['tmpdirs'][fit_number]))
     header_line = "# Generated from npzfile: {} of fit number: {}\n".format(
                   npz_file.rpartition('/')[2], fit_number)
     sample_label = npz_file.rpartition('/')[2].rstrip('.npz').split('_')[-1]
