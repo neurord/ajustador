@@ -112,7 +112,7 @@ def _evaluate_single(a, b, error=ErrorCalc.relative):
 
 def response_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of response to hyperpolarizing injection"
-    m1, m2 = _select(sim, measurement, measurement.injection <= 110e-12)
+    m1, m2 = _select(sim, measurement, measurement.spike_count < 1)
     return _evaluate(m1.response, m2.response, error=error)
 
 def baseline_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
