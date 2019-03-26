@@ -1,0 +1,6 @@
+ntype,modeltype,generations,popsiz,seed,morph_file,data_wave_module,datasection,dataname,trace_array,rootdir,tmp_dir_prefix,optimization_parmas_finess_weights
+D1,d1d2,250,8,1234,MScelltaperspines.p,A2Acre,alldata,non05Jan2015_SLH004,"[0, 8, 16, 20]",/home/Sriramsagar/neural_prj/outputs/spn_opt/,/tmp/Sriramsagar,aju_param_fitness.py
+D1,d1d2,250,8,1234,MScelltaperspines.p,A2Acre,alldata,non08Jan2015_SLH001,"[0, 8, 16, 20]",/home/Sriramsagar/neural_prj/outputs/spn_opt/,/tmp/Sriramsagar,aju_param_fitness.py
+D2,d1d2,250,8,1234,MScelltaperspines.p,A2Acre,alldata,LR08Mar2015_SLH003,"[0, 8, 16, 20]",/home/Sriramsagar/neural_prj/outputs/spn_opt/,/tmp/Sriramsagar,aju_param_fitness.py
+D1,d1d2,250,8,1234,MScelltaperspines.p,A2Acre,alldata,non08Jan2015_SLH003,"[0, 8, 16, 20]",/home/Sriramsagar/neural_prj/outputs/spn_opt/,/tmp/Sriramsagar,aju_param_fitness.py
+D2,d1d2,250,8,1234,MScelltaperspines.p,A2Acre,alldata,LR08Mar2015_SLH004,"[0, 8, 16, 20]",/home/Sriramsagar/neural_prj/outputs/spn_opt/,/tmp/Sriramsagar,aju_param_fitness.py

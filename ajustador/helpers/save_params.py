@@ -2,7 +2,7 @@ import numpy as np
 from ajustador import xml
 import importlib
 
-def save_params(fitX, start = 0,threshold = np.inf):
+def save_params(fitX, start = 0,threshold = np.inf,fn=None):
 
     #initialized arrays and lists for feature fitnesses and param values
     if isinstance(fitX[0],xml.NeurordSimulation):
@@ -17,7 +17,8 @@ def save_params(fitX, start = 0,threshold = np.inf):
     paramcols=len(fitX.param_names())
     paramvals=np.zeros((rows,paramcols))
     param_subset=[]  #this only saves a subset of simulation parameters
-
+    tmpdirs=[fit.tmpdir.name for fit in fitX]
+    
     #full=1 will print fitness of each feature, full=0 prints only overall fitness
     for i in range(len(fitX)):
         if isinstance(fitX[0],xml.NeurordSimulation):
@@ -38,6 +39,10 @@ def save_params(fitX, start = 0,threshold = np.inf):
     fname=fitX.name
     if len(fitX.name)==0:
         fname=fitX.model
+        if fn==None:
+            fname=fname+fitX.measurement.name
+        else:
+            fname=fname+fn
     header=[nm+'='+'%.5g'%(val)+'+/-'+'%.5g'%(stdev)
             for nm,val,stdev in zip(fitX.param_names(),
                                     fitX.params.unscale(fitX.optimizer.result()[0]),
@@ -58,7 +63,7 @@ def save_params(fitX, start = 0,threshold = np.inf):
     np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
     print ('parameters saved to', fname)
     #save entire parameters and individual fitness values as dictionary
-    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list)
+    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,tmpdirs=tmpdirs)
 
 #To access the data:
 #dat=np.load(fname)
