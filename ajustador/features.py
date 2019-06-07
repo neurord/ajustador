@@ -730,6 +730,7 @@ def _fit_falling_curve(ccut, baseline, steady):
     return function_fit(func, params, good)
 
 
+
 class FallingCurve(Feature):
     requires = ('wave',
                 'injection_start', 'steady_before',
@@ -852,12 +853,32 @@ class Rectification(Feature):
         ax.figure.tight_layout()
 
 
+charging_param = namedtuple('charging_param', 'amp tau')
+charging_function_fit = namedtuple('charging_function_fit', 'function params good')
+
+def _fit_charging_curve(ccut, baseline, steady):
+    if ccut.size < 5 or (steady-baseline).negative:
+        func = None
+        params = charging_param(vartype.vartype.nan,
+                            vartype.vartype.nan)
+        good = False
+    else:
+        init = (ccut.y.min()-baseline.x, ccut.x.ptp())
+        func = negative_exp
+        popt, pcov = optimize.curve_fit(func, ccut.x-ccut.x[0], ccut.y-ccut.y[0], p0 = (.02,.02), maxfev = 100000)
+        pcov = np.zeros((2,2)) + pcov
+        params = charging_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
+                            vartype.vartype(popt[1], pcov[1,1]**0.5))
+        good = params.amp.positive and params.tau.positive
+    return charging_function_fit(func, params, good)
+
+
 class ChargingCurve(Feature):
-    requires = ('wave', 'injection_start',
+    requires = ('wave', 'injection_start', 'steady_before',
                 'baseline', 'baseline_before',
                 'spikes', 'spike_count', 'spike_threshold')
-    provides = 'charging_curve_halfheight',
-    array_attributes = 'charging_curve_halfheight',
+    provides = ('charging_curve_halfheight', 'charging_curve','charging_curve_fit', 'charging_curve_amp', 'charging_curve_tau','charging_curve_function')
+    array_attributes = ('charging_curve_halfheight','charging_curve_amp', 'charging_curve_tau','charging_curve_function')
 
     @property
     @utilities.once
@@ -871,21 +892,51 @@ class ChargingCurve(Feature):
 
         return (threshold - baseline) / 2
 
+  
+    def negative_exp(x, amp, tau):
+        return float(amp) * (1-np.exp(-(x-x[0]) / float(tau)))
+
+   
     @property
     @utilities.once
     def charging_curve(self):
-        if self._obj.spike_count < 1:
-            return None
+        #if self._obj.spike_count < 1:
+        #    return None
         wave = self._obj.wave
         injection_start = self._obj.injection_start
-        spike0 = self._obj.spikes[0]
-        baseline = self._obj.baseline
-        threshold = self._obj.spike_threshold[0]
-
-        what = wave[(wave.x > injection_start) & (wave.x < spike0.x)]
-        what = what[what.y < threshold]
+        baseline = self._obj.baseline.x
+        if self._obj.spike_count < 1:
+            threshold_y =  (np.max(wave.y) - baseline) * 0.9
+        
+        else:
+            threshold_y = 0.7*(self._obj.spike_threshold[0] - baseline)
+        
+        threshold_x = wave.x[(wave.y-baseline > threshold_y)][0] #x value of when y first crosses threshold
+        what = wave[(wave.x > injection_start) & (wave.x < threshold_x)]
+        #what = what[what.y < threshold]
         return what
 
+    @property
+    @utilities.once
+    def charging_curve_fit(self):
+        return _fit_charging_curve(self.charging_curve, self._obj.baseline, self._obj.steady)
+
+    @property
+    def charging_curve_amp(self):
+        fit = self.charging_curve_fit
+        return fit.params.amp if fit.good else vartype.vartype.nan
+
+    @property
+    def charging_curve_tau(self):
+        fit = self.charging_curve_fit
+        return fit.params.tau if fit.good else vartype.vartype.nan
+
+    @property
+    def charging_curve_function(self):
+        fit = self.charging_curve_fit
+        return fit.function if fit.good else None
+
+    
     def plot(self, figure=None):
         ax = super().plot(figure)
         baseline = self._obj.baseline

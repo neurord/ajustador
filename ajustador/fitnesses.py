@@ -142,6 +142,14 @@ def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relativ
     return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight,
                      error=error)
 
+def charging_curve_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    m1, m2 = _select(sim, measurement, measurement.injection >0)
+    if len(m2) == 0:
+        return vartype.vartype.nan
+    return _evaluate(m1.charging_curve_tau, m2.charging_curve_tau, error=error)
+
+
+
 #alternatively, could do falling curve for positive current injection if no spike
 def falling_curve_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.injection <= -10e-12)

@@ -87,7 +87,7 @@ fitness = aju.fitnesses.combined_fitness('empty',
                                          spike_count=1,
                                          spike_ahp=1,
                                          ahp_curve=4,
-                                         charging_curve=1,
+                                         charging_curve_time=1,
                                          spike_range_y_histogram=1)
 
 ########### Neuron and fit specific commands ############
