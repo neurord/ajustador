@@ -61,9 +61,14 @@ def relative_diff_single(a, b, extra=0):
     y = getattr(b, 'x', b)
 
     base = abs(x) + abs(y) / RELATIVE_MAX_RATIO
-    nonzero = np.atleast_1d(base > 0).any()
-    return ((abs(x - y) / base if nonzero else base)
-             + RELATIVE_MAX_RATIO * extra)
+    
+    ## `np.where( (base>0), (x-y)/base, base)` returns element wise array of 
+    ## the second argument, `(x-y)/base`, wherever first argument is True, and
+    ## the third argument wherever the first argument is False, so if x and y 
+    ## are both zero, a difference of zero is returned rather than a NaN.
+        
+    return (np.where( (base>0), abs(x-y)/base, base)
+            + RELATIVE_MAX_RATIO * extra)
 
 def relative_diff(a, b):
     """A difference between a and b using b as the yardstick
