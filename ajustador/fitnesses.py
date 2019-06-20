@@ -120,6 +120,12 @@ def response_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count < 1)
     return _evaluate(m1.response, m2.response, error=error)
 
+def response_variance_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    '''Variance of steady state response for non-spiking responses'''
+    m1, m2 = _select(sim, measurement, measurement.spike_count < 1)
+    return _evaluate(m1.steady.dev, m2.steady.dev, error=error)
+
+
 def baseline_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     "Similarity of baselines"
     m1, m2 = _select(sim, measurement)
@@ -214,6 +220,9 @@ def spike_width_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
 def spike_height_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     return _evaluate_single(sim.mean_spike_height, measurement.mean_spike_height,
                             error=error)
+
+def spike_threshold_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    return _evaluate_single(sim.mean_spike_threshold, measurement.mean_spike_threshold, error=error)
 
 def spike_ahp_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.spike_count >= 1)

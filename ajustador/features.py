@@ -327,7 +327,7 @@ class Spikes(Feature):
     """
     requires = ('wave', 'injection_interval', 'injection_start')
     provides = ('spike_i', 'spikes', 'spike_count',
-                'spike_threshold',
+                'spike_threshold','mean_spike_threshold',
                 'mean_isi', 'isi_spread',
                 'spike_latency',
                 'spike_bounds',
@@ -338,7 +338,7 @@ class Spikes(Feature):
     array_attributes = ('spike_count',
                         'spike_height', 'spike_width',
                         'mean_isi', 'isi_spread',
-                        'spike_latency')
+                        'spike_latency','spike_threshold')
     mean_attributes = ('spike_height', 'spike_width', 'spike_threshold')
 
     @property
@@ -452,6 +452,13 @@ class Spikes(Feature):
         "The mean absolute position of spike vertices"
         # TODO: is the variance too big?
         return vartype.array_mean(self.spikes.y)
+
+    @property
+    @utilities.once
+    def mean_spike_threshold(self):
+        "The mean absolute position of spike vertices"
+        # TODO: is the variance too big?
+        return vartype.array_mean(self.spikes.spike_threshold)
 
     def plot(self, figure=None):
         from . import drawing_util
