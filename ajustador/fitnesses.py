@@ -153,12 +153,37 @@ def charging_curve_fitness(sim, measurement, full=False, error=ErrorCalc.relativ
     return _evaluate(m1.charging_curve_halfheight, m2.charging_curve_halfheight,
                      error=error)
 
+
+def post_injection_curve_tau_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    "Similarity of time constants fit to post injection curve"
+    m1, m2 = _select(sim, measurement)
+    return _evaluate(m1.post_injection_curve_tau, m2.post_injection_curve_tau, error=error)
+
+
 def charging_curve_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     m1, m2 = _select(sim, measurement, measurement.injection >0)
     if len(m2) == 0:
         return vartype.vartype.nan
     return _evaluate(m1.charging_curve_tau, m2.charging_curve_tau, error=error)
 
+
+def charging_curve_full_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
+    ''''''
+    m1, m2 = _select(sim, measurement, measurement.injection > 0)
+
+    diffs = [ahp_curve_compare(wave1.charging_curve, wave2.charging_curve)
+             for wave1, wave2 in zip(m1, m2)]
+    if not diffs:
+        return 0
+
+    assert 0 <= min(diffs) <= 1, diffs
+    assert 0 <= max(diffs) <= 1, diffs
+
+    diffs = np.array(diffs)
+    if full:
+        return diffs
+    else:
+        return vartype.array_rms(diffs, nan_replacement=NAN_REPLACEMENT)
 
 
 #alternatively, could do falling curve for positive current injection if no spike
@@ -241,7 +266,7 @@ def spike_ahp_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
 
 def interpolate(wave1, wave2):
     "Interpolate wave1 to wave2.x"
-    y = np.interp(wave2.x, wave1.x, wave1.y)
+    y = np.interp(wave2.x, wave1.x, wave1.y, left=np.nan, right=np.nan)
     return np.rec.fromarrays((wave2.x, y), names='x,y')
 
 def ahp_curve_centered(wave, i):
@@ -261,6 +286,9 @@ def ahp_curve_compare(cut1, cut2):
     assert not cut1 is cut2 is None
 
     if cut1 is None or cut2 is None:
+        return 1
+
+    if len(cut1.x) is 0 or len(cut2.x) is 0:
         return 1
 
     cut1i = interpolate(cut1, cut2)

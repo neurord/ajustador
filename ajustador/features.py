@@ -800,6 +800,70 @@ class FallingCurve(Feature):
         ax.figure.tight_layout()
 
 
+class PostInjectionCurve(Feature):
+    requires = ('wave',
+                'injection_start', 'injection_end', 'steady_before',
+                'falling_curve_window',
+                 'baseline_after', 'steady')
+    provides = ('post_injection_curve', 'post_injection_curve_fit',
+                'post_injection_curve_amp', 'post_injection_curve_tau',
+                'post_injection_curve_function')
+    array_attributes = ('post_injection_curve_amp', 'post_injection_curve_tau',
+                        'post_injection_curve_function')
+
+    @property
+    @utilities.once
+    def post_injection_curve(self):
+        window = self._obj.wave[(self._obj.wave.x > self._obj.injection_end)]
+        return window
+
+    @property
+    @utilities.once
+    def post_injection_curve_fit(self):
+        if self._obj.steady > self._obj.baseline_post:
+            return _fit_falling_curve(self.post_injection_curve, self._obj.steady, self._obj.baseline_post)
+        if self._obj.steady < self._obj.baseline_post:
+            return _fit_charging_curve(self.post_injection_curve, self._obj.steady, self._obj.baseline_post)
+
+    @property
+    def post_injection_curve_amp(self):
+        fit = self.post_injection_curve_fit
+        return fit.params.amp if fit.good else vartype.vartype.nan
+
+    @property
+    def post_injection_curve_tau(self):
+        fit = self.post_injection_curve_fit
+        return fit.params.tau if fit.good else vartype.vartype.nan
+
+    @property
+    def post_injection_curve_function(self):
+        fit = self.post_injection_curve_fit
+        return fit.function if fit.good else None
+
+    def plot(self, figure=None):
+        ax = super().plot(figure)
+
+        ccut = self.post_injection_curve
+        baseline = self._obj.baseline
+        steady = self._obj.steady
+        ax.plot(ccut.x, ccut.y, 'r', label='falling curve')
+        ax.set_xlim(self._obj.injection_start - 0.005, ccut.x.max() + .01)
+
+        func, popt, good = self.post_injection_curve_fit
+        if good:
+            label = 'fitted {}'.format(func.__name__)
+            ax.plot(ccut.x, baseline.x + func(ccut.x, *popt), 'g--', label=label)
+        else:
+            ax.text(0.2, 0.5, 'bad fit',
+                    horizontalalignment='center',
+                    transform=ax.transAxes,
+                    color='red')
+
+        ax.legend(loc='upper right')
+        ax.figure.tight_layout()
+
+
+
 class Rectification(Feature):
     requires = ('injection_start',
                 'steady_after', 'steady_before',
@@ -883,9 +947,9 @@ def _fit_charging_curve(ccut, baseline, steady):
 class ChargingCurve(Feature):
     requires = ('wave', 'injection_start', 'steady_before',
                 'baseline', 'baseline_before',
-                'spikes', 'spike_count', 'spike_threshold')
+                'spikes', 'spike_count', 'spike_threshold', 'injection_end')
     provides = ('charging_curve_halfheight', 'charging_curve','charging_curve_fit', 'charging_curve_amp', 'charging_curve_tau','charging_curve_function')
-    array_attributes = ('charging_curve_halfheight','charging_curve_amp', 'charging_curve_tau','charging_curve_function')
+    array_attributes = ('charging_curve', 'charging_curve_halfheight','charging_curve_amp', 'charging_curve_tau','charging_curve_function')
 
     @property
     @utilities.once
@@ -911,17 +975,19 @@ class ChargingCurve(Feature):
         #    return None
         wave = self._obj.wave
         injection_start = self._obj.injection_start
+        injection_end = self._obj.injection_end
         baseline = self._obj.baseline.x
         if self._obj.spike_count < 1:
-            threshold_y =  (np.max(wave.y) - baseline) * 0.9
-        
+            #threshold_y =  (np.max(wave.y) - baseline) * 0.9
+            what = wave[(wave.x > injection_start) & (wave.x < injection_end)]
+            return what
         else:
-            threshold_y = 0.7*(self._obj.spike_threshold[0] - baseline)
-        
-        threshold_x = wave.x[(wave.y-baseline > threshold_y)][0] #x value of when y first crosses threshold
-        what = wave[(wave.x > injection_start) & (wave.x < threshold_x)]
-        #what = what[what.y < threshold]
-        return what
+            cut = wave[(wave.x<self._obj.spikes[0].x)]
+            threshold_y = 0.95*(self._obj.spike_threshold[0] - baseline)
+            threshold_x = cut[(cut.y-baseline < threshold_y)][-1].x #x value of last y value below threshold before first spike
+            what = wave[(wave.x > injection_start) & (wave.x < threshold_x)]
+            #what = what[what.y < threshold]
+            return what
 
     @property
     @utilities.once
@@ -979,4 +1045,5 @@ standard_features = (
     FallingCurve,
     Rectification,
     ChargingCurve,
+    PostInjectionCurve,
     )
