@@ -50,7 +50,7 @@ As an example, let's use `measurements1.042811`, a current-clamp
 recording from a striatal D1 neuron:
 
 >>> import measurements1
->>> exp = measurements1.waves042811
+>>> exp = measurements1.D1waves042811
 >>> exp.name
 '042811-6ivifcurves_Waves'
 
@@ -83,7 +83,7 @@ array([-0.0798125 , -0.07953125, -0.0795    , ..., -0.07959375,
 
     from matplotlib import pyplot
     import measurements1
-    exp = measurements1.waves042811
+    exp = measurements1.D1waves042811
     pyplot.plot(exp.waves[22].wave.x, exp.waves[22].wave.y)
     pyplot.title(exp.name)
 
@@ -147,7 +147,7 @@ the extracted values in both graphical and textual modes:
 
     import measurements1
     import ajustador as aju
-    exp = measurements1.waves042811
+    exp = measurements1.D1waves042811
     aju.features.Spikes(exp.waves[22]).plot()
 
 
@@ -320,7 +320,7 @@ We need to import :module:`ajustador.drawing` separately.
    fitness = aju.fitnesses.combined_fitness()
 
    fit = aju.optimize.Fit('quick-start-d1.fit',
-                          measurements1.waves042811[[0, 6, 23]],
+                          measurements1.D1waves042811[[0, 6, 23]],
                           'd1d2', 'D1',
                           fitness,
                           params)
@@ -347,7 +347,7 @@ can always plot some set traces explicitly:
    fitness = aju.fitnesses.combined_fitness()
 
    fit = aju.optimize.Fit('quick-start-d1.fit',
-                          measurements1.waves042811[[0, 6, 23]],
+                          measurements1.D1waves042811[[0, 6, 23]],
                           'd1d2', 'D1',
                           fitness,
                           params)

@@ -7,49 +7,49 @@ Additional plots for SteadyState
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 0
+   wavename, n = 'D1waves042811', 0
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 2
+   wavename, n = 'D1waves042811', 2
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 8
+   wavename, n = 'D1waves042811', 8
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 9
+   wavename, n = 'D1waves042811', 9
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 10
+   wavename, n = 'D1waves042811', 10
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 11
+   wavename, n = 'D1waves042811', 11
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 13
+   wavename, n = 'D1waves042811', 13
    exec(open('features_steady_state.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 14
+   wavename, n = 'D1waves042811', 14
    exec(open('features_steady_state.py').read())
 
 042911-10ivifcurves_Waves

@@ -7,55 +7,55 @@ Additional plots for FallingCurve
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 0
+   wavename, n = 'D1waves042811', 0
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 1
+   wavename, n = 'D1waves042811', 1
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 3
+   wavename, n = 'D1waves042811', 3
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 6
+   wavename, n = 'D1waves042811', 6
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 8
+   wavename, n = 'D1waves042811', 8
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 9
+   wavename, n = 'D1waves042811', 9
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 10
+   wavename, n = 'D1waves042811', 10
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 11
+   wavename, n = 'D1waves042811', 11
    exec(open('features_falling_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 12
+   wavename, n = 'D1waves042811', 12
    exec(open('features_falling_curve.py').read())
 
 050611-5ivifcurves_Waves
