@@ -7,19 +7,19 @@ Additional plots for Spikes
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 21
+   wavename, n = 'D1waves042811', 21
    exec(open('features_spikes.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 22
+   wavename, n = 'D1waves042811', 22
    exec(open('features_spikes.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 23
+   wavename, n = 'D1waves042811', 23
    exec(open('features_spikes.py').read())
 
 050411-7ivifcurves_Waves

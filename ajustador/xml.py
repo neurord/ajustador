@@ -172,8 +172,11 @@ class NeurordSimulation(optimize.Simulation):
 
 def execute(p):
     modelfile, outfile, num = p
+    home_path = os.path.expanduser("~")
+    neurord_path = os.path.join(home_path,
+                                "neurord-3.2.3-all-deps.jar")
 
-    cmdline = ['java', '-jar', '/home/nadia/neurord-3.2.4-all-deps.jar', modelfile, outfile]
+    cmdline = ['java', '-jar', neurord_path, modelfile, outfile]
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
     subprocess.check_call(cmdline)
 

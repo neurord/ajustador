@@ -7,31 +7,31 @@ Additional plots for ChargingCurve
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 0
+   wavename, n = 'D1waves042811', 0
    exec(open('features_charging_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 10
+   wavename, n = 'D1waves042811', 10
    exec(open('features_charging_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 21
+   wavename, n = 'D1waves042811', 21
    exec(open('features_charging_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 22
+   wavename, n = 'D1waves042811', 22
    exec(open('features_charging_curve.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 23
+   wavename, n = 'D1waves042811', 23
    exec(open('features_charging_curve.py').read())
 
 050511-3ivifcurves_Waves

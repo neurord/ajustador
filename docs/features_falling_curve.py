@@ -7,7 +7,7 @@ try:
     wavename
 except NameError:
     import measurements1 as mod
-    wavename, n = 'waves042811', 0
+    wavename, n = 'D1waves042811', 0
 
 rec = mod.waves[wavename][n]
 

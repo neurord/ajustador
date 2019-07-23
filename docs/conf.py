@@ -39,7 +39,6 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinxarg.ext',
     'matplotlib.sphinxext.plot_directive',
     'sphinxcontrib.codesample_directive',
 ]

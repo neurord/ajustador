@@ -25,7 +25,7 @@ SteadyState
         import measurements1
         import ajustador
 
-        rec = measurements1.waves042811[8]
+        rec = measurements1.D1waves042811[8]
         feat = ajustador.features.SteadyState(rec)
         print(feat.report())
 
@@ -57,7 +57,7 @@ Spikes
         import measurements1          # SUPPRESS
         import ajustador              # SUPPRESS
 
-        rec = measurements1.waves042811[-1]
+        rec = measurements1.D1waves042811[-1]
         feat = ajustador.features.Spikes(rec)
         print(feat.report())
 
@@ -89,7 +89,7 @@ AHP
         import measurements1          # SUPPRESS
         import ajustador              # SUPPRESS
 
-        rec = measurements1.waves042811[-1]
+        rec = measurements1.D1waves042811[-1]
         feat = ajustador.features.AHP(rec)
         print(feat.report())
 
@@ -108,7 +108,7 @@ FallingCurve
         import measurements1          # SUPPRESS
         import ajustador              # SUPPRESS
 
-        rec = measurements1.waves042811[0]
+        rec = measurements1.D1waves042811[0]
         feat = ajustador.features.FallingCurve(rec)
         print(feat.report())
 
@@ -129,7 +129,7 @@ Rectification
         import measurements1          # SUPPRESS
         import ajustador              # SUPPRESS
 
-        rec = measurements1.waves042811[1]
+        rec = measurements1.D1waves042811[1]
         feat = ajustador.features.Rectification(rec)
         print(feat.report())
 
@@ -150,7 +150,7 @@ ChargingCurve
         import measurements1          # SUPPRESS
         import ajustador              # SUPPRESS
 
-        rec = measurements1.waves042811[-1]
+        rec = measurements1.D1waves042811[-1]
         feat = ajustador.features.ChargingCurve(rec)
         print(feat.report())
 

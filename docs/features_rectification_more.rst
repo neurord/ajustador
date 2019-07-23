@@ -7,19 +7,19 @@ Additional plots for Rectification
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 0
+   wavename, n = 'D1waves042811', 0
    exec(open('features_rectification.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 5
+   wavename, n = 'D1waves042811', 5
    exec(open('features_rectification.py').read())
 
 .. plot::
 
    import measurements1 as mod
-   wavename, n = 'waves042811', 8
+   wavename, n = 'D1waves042811', 8
    exec(open('features_rectification.py').read())
 
 042911-10ivifcurves_Waves
