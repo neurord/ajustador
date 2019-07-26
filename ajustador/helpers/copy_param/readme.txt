@@ -33,3 +33,6 @@ Inputs => npz_file          -> *.npz file;
 Note-1** Program searches for cond_file in model folder and conductance_save in-order.
 Note-2** *.p file in cond_file should be present in the same directory for proper execution.
 Note-3** Avoid scientifc notation (12E-3) in param_cond.py.
+
+create_model_from_param.py creates new moose_nerp model folder from optimization results.
+
