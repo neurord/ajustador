@@ -24,6 +24,7 @@
 #Note-3** Avoid scientifc notation (12E-3) in param_cond.py.
 
 ##### TAKES FOUR ARGUMENTS: model(d1d2), neurtype(D1), abs path to npz data, and name of new model (new moose_nerp file name)
+##### Changed one line in create_npz_param.py: model_path = Path(moose_nerp.__file__.rpartition('/')[0] + "/tentative")/model
 
 import sys
 import shutil, errno
@@ -39,32 +40,51 @@ def copy(src, dest):
             shutil.copy(src, dest)
         else: raise
         
-
-def createNewModelFolder(model, neuron_type, npz_file, nameNeuron):
-    ### creates new param files in moose_nerp/model/conductance_save, taking the ABSOLUTE PATH of npz file as input
-    create_npz_param(npz_file, model, neuron_type, fitnum=1)
-
-    ### copy new cond, chan, and morph files to new moose_nerp folder 
+def correct_cond_and_morph(model, neuron_type, npz_file, morphfile="D1_short_patch.p"):
     path = moose_nerp.__path__[0]
-    savedNewParams = path + "/" + model + "/conductance_save"
-    newModelFolder = path + "/" + nameNeuron 
-    copy(savedNewParams, newModelFolder)                                      
+    os.mkdir(path + "/" + "tentative")
+    copy(path + "/" + model, path + "/" + "tentative" + "/d1d2")
+    sys.path.insert(0, path + "/" + "tentative" + "/d1d2")
+    
+    condfile = open(path + "/" + "tentative" + "/d1d2" + "/param_cond.py", "r")
+    newcond = open(path + "/" + "tentative" + "/d1d2" + "/param_cond_2.py", "w+") #creates new cond with correct morph
 
-    ### rename the new cond, chan files to standard file names
-    for filename in os.listdir(path + "/" + nameNeuron):
+    lines = condfile.readlines()
+    for line in lines:
+        if line.strip().startswith("morph_file"):
+            morphline = line.strip()
+            morphdict = eval(morphline[morphline.find("{"):])
+            morphdict[neuron_type] = morphfile
+            newcond.write("morph_file = " + str(morphdict) + "\n")
+        else:
+            newcond.write(line)
+    condfile.close()
+    newcond.close()
+
+    os.remove(path + "/" + "tentative" + "/d1d2" + "/param_cond.py")           #deletes old main
+    os.rename(path + "/" + "tentative" + "/d1d2" + "/param_cond_2.py", path + "/" + "tentative" + "/d1d2" + "/param_cond.py")
+   
+    ### creates new param files in moose_nerp/model/conductance_save, taking the ABSOLUTE PATH of npz file as input
+    create_npz_param(npz_file, model, neuron_type)#, fitnum=1) ###EDITED THIS ONE
+    
+
+def rename_cond_chan(newModelFolder):
+    print("")
+    for filename in os.listdir(newModelFolder):
         if filename.find("param_chan") != -1:
+            print("PARAMCHAN FILE", filename)
             os.rename(newModelFolder + "/" + filename, newModelFolder + "/" + "param_chan.py")
         if filename.find("param_cond") != -1:
+            print("PARAMCOND FILE", filename)
             os.rename(newModelFolder + "/" + filename, newModelFolder + "/" + "param_cond.py") 
 
-    ### from model folder, copy everything that is .py, and does not start with param_chan or param_cond
-    ### includes __main__.py, __init__.py, etc.
-    for filename in os.listdir(path + "/" + model):    
+def copy_model_without_cond_chan(modelpath, dest):      
+    for filename in os.listdir(modelpath):    
         if filename.endswith(".py") and filename.find("param_chan") == -1 and filename.find("param_cond") == -1:
-            shutil.copy(path + "/" + model + "/" + filename, newModelFolder)
+            shutil.copy(modelpath + "/" + filename, dest)
             print(filename, "copied")
-           
-    ### EDIT THE MAIN so that it runs the new nameNeuron file
+
+def edit_main(newModelFolder, nameNeuron):
     mainfile = open(newModelFolder + "/__main__.py", "r")
     newmain = open(newModelFolder + "/__main__2.py", "w+") #creates new main
 
@@ -80,8 +100,28 @@ def createNewModelFolder(model, neuron_type, npz_file, nameNeuron):
     os.remove(newModelFolder + "/__main__.py")           #deletes old main
     os.rename(newModelFolder + "/__main__2.py", newModelFolder + "/__main__.py")
 
+def createNewModelFolder(model, neuron_type, npz_file, nameNeuron):
+    ### creates new param files in moose_nerp/tentative/model/conductance_save, taking the ABSOLUTE PATH of npz file as input
+    correct_cond_and_morph(model, neuron_type, npz_file, morphfile="D1_long_matrix.p")
+    
+    ### copy new cond, chan, and morph files to new moose_nerp folder 
+    path = moose_nerp.__path__[0]
+    savedNewParams = path + "/" + "tentative/" + model + "/conductance_save"
+    newModelFolder = path + "/" + nameNeuron 
+    copy(savedNewParams, newModelFolder)  
+    
+    ### rename the new cond, chan files to standard file names
+    rename_cond_chan(newModelFolder)                                    
+
+    ### from model folder, copy everything that is .py, and does not start with param_chan or param_cond
+    ### includes __main__.py, __init__.py, etc.
+    copy_model_without_cond_chan(path + "/" + model, newModelFolder)
+           
+    ### EDIT THE MAIN so that it runs the new nameNeuron file
+    edit_main(newModelFolder, nameNeuron)
+
     ### delete the conductance_save folder in moose_nerp/model
-    shutil.rmtree(savedNewParams)
+    shutil.rmtree(path + "/" + "tentative")
 
 if __name__ == "__main__":
     model, neuron_type, npz_file, nameNeuron = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]    

@@ -50,13 +50,16 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
        Note** If *.p file in cond_file should be present in the same directory for proper execution.
        Note** Block comments in param_chan.py and param_cond.py must be of <'''>.
     """
-
-    model_path = Path(moose_nerp.__file__.rpartition('/')[0])/model
+    #### MODEL_PATH IS NEW
+    model_path = Path(moose_nerp.__file__.rpartition('/')[0] + "/tentative")/model
+    
+    #print(model_path)
 
     logger.info("START STEP 1!!!\n loading npz file: {}.".format(npz_file))
     data = np.load(npz_file)
 
     logger.info("START STEP 2!!! Prepare param conductances.")
+
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
     logger.info("*******Data directory for fit: {}".format(data['tmpdirs'][fit_number]))
     header_line = "# Generated from npzfile: {} of fit number: {}\n".format(
@@ -69,15 +72,16 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
 
     # Create new path to save param_cond.py and *.p
     new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
-
+    print(new_param_path)
+    
     if cond_file is None:
         cond_file = 'param_cond.py'
     new_param_cond = make_new_file_name_from_npz(data, npz_file,
                          str(new_param_path), neuron_type, cond_file)
     new_cond_file_name = check_version_build_file_path(str(new_param_cond), neuron_type, fit_number)
     logger.info("START STEP 3!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,cond_file), new_cond_file_name))
+    
     new_param_cond = clone_file(src_path=model_path, src_file=cond_file, dest_file=new_cond_file_name)
-
     logger.info("START STEP 4!!! Extract and modify morph_file from {}".format(new_param_cond))
     morph_file = clone_and_change_morph_file(new_param_cond, model_path, model, neuron_type, non_conds, sample_label)
     #NOTE: created param_cond.py file in conductance_save directory of moose_nerp squid model.
