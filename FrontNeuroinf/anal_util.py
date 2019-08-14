@@ -3,18 +3,33 @@ import numpy as np
 from scipy.stats import pearsonr
 
 def load_npz(fname, tile):
-
-    dat=np.load(fname)
-
-    param=pd.DataFrame(list(dat['params']),columns=list(dat['paramnames']))
-    print(param.columns, dat['features']) #names of columns
+    dat = np.load(fname)
+    
+    param = pd.DataFrame(list(dat['params']), columns=list(dat['paramnames']))
+    
+    print(param.columns, "FEATURES", dat['features'], len(dat['features'])) #names of columns
     #param.describe() #summary statistics
-
-    features=[feat.split('=')[0][0:-8] for feat in dat['features'][0:-1]]
+    #features=[feat.split('=')[0][0:-8] for feat in dat['features'][0:-1]]
+    
+    #THE TOTAL FEATURE IS 3RD FROM THE END
+    
+    features = [feat.split('=')[0] for feat in dat['features'][0:-3]]
     #treat last feature (total) differently because has neither = nor 'fitness'
-    features.append(dat['features'][-1].split(':')[0])
+    #features.append(dat['features'][-1].split(':')[0])
+    
+    features.append(dat['features'][-3].split(':')[0])
+    
+    print("FEATURES")
+    print(features)
+    
+    #print("FITVALUES")
+    #print(dat["fitvals"], "LENGTH", len(dat["fitvals"]), len(dat["fitvals"][0]))
+    
     fit=pd.DataFrame(dat['fitvals'], columns=features)
-
+    
+    #print("FEATURES AND THEIR VALUES")
+    #print(fit)
+    
     fit.columns #names of columns
     #fit.describe() #summary statistics
 
@@ -22,6 +37,9 @@ def load_npz(fname, tile):
 
     thresh=fit_param.quantile(tile)['total'] #values of 10th percentile
     goodsamples=fit_param[fit_param['total']<thresh]
+    goodsamples["neuron"] = dat['features'][-1].split("=")[1]
+    goodsamples["model"] = dat['features'][-2].split("=")[1]
+    
     print('cell', fname, 'percentile', tile, 'threshold', thresh, 'samples',len(goodsamples),'from',len(fit_param))
     return goodsamples,features
 
@@ -66,15 +84,42 @@ def create_var_list(sig_list):
     return np.unique(varlist)
 
 #combined cells into single df
-def combined_df(fnames,tile):
-    df_list=[]
+def combined_df(fnames, tile, neurtype):
+    df_list = []
+    columnList = []
     for fn in fnames:
-        cellname=fn.split('/')[-2]
-        good,features=load_npz(fn,tile)
-        good['cell']=cellname
+        cellname = fn.split('.')[0]
+        good, features = load_npz(fn,tile)
+        good['cell'] = cellname
+        good["neurtype"] = neurtype
+        
         df_list.append(good)
-    ## join multiple dataFrames, e.g. join all the proto together:
-    alldf=pd.concat(df_list)
-    return alldf,df_list
+    
+    columnList = []
+    for df in df_list:
+        columnList.append(set(df.columns))
+        print(len(df.columns))
+    commonCol = set.intersection(*columnList)
+    commonCol = list(commonCol)
+    print(len(commonCol))
+    
+    '''columnSet = set(df_list[0].columns)
+    for index in range(1, len(df_list)):
+        currSet = set(df_list[index].columns)
+        columnSet = columnSet.intersection(currSet)
+    print(columnSet)
+    columnList = list(columnSet)'''
+    
+    for df in df_list:
+        df = df[commonCol]
+    
+    ## join multiple dataFrames, e.g. join all the proto together    
+    
+    alldf=pd.concat(df_list)    
+    
+    #print(alldf)
+    #print(alldf.columns)
+        
+    return alldf, df_list
 
 
