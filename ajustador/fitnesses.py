@@ -538,16 +538,15 @@ class combined_fitness:
 
     def __call__(self, sim, measurement, full=False):
         # Computes feature fitnesses using _parts for one trace.
-        parts = {feature_name: w*NAN_REPLACEMENT if r == vartype.vartype.nan else w*r for w, r, feature_name in self._parts(sim, measurement)}
-        for feature_name, value in parts.items():
+        parts = [(feature_name, w*NAN_REPLACEMENT if r == vartype.vartype.nan else w*r) for w, r, feature_name in self._parts(sim, measurement)]
+        for feature_name, value in parts:
             logger.debug("{} {}".format(feature_name, value))
             if str(value) == str(np.nan):
                 logger.warning("Feature: {}  fitness: {} Check Feature declaration in 'combined_fitness'!!!".format(feature_name, value))
-
+        arr = np.array([p[1] for p in parts])
         if full:
-            return np.array(list(parts.values()))
+            return arr
         else:
-            arr = np.array(list(parts.values()))
             # Calculates RMS across feature. (fitness metrics.)
             return vartype.array_rms(arr, nan_replacement=NAN_REPLACEMENT)
 
