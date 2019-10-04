@@ -729,11 +729,15 @@ def _fit_falling_curve(ccut, baseline, steady):
     else:
         init = (ccut.y.min()-baseline.x, ccut.x.ptp())
         func = negative_exp
-        popt, pcov = optimize.curve_fit(func, ccut.x, ccut.y-baseline.x, (-1,1))
-        pcov = np.zeros((2,2)) + pcov
-        params = falling_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
-                               vartype.vartype(popt[1], pcov[1,1]**0.5))
-        good = params.amp.negative and params.tau.positive
+        try:
+            popt, pcov = optimize.curve_fit(func, ccut.x, ccut.y-baseline.x, (-1,1))
+            pcov = np.zeros((2,2)) + pcov
+            params = falling_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
+                                vartype.vartype(popt[1], pcov[1,1]**0.5))
+            good = params.amp.negative and params.tau.positive
+        except RuntimeError:
+            params = None
+            good = False
     return function_fit(func, params, good)
 
 
@@ -936,11 +940,15 @@ def _fit_charging_curve(ccut, baseline, steady):
     else:
         init = (ccut.y.min()-baseline.x, ccut.x.ptp())
         func = negative_exp
-        popt, pcov = optimize.curve_fit(func, ccut.x-ccut.x[0], ccut.y-ccut.y[0], p0 = (.02,.02), maxfev = 100000)
-        pcov = np.zeros((2,2)) + pcov
-        params = charging_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
+        try:
+            popt, pcov = optimize.curve_fit(func, ccut.x-ccut.x[0], ccut.y-ccut.y[0], p0 = (.02,.02), maxfev = 100000)
+            pcov = np.zeros((2,2)) + pcov
+            params = charging_param(vartype.vartype(popt[0], pcov[0,0]**0.5),
                             vartype.vartype(popt[1], pcov[1,1]**0.5))
-        good = params.amp.positive and params.tau.positive
+            good = params.amp.positive and params.tau.positive
+        except RuntimeError:
+            params = None
+            good = False
     return charging_function_fit(func, params, good)
 
 

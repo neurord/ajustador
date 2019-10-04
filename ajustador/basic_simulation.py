@@ -22,8 +22,31 @@ This module is not automatically imported as a child of ajustador.
 An explicit import is needed:
 >>> import ajustador.basic_simulation
 """
+
+# Basic_simulation.py is called in optimize.py as a subprocess from a different
+# directory than the optimization originated in, which can mess up the python
+# path if, for example, ajustador is not added globally to the python path but 
+# expected to be in the current directory. This is the case for simulations on 
+# the Neuroscience Gateway Portal. To rectify this, we modify the system path 
+# below by getting the parent directory of the parent directory of basic_simulation
+
+# Note: the below solution is commented out because a more robust solution has been
+# implemented in optimize.py where basic_simulation gets called. Can remove these 
+# commented blocks following sufficient testing.
 import os
 import sys
+print(sys.path)
+print(os.getcwd())
+# file = __file__ # Get path of basic_simulation.py
+# # Root directory for inserting in path should be one above parent directory
+# import pathlib
+# root = str(pathlib.Path(file).parent.parent)
+# # insert root path into first position of system path if it's not already there
+# if str(pathlib.Path(sys.path[0]).absolute()) !=root:
+#     sys.path.insert(0,root)
+# print(sys.path)
+# print(os.getcwd())
+
 import tempfile
 import re
 import importlib
@@ -254,8 +277,7 @@ def setup(param_sim, model):
     neuron_paths = {ntype:[neuron.path]
                     for ntype, neuron in model.neurons.items()}
     pg = inject_func.setupinj(model, param_sim.injection_delay, param_sim.injection_width, neuron_paths)
-    writer=tables.setup_hdf5_output(model, model.neurons, filename=fname,
-                                    compartments=plotcomps)
+    writer=None#tables.setup_hdf5_output(model, model.neurons, filename=fname,                                 compartments=plotcomps)
     tables.graphtables(model, model.neurons, model.param_sim.plot_current,
                        model.param_sim.plot_current_message, model.plas,
                        plotcomps)
@@ -278,7 +300,7 @@ def run_simulation(injection_current, simtime, param_sim, model):
     global pulse_gen
     if logger.level == logging.DEBUG:
         print("################## moose versions: ", moose.__version__)
-    print(u'◢◤◢◤◢◤◢◤ injection_current = {} ◢◤◢◤◢◤◢◤'.format(injection_current))
+    print(u'************* injection_current = {} ******'.format(injection_current))
     pulse_gen.firstLevel = injection_current
     moose.reinit()
     if param_sim.baseline is not None:
@@ -301,7 +323,7 @@ def main(args):
     logger.debug("param_sim::::::::: {}".format(param_sim))
     pulse_gen, hdf5writer = setup(param_sim, model)
     run_simulation(param_sim.injection_current[0], param_sim.simtime, param_sim, model)
-    hdf5writer.close()
+    #hdf5writer.close()
 
     if param_sim.plot_vm:
         neuron_graph.graphs(model,model.vmtab, param_sim.plot_current, param_sim.simtime, compartments=[0])

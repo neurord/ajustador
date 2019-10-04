@@ -176,8 +176,8 @@ def charging_curve_full_fitness(sim, measurement, full=False, error=ErrorCalc.re
     if not diffs:
         return 0
 
-    assert 0 <= min(diffs) <= 1, diffs
-    assert 0 <= max(diffs) <= 1, diffs
+    #assert 0 <= min(diffs) <= 1, diffs
+    #assert 0 <= max(diffs) <= 1, diffs
 
     diffs = np.array(diffs)
     if full:
@@ -218,16 +218,17 @@ def spike_time_fitness(sim, measurement, full=False, error=ErrorCalc.relative):
     if len(m1) == 0:
         m1, m2 = _select(measurement, sim, sim.spike_count >= 2)
         if len(m1) == 0:
-            # neither is spiking, cannot determine spike timing
-            return np.nan
-
+            # neither is spiking, cannot determine spike timing (Good thing)
+            print('************')
+            return 0 # If both are not spiking (rare but possible), cannot imporve spike_time_fitness
     spikes1 = _measurement_to_spikes(m1)
     spikes2 = _measurement_to_spikes(m2)
-    diff = spikes2 - spikes1
-    spikes1 = spikes1 + diff # this is original spikes1 with nans inserted for missing spikes
-    spikes2 = spikes2 - diff # and the same for spikes2
+    # spikes1, spikes2 are pandas DataFrames indexed by injection level and spike number
+    # The align method below will insert nans for missing spikes (only in the data frame missing a spike; the other dataframe will preserve its times)
+    spikes1, spikes2 = spikes1.align(spikes2,axis=0)
+    # Missing spikes contribute error scaled by injection_interval (could be left simply as NaNs and handled by NAN_REPLACEMENT)
     spikes1.fillna(sim[0].injection_interval, inplace=True)
-    spikes2.fillna(sim[0].injection_interval, inplace=True)
+    spikes2.fillna(sim[0].injection_interval, inplace=True) 
     return _evaluate(spikes1['x'], spikes2['x'], error=error)
 
 def spike_count_fitness(sim, measurement, full=False, error=ErrorCalc.relative):

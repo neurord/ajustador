@@ -29,9 +29,11 @@ def filtereddict(**kwargs):
 
 
 _exe = None
-def exe_map(single=False, do_async=False):
+def exe_map(single=False, do_async=False, map_func = None):
     if single and not do_async:
         return map
+    elif map_func is not None:
+        return map_func
     else:
         global _exe
         if _exe is None:
@@ -50,7 +52,9 @@ def iv_filename_to_current(ivfile):
     return injection_current
 
 def execute(p):
+    #print("starting execute")
     from . import basic_simulation
+    #print('imported basic_simulation in execute')
     dirname, injection, junction_potential, params, features = p
     simtime = params['simtime']
     logger.debug("Unseralized params:\n {} inject {}".format(params,injection)) #SRIRAM 02192018
@@ -58,6 +62,22 @@ def execute(p):
     params['injection_width'] = params['injection_width'][0] #SRIRAM 02192018
     params = basic_simulation.serialize_options(params)
     result = iv_filename(injection) #result is filename
+    
+    # Ensure PYTHONPATH is correct when calling basic_simulation (below) in a 
+    # subprocess from a different directory than the main optimization script.
+    # Updates the os.environ['PYTHONPATH'] and passes it to 
+    # subprocess.check_call `env` kwarg 
+    import pathlib
+    # Ensure we get absolute path of sys.path[0]--the directory of the main optimization script
+    pythonpath_string = str(pathlib.Path(sys.path[0]).absolute())
+    # Get the PYTHONPATH environment variable
+    current_python_path = os.environ.get('PYTHONPATH')
+    # prepend pythonpath_string to existing PYTHONPATH
+    if current_python_path is not None:
+        pythonpath_string = pythonpath_string + ':' + current_python_path
+    # update PYTHONPATH environment variable 
+    os.environ['PYTHONPATH']=pythonpath_string
+    #print('os.environ: ', os.environ['PYTHONPATH'])
     cmdline = [sys.executable,
                basic_simulation.__file__,
                '-i={}'.format(injection),
@@ -67,7 +87,7 @@ def execute(p):
     #logger.debug("Seralized params:\n {}".format(params))
     logger.debug("Basic_simulation command:\n {}".format(cmdline))
     with utilities.chdir(dirname):
-        subprocess.check_call(cmdline)
+        subprocess.check_call(cmdline,env=os.environ) # 'env' updates environment with PYTHONPATH
         iv = load_simulation(result,
                              simtime=simtime,
                              junction_potential=junction_potential,
@@ -115,6 +135,13 @@ class Simulation(loader.Attributable):
 
     def wait(self):
         if self._result is not None:
+            if type(self._result)==list:
+                import concurrent.futures
+                concurrent.futures.wait(self._result,timeout=300)
+                result = [f.result() for f in self._result]
+                self._set_result(result)
+
+            else:
             self._result.wait()
 
 class MooseSimulation(Simulation):
@@ -128,7 +155,8 @@ class MooseSimulation(Simulation):
                  single=False,
                  do_async=True,
                  features=None,
-                 params):
+                 params,
+                 map_func=None):
 
         junction_potential = params['junction_potential'].value # FIXME: nicer syntax?
         params = filtereddict(simtime=simtime,
@@ -141,19 +169,30 @@ class MooseSimulation(Simulation):
             self.waves = np.array([], dtype=object)
         else:
             print("Simulating{} at {} points".format(" asynchronously" if do_async else "", len(currents)))
-            self.execute_for(currents, junction_potential, single, do_async=do_async)
+            self.execute_for(currents, junction_potential, single, do_async=do_async,map_func=map_func)
 
-    def execute_for(self, injection_currents, junction_potential, single, do_async):
+    def execute_for(self, injection_currents, junction_potential, single, do_async,map_func=None):
         params = ((self.tmpdir.name, inj, junction_potential, self.params, self.features)
                   for inj in injection_currents)
-        if do_async:
+        if map_func is not None:
             logger.debug("MooseSimulation, Params in execute_for \n {}".format(params)) #SRIRAM
-            self._result = exe_map(single=False, do_async=True)(execute, params, callback=self._set_result)
+            self._result = map_func(execute, params)
+            #self._result[-1].add_done_callback(self._map_func_set_result)
+    
+
+        elif do_async:
+            logger.debug("MooseSimulation, Params in execute_for \n {}".format(params)) #SRIRAM
+            self._result = exe_map(single=False, do_async=True,map_func=map_func)(execute, params, callback=self._set_result)
         else:
             self._result = None
             logger.debug("MooseSimulation, Params in execute_for \n {} featues {}".format(self.params, self.features)) #SRIRAM
-            result = exe_map(single=single, do_async=False)(execute, params)
+            result = exe_map(single=single, do_async=False,map_func=map_func)(execute, params)
             self._set_result(result)
+
+    def _map_func_set_result(self, result):
+        import concurrent.futures
+        concurrent.futures.wait(self._result,timeout=300)
+        self._set_result(self._result)
 
     def _set_result(self, result):
         self.waves = np.array(result, dtype=object)
@@ -162,7 +201,7 @@ class MooseSimulation(Simulation):
         open(tag, 'w').close()
 
     @classmethod
-    def make(cls, *, dir, model, measurement, params):
+    def make(cls, *, dir, model, measurement, params,map_func=None):
         # A hack wrapper to push moose-specific stuff out from Fit
         simtime = measurement.waves[0].time
         injection_delay=measurement.features[0].injection_start,    #SRIRAM 02192018
@@ -179,7 +218,8 @@ class MooseSimulation(Simulation):
                    currents=measurement.injection,
                    simtime=simtime,
                    features=measurement.features,
-                   params=params)
+                   params=params,
+                   map_func=map_func)
 
 class SimulationResult(loader.Attributable):
     def __init__(self, dirname, features):
@@ -442,7 +482,8 @@ class Fit:
     def __init__(self, dirname, measurement, model, neuron_type, fitness_func, params,
                  feature_list=None,
                  _make_simulation=None,
-                 _result_constructor=MooseSimulationResult):
+                 _result_constructor=MooseSimulationResult,
+                 map_func = None):
         self.dirname = dirname
         self.measurement = measurement
         self.model = model
@@ -454,6 +495,7 @@ class Fit:
         self.optimizer = None
         self._make_simulation = _make_simulation
         self._result_constructor = _result_constructor
+        self.map_func = map_func
 
         # we assume that the first param value does not need penalties
         self._fitness_worst = None
@@ -490,7 +532,8 @@ class Fit:
         sim = self._make_simulation(dir=self.dirname,
                                     model=self.model,
                                     measurement=self.measurement,
-                                    params=self.params.updated(**unscaled)) #define params here SRIRAM
+                                    params=self.params.updated(**unscaled),
+                                    map_func=self.map_func) #define params here SRIRAM
         return sim
 
     def sim_fitness(self, sim, full=False, max_fitness=None):
