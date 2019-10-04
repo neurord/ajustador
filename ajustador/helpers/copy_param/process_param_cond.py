@@ -24,12 +24,14 @@ def extract_morph_file_from_cond(cond_file_path, neuron_type):
         morph_file = {'squid':'squid_10C_squid_1_squid_14.p'}
         gets and returns 'squid_10C_squid_1_squid_14.p'
     '''
+    print("COND_FILE", cond_file_path)
     with fileinput.input(files=(cond_file_path)) as f_obj:
        for line in f_obj:
            if find_morph_file(line):
                return get_morph_file_name(line, neuron_type)
 
 def update_morph_file_name_in_cond(cond_file, neuron_type, morph_file_name):
+    print("COND_FILE", cond_file, "MORH_FILE_NAME", morph_file_name)
     logger.debug("\n {}".format(cond_file))
     with fileinput.input(files=(cond_file), inplace=True) as f_obj:
          for line in f_obj:

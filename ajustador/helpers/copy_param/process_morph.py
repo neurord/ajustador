@@ -46,6 +46,7 @@ def clone_and_change_morph_file(param_cond_file, model_path, model, neuron_type,
     morph_features = ('RM', 'Eleak', 'RA', 'CM')
     model_obj = make_model_path_obj(model_path, model)
     logger.debug("\n{} \n{}".format(param_cond_file, neuron_type))
+    print("PARAM_COND_FILE", param_cond_file)
     morph_file = extract_morph_file_from_cond(param_cond_file, neuron_type) #PROBLEM HERE.  NOT RETURNING CORRECT FILE FOR D2?
     logger.debug('\n{} \n{}'.format(model_path, morph_file))
     src_morph_file_path = get_file_abs_path(model_path, morph_file)
