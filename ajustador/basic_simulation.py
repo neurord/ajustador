@@ -211,7 +211,7 @@ def setup_conductance(condset, name, index, value):
     distance dependent conductances.
     '''
     attr = getattr(condset, name)
-    keys = list(attr.keys())
+    keys = sorted(list(attr.keys())) # sorted ensures keys are in order of distance from soma
     if index == ':':
         for k in keys:
             attr[k] = value
