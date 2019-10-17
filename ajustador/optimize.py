@@ -142,7 +142,7 @@ class Simulation(loader.Attributable):
                 self._set_result(result)
 
             else:
-            self._result.wait()
+                self._result.wait()
 
 class MooseSimulation(Simulation):
     def __init__(self, dir,
