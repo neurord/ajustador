@@ -53,7 +53,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     #### MODEL_PATH IS NEW
     model_path = Path(moose_nerp.__file__.rpartition('/')[0] + "/tentative")/model
     
-    #print(model_path)
+    print(model_path)
 
     logger.info("START STEP 1!!!\n loading npz file: {}.".format(npz_file))
     data = np.load(npz_file)
