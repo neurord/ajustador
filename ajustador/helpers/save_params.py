@@ -2,8 +2,9 @@ import numpy as np
 # from ajustador import xml 
 import importlib
 
-def save_params(fitX, start = 0,threshold = np.inf,fn=None):
-
+def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=True, npz=True):
+    index = [i for i in range(len(fitX)) if i > start and fitX._history[i] < threshold]
+    print(index)
     #initialized arrays and lists for feature fitnesses and param values
     if 'NeurordSimulation' in str(type(fitX[0])):
         mols=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1).keys())
@@ -12,29 +13,26 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None):
     else:
         model_params = importlib.import_module('moose_nerp.' + fitX.model)
         cols=len(fitX.fitness_func.report(fitX[0],fitX.measurement).split('\n'))
-    rows=len(fitX)
+    rows=len(index)
     fitnessX=np.zeros((rows,cols))
     paramcols=len(fitX.param_names())
     paramvals=np.zeros((rows,paramcols))
     param_subset=[]  #this only saves a subset of simulation parameters
-    tmpdirs=[fit.tmpdir.name for fit in fitX]
+    tmpdirs=[fitX[i].tmpdir.name for i in index]
     
     #full=1 will print fitness of each feature, full=0 prints only overall fitness
-    for i in range(len(fitX)):
+    for n,i in enumerate(index):
         if 'NeurordSimulation' in str(type(fitX[0])):
             fitness_tmp=[fitX.fitness_func(fitX[i],fitX.measurement,full=1)[mol][cond] for mol in mols for cond in conditions]
             for j in range(len(fitness_tmp)):
-                fitnessX[i,j]=fitness_tmp[j]
+                fitnessX[n,j]=fitness_tmp[j]
         else:
-            fitnessX[i,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
-        fitnessX[i,-1]=fitX._history[i]
+            fitnessX[n,0:-1]=fitX.fitness_func(fitX[i], fitX.measurement, full=1)
+        fitnessX[n,-1]=fitX._history[i]
         #paramvals[i]=['%.5g'%(fitX[i].params[j].value) for j in fitX.param_names()] # Here we are rounding to 5 decimal places.wa
-        paramvals[i]=[fitX[i].params[j].value for j in fitX.param_names()]
-        line=list(paramvals[i])
-        line.insert(0,i)
-        if fitnessX[i,-1]<threshold and i>=start:
-            line.append(fitnessX[i,-1])
-            param_subset.append(line)
+        paramvals[n]=[fitX[i].params[j].value for j in fitX.param_names()]
+        if sas:
+            param_subset=paramvals
 
     fname=fitX.name
     if len(fitX.name)==0:
@@ -64,10 +62,12 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None):
         feature_list.append('neuron='+fitX.neuron_type)
     #
     #save as text file to read into sas
-    np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
-    print ('parameters saved to', fname)
+    if sas:
+        np.savetxt(fname+'.sasparams',param_subset,fmt='%-10s', header=" ".join(header))
+        print('parameters saved to', fname)
     #save entire parameters and individual fitness values as dictionary
-    np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,tmpdirs=tmpdirs)
+    if npz:
+        np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,tmpdirs=tmpdirs)
 
 #To access the data:
 #dat=np.load(fname)
