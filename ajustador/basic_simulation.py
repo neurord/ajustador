@@ -210,8 +210,25 @@ def setup_conductance(condset, name, index, value):
                         with value(input argument).
     distance dependent conductances.
     '''
+    def sort_func(key):
+        '''custom sort function to assign conductances given by e.g. 0, 1, or 2
+        to the appropriate distance-mapping key. The ordering is:
+        First: Shorter tuple keys first: e.g. (0,1) comes before (0,1,'axon')
+        Second: The smaller value of key[0], for keys of length 2 without description
+                Or for keys with a description (of length 3), sort by custom description list
+        '''
+        sort_order_0 = len(key)
+
+        if len(key)==2:
+            sort_order_1 = key[0]
+        if len(key)==3:
+            custom_order = ['soma','_1','axon','_2','basal_dend','dend','_3','apical_dend','_4']
+            sort_order_1 = custom_order.index(key[2])
+        return (sort_order_0, sort_order_1)
+
+    # TODO: Print what "_1", "_2", "_3" refer to; document the order; check copy_params ordering
     attr = getattr(condset, name)
-    keys = sorted(list(attr.keys())) # sorted ensures keys are in order of distance from soma
+    keys = sorted(attr, key=sort_func) # sorted ensures keys are in order of distance if no description, then by description
     if index == ':':
         for k in keys:
             attr[k] = value
