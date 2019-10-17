@@ -388,11 +388,42 @@ class AjuParam(Param):
     def scaled(self):
         return self.scale(self.value)
 
-    def scale(self, val):
+    # changing scale to scale_old and unscale to unscale_old to try 
+    # writing a new scaling/unscaling approach
+    def scale_old(self, val):
         return val / self._scaling if self._scaling is not None else self.value
 
-    def unscale(self, val):
+    def unscale_old(self, val):
         return val * self._scaling if self._scaling is not None else self.value
+
+    # New scaling approach. Scale all parameters to the range [0,10];
+    # Optionally, perform a log scaling of parameters with orders of 
+    # magnitude difference in min and max
+
+    def scale(self, val):
+        if self._scaling is None:
+            return self.value
+        if self.min is None or self.max is None:
+            return self.scale_old(self,val)
+        # linear scaling if <= 0 or less than order of magnitude difference
+        if self.min <= 0 or self.max/self.min < 10.0:
+            return 10.0*(val-self.min)/(self.max-self.min)
+        # else, log scaling:
+        else:
+            return np.log10(val/self.min)/np.log10(self.max/self.min)*10.0
+
+
+    def unscale(self, val):
+        if self._scaling is None:
+            return self.value
+        if self.min is None or self.max is None:
+            return self.unscale_old(self,val)
+        # linear scaling if less than order of magnitude difference
+        if self.min <= 0 or self.max/self.min < 10.0:
+            return self.min + (self.max-self.min)*val/10.0
+        # else, log scaling: 
+        else:
+            return self.min * (self.max/self.min)**(val/10.0) 
 
     def valid(self, val):
         return ((self.min is None or self.min <= val) and
@@ -598,7 +629,7 @@ class Fit:
                 values[i, j] = item.params[param].value
         return values
 
-    def do_fit(self, count, params=None, sigma=1, popsize=8, seed=123):
+    def do_fit(self, count, params=None, sigma=2, popsize=8, seed=123):
         # what is the order of params which position represents which params?
         if self.optimizer is None:
             if params is None:
