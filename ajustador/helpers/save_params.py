@@ -1,11 +1,11 @@
 import numpy as np
-from ajustador import xml
+# from ajustador import xml 
 import importlib
 
 def save_params(fitX, start = 0,threshold = np.inf,fn=None):
 
     #initialized arrays and lists for feature fitnesses and param values
-    if isinstance(fitX[0],xml.NeurordSimulation):
+    if 'NeurordSimulation' in str(type(fitX[0])):
         mols=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1).keys())
         conditions=list(fitX.fitness_func(fitX[0],fitX.measurement,full=1)[mols[0]].keys())
         cols=len(mols)*len(conditions)
@@ -21,7 +21,7 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None):
     
     #full=1 will print fitness of each feature, full=0 prints only overall fitness
     for i in range(len(fitX)):
-        if isinstance(fitX[0],xml.NeurordSimulation):
+        if 'NeurordSimulation' in str(type(fitX[0])):
             fitness_tmp=[fitX.fitness_func(fitX[i],fitX.measurement,full=1)[mol][cond] for mol in mols for cond in conditions]
             for j in range(len(fitness_tmp)):
                 fitnessX[i,j]=fitness_tmp[j]
@@ -52,7 +52,7 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None):
                                     fitX.params.unscale(result[0]),
                                     fitX.params.unscale(result[6]))]
     header.append('fitness')
-    if isinstance(fitX[0],xml.NeurordSimulation):
+    if 'NeurordSimulation' in str(type(fitX[0])):
         header.insert(0,'iteration')
         feature_list=["".join(mol+' '+cond) for mol in mols for cond in conditions]
     else:
