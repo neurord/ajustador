@@ -962,11 +962,14 @@ class ChargingCurve(Feature):
     @property
     @utilities.once
     def charging_curve_halfheight(self):
-        "The height in the middle between depolarization start and first spike"
+        "The height in the middle between depolarization start and first spike or peak depolarization if no spike"
         ccut = self.charging_curve
         if ccut is None:
             return vartype.vartype.nan
-        threshold = self._obj.spike_threshold[0]
+        if self._obj.spike_count < 1:
+            threshold = np.max(self._obj.wave.y)
+        else:
+            threshold = self._obj.spike_threshold[0]
         baseline = self._obj.baseline
 
         return (threshold - baseline) / 2
@@ -990,9 +993,13 @@ class ChargingCurve(Feature):
             what = wave[(wave.x > injection_start) & (wave.x < injection_end)]
             return what
         else:
-            cut = wave[(wave.x<self._obj.spikes[0].x)]
-            threshold_y = 0.95*(self._obj.spike_threshold[0] - baseline)
-            threshold_x = cut[(cut.y-baseline < threshold_y)][-1].x #x value of last y value below threshold before first spike
+            first_spike_after_injection = (self._obj.spikes.x > injection_start).argmax()
+            cut = wave[(wave.x<self._obj.spikes[first_spike_after_injection].x)]
+            threshold_y = 0.95*(self._obj.spike_threshold[first_spike_after_injection] - baseline)
+            if np.isnan(threshold_y):
+                threshold_x = cut.x[-1]
+            else:
+                threshold_x = cut[(cut.y-baseline < threshold_y)][-1].x #x value of last y value below threshold before first spike
             what = wave[(wave.x > injection_start) & (wave.x < threshold_x)]
             #what = what[what.y < threshold]
             return what
