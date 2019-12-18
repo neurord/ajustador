@@ -41,33 +41,37 @@ def copy(src, dest):
             shutil.copy(src, dest)
         else: raise
         
-def correct_cond_and_morph(model, neuron_type, npz_file, morphfile="D1_short_patch.p"):
-    path = moose_nerp.__path__[0]
+#def correct_cond_and_morph(model, neuron_type, npz_file, morphfile="D1_short_patch.p"):
+#def correct_cond_and_morph(model, neuron_type, npz_file,optpath, morphfile="D1_short_patch.p"):
+def correct_cond_and_morph(model, neuron_type, npz_file,optpath, morphfile=None):
+    path=moose_nerp.__path__[0]
+    print('******************* source path, dest path', optpath+ "/" + model, path)
     os.mkdir(path + "/" + "tentative")
-    copy(path + "/" + model, path + "/" + "tentative/" + model)
+    copy(optpath + "/" + model, path + "/" + "tentative/" + model)
+    #copy(path + "/" + model, path + "/" + "tentative/" + model)
     sys.path.insert(0, path + "/" + "tentative/" + model)
     
     condfile = open(path + "/" + "tentative/" + model + "/param_cond.py", "r")
     newcond = open(path + "/" + "tentative/" + model + "/param_cond_2.py", "w+") #creates new cond with correct morph
-
     lines = condfile.readlines()
     for line in lines:
         if line.strip().startswith("morph_file"):
             morphline = line.strip()
             morphdict = eval(morphline[morphline.find("{"):])
-            morphdict[neuron_type] = morphfile
+            if morphfile: #if morphfile is specified, update param_cond with that file name.  Else use the one already specified
+                morphdict[neuron_type] = morphfile
             newcond.write("morph_file = " + str(morphdict) + "\n")
         else:
             newcond.write(line)
     condfile.close()
     newcond.close()
-
     os.remove(path + "/" + "tentative/" + model + "/param_cond.py")           #deletes old main
     os.rename(path + "/" + "tentative/" + model + "/param_cond_2.py", path + "/" + "tentative/" + model + "/param_cond.py")
    
     ### creates new param files in moose_nerp/model/conductance_save, taking the ABSOLUTE PATH of npz file as input
-    create_npz_param(npz_file, model, neuron_type)#, fitnum=1) ###EDITED THIS ONE
-    
+    data_dir=create_npz_param(npz_file, model, neuron_type)#, fitnum=1) ###EDITED THIS ONE
+    print('*****************', data_dir)
+    return data_dir
 
 def rename_cond_chan(newModelFolder):
     print("")
@@ -101,9 +105,9 @@ def edit_main(newModelFolder, nameNeuron):
     os.remove(newModelFolder + "/__main__.py")           #deletes old main
     os.rename(newModelFolder + "/__main__2.py", newModelFolder + "/__main__.py")
 
-def createNewModelFolder(model, neuron_type, npz_file, nameNeuron, morphfile='D1_short_patch.p'):
+def createNewModelFolder(model, neuron_type, npz_file, nameNeuron, morphfile='D1_short_patch.p',optpath=moose_nerp.__path__[0],copy_traces=False):
     ### creates new param files in moose_nerp/tentative/model/conductance_save, taking the ABSOLUTE PATH of npz file as input
-    correct_cond_and_morph(model, neuron_type, npz_file, morphfile=morphfile)
+    data_dir=correct_cond_and_morph(model, neuron_type, npz_file,optpath, morphfile=morphfile)
     
     ### copy new cond, chan, and morph files to new moose_nerp folder 
     path = moose_nerp.__path__[0]
@@ -121,14 +125,24 @@ def createNewModelFolder(model, neuron_type, npz_file, nameNeuron, morphfile='D1
     ### EDIT THE MAIN so that it runs the new nameNeuron file
     edit_main(newModelFolder, nameNeuron)
 
+    new_data_path=newModelFolder+'/'+os.path.basename(data_dir)
+    copy(data_dir,new_data_path)
+    print('traces copied to new data path:', os.listdir(new_data_path))
     ### delete the conductance_save folder in moose_nerp/model
     shutil.rmtree(path + "/" + "tentative")
 
 if __name__ == "__main__":
-    model, neuron_type, npz_file, nameNeuron = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]    
-    #d1d2, D1, /home/emily/fitd1d2-D1-D1_Matrix_Sample_2_real_morphtmp_8125.npz, D1MatrixSample2
-    #"/home/emily/fitd1d2-D1-D1_Patch_Sample_2_post_injection_curve_tau_and_full_charging_curve_tmp_358.npz"
-    createNewModelFolder(model, neuron_type, npz_file, nameNeuron)
+    inputs=sys.argv[1:]
+    neuron_type=inputs[0]
+    npz_file=inputs[1]
+    nameNeuron=inputs[2]
+    if len(inputs)>3:
+        mn_dir =inputs[3]
+        createNewModelFolder(model, neuron_type, npz_file, nameNeuron,optpath=mn_dir)
+    else:
+        #d1d2, D1, /home/emily/fitd1d2-D1-D1_Matrix_Sample_2_real_morphtmp_8125.npz, D1MatrixSample2
+        #"/home/emily/fitd1d2-D1-D1_Patch_Sample_2_post_injection_curve_tau_and_full_charging_curve_tmp_358.npz"
+        createNewModelFolder(model, neuron_type, npz_file, nameNeuron)
 
         
     

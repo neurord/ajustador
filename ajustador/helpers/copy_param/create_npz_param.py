@@ -61,18 +61,18 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     logger.info("START STEP 2!!! Prepare param conductances.")
 
     fit_number, param_data_list = get_least_fitness_params(data, fitnum)
-    logger.info("*******Data directory for fit: {}".format(data['tmpdirs'][fit_number]))
+    logger.info("*******Data directory for fit: {} fit value {}".format(data['tmpdirs'][fit_number],data['fitvals'][fit_number][-1]))
     header_line = "# Generated from npzfile: {} of fit number: {}\n".format(
                   npz_file.rpartition('/')[2], fit_number)
     sample_label = npz_file.rpartition('/')[2].rstrip('.npz').split('_')[-1]
-
+    
     logger.debug("Param_data: {}".format(param_data_list))
     conds = get_params(param_data_list, 'Cond_')
     non_conds = get_params(param_data_list, 'Cond_', exclude_flag=True)
 
     # Create new path to save param_cond.py and *.p
     new_param_path = create_path(store_param_path) if store_param_path else create_path(model_path/'conductance_save')
-    print(new_param_path)
+    print('**** new param path', new_param_path)
     
     if cond_file is None:
         cond_file = 'param_cond.py'
@@ -91,7 +91,6 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     new_morph_file_name = check_version_build_file_path(morph_file, neuron_type, fit_number)
     Path(str(new_param_path/morph_file)).rename(str(new_morph_file_name))
 
-    logger.info("START STEP 6!!! Renaming morph file after checking version.")
     update_morph_file_name_in_cond(new_cond_file_name, neuron_type, new_morph_file_name.rpartition('/')[2])
 
     write_header(header_line, new_param_cond)
@@ -100,7 +99,7 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     conds_dict = reshape_conds_to_dict(conds)
     update_conductance_param(new_param_cond, conds_dict, start_param_cond_block, end_param_cond_block)
 
-    logger.info("STEP 8!!! start channel processing.")
+    logger.info("STEP 6!!! start channel processing.")
     chans = get_params(param_data_list, 'Chan_')
     logger.debug('{}'.format(chans))
 
@@ -110,14 +109,14 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
                          str(new_param_path), neuron_type, chan_file)
     new_chan_file_name = check_version_build_file_path(str(new_param_chan), neuron_type, fit_number)
 
-    logger.info("START STEP 9!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,chan_file), new_chan_file_name))
+    logger.info("START STEP 7!!! Copy \n source : {} \n dest: {}".format(get_file_abs_path(model_path,chan_file), new_chan_file_name))
     new_param_chan = clone_file(src_path=model_path, src_file=chan_file, dest_file=new_chan_file_name)
 
-    logger.info("START STEP 10!!! Preparing channel and gateparams relations.")
+    logger.info("START STEP 8!!! Preparing channel and gateparams relations.")
     start_param_chan_block = get_namedict_block_start(new_param_chan, 'Channels')
     end_param_chan_block = get_block_end(new_param_chan, start_param_chan_block, r"^(\s*\))")
     chans_dict = reshape_chans_to_dict(chans)
-    logger.info("START STEP 11!!! import parameters from param_chan.py. and apply scale Tau and delay SS")
+    logger.info("START STEP 9!!! import parameters from param_chan.py. and apply scale Tau and delay SS")
     py_param_chan = import_param_chan(model) # import param_chan.py file from model.
     chanset = py_param_chan.Channels # Get Channels set from the imported param_chan.py.
     for key,value in chans_dict.items():
@@ -131,3 +130,4 @@ def create_npz_param(npz_file, model, neuron_type, store_param_path=None,
     update_chan_param(new_param_chan, chan_param_name_relation, chanset, param_location) #Update new param_chan files with new channel params.
     write_header(header_line, new_param_chan) # Write header to the new param_chan.py
     logger.info("THE END!!! New files names \n morph: {1} \n param_cond file: {0} \n param_chan file: {2}".format(new_cond_file_name, new_morph_file_name, new_chan_file_name))
+    return data['tmpdirs'][fit_number]
