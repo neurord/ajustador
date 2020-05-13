@@ -2,7 +2,7 @@ import numpy as np
 # from ajustador import xml 
 import importlib
 
-def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=True, npz=True):
+def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=False, npz=True):
     index = [i for i in range(len(fitX)) if i > start and fitX._history[i] < threshold]
     print(index)
     #initialized arrays and lists for feature fitnesses and param values
@@ -49,13 +49,19 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=True, npz=True):
             for nm,val,stdev in zip(fitX.param_names(),
                                     fitX.params.unscale(result[0]),
                                     fitX.params.unscale(result[6]))]
+    opt_result={nm:{'mean':val,'std':stdev} for nm,val,stdev in zip(fitX.param_names(),
+                                    fitX.params.unscale(result[0]),
+                                    fitX.params.unscale(result[6]))}
+    opt_result['datawave']=fitX.measurement.name
     header.append('fitness')
     if 'NeurordSimulation' in str(type(fitX[0])):
         header.insert(0,'iteration')
         feature_list=["".join(mol+' '+cond) for mol in mols for cond in conditions]
     else:
         header.insert(0,'cell iteration')
-        header.append('Init: cal='+str(model_params.calYN)+' spines='+str(model_params.spineYN)+' syn='+str(model_params.synYN)+' ghk='+str(model_params.ghkYN)+'plas='+str(model_params.plasYN))
+        model_bits='Init: cal='+str(model_params.calYN)+' spines='+str(model_params.spineYN)+' syn='+str(model_params.synYN)+' ghk='+str(model_params.ghkYN)+'plas='+str(model_params.plasYN)
+        opt_result['model_bits']=model_bits
+        header.append(model_bits)
         feature_list=fitX.fitness_func.report(fitX[-1],fitX.measurement).split('\n')
     feature_list.append('model='+fitX.model)
     if fitX.neuron_type is not None:
@@ -67,7 +73,7 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=True, npz=True):
         print('parameters saved to', fname)
     #save entire parameters and individual fitness values as dictionary
     if npz:
-        np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,tmpdirs=tmpdirs)
+        np.savez(fname, params=paramvals, paramnames=fitX.param_names(),fitvals=fitnessX,features=feature_list,tmpdirs=tmpdirs,finalfit=opt_result)
 
 #To access the data:
 #dat=np.load(fname)

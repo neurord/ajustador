@@ -279,6 +279,7 @@ class CSVSeries(Measurement):
 
     def _waves(self):
         import pandas as pd
+        #Need to add "time" as in IVCurve, and limit csv to data between 0 and time
 
         csv = pd.read_csv(self.dirname, index_col=0)
         value, factor = parse_data_header(csv.index.name)
