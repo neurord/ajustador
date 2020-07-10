@@ -11,18 +11,20 @@ https://github.com/neurord/ajustador/
 
 Setting up Optimizations on the Neuroscience Gate (NSG)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- create directory with main optimization scripts, e.g. opt_NSG
-   - e.g. gpNpas_opt.py, in https://github.com/neurord/optimization_scripts/blob/master/gp_opt/, which 
-     - specifies model type (moose_nerp package)
-     - specifies neuron type
-     - specifies data name (e.g. which experimental trace)
-     - specifies optimization parameters, such as generations, population size
-     - specifies output directory according to some naming convention, e.g.
-        rootdir=os.getcwd()+'/output'
-        dirname='cmaes_'+dataname+'_'+str(seed)+'_'+str(popsiz)
-        if not in dirname in os.listdir(rootdir):
-           os.mkdir(rootdir+dirname)
-	os.chdir(rootdir+dirname)
+- create directory with main optimization scripts, such as my_NSGopt_dir
+   - example is gpNpas_opt.py, in https://github.com/neurord/optimization_scripts/blob/master/gp_opt/, which 
+   
+     + specifies model type (moose_nerp package)
+     + specifies neuron type
+     + specifies data name (i.e., which experimental trace)
+     + specifies optimization parameters, such as generations and population size
+     + creates and moves to output directory according to some naming convention, e.g.
+       ::
+         rootdir=os.getcwd()+'/output'
+         dirname='cmaes_'+dataname+'_'+str(seed)+'_'+str(popsiz)
+         if not in dirname in os.listdir(rootdir):
+            os.mkdir(rootdir+dirname)
+         os.chdir(rootdir+dirname)
    -  fit_commands.py
    -  param_fitness_chan.py, which specifies
       - which parameters to change, and their ranges
@@ -38,4 +40,6 @@ Setting up Optimizations on the Neuroscience Gate (NSG)
   - https://github.com/neurord/waves/blob/master/gpedata_experimental.py
   - https://github.com/neurord/waves/tree/master/gpedata-experimental
 
-- from directory _above_ directory you just created, e.g. opt_NSG, zip opt_NSG
+- create a zip file from the directory _above_ the directory you just created 
+  ::
+    zip -r NSGopt.zip my_NSGopt_dir/
