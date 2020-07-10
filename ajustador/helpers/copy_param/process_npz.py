@@ -18,8 +18,11 @@ def get_least_fitness_params(data, fitnum= None):
     return (row, np.dstack((data['params'][row],data['paramnames']))[0])
 
 def check_key_in_npz_data(npz_data, key):
+    feat=[feat.split('=')[0] for feat in npz_data['features']]
     if key in npz_data.files:
          return True
+    elif key in feat:
+        return True
     logger.error("No KEY {} in optimization npz data load!!!".format(key))
     return False
 
