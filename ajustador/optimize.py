@@ -77,9 +77,9 @@ def execute(p):
         pythonpath_string = pythonpath_string + ':' + current_python_path
     # update PYTHONPATH environment variable 
     os.environ['PYTHONPATH']=pythonpath_string
-    #print('os.environ: ', os.environ['PYTHONPATH'])
-    cmdline = [sys.executable,
-               basic_simulation.__file__,
+    #print('os.environ: ', os.environ['PYTHONPATH'],basic_simulation.__name__)
+    cmdline = [sys.executable, '-m',
+               basic_simulation.__name__, #basic_simulation.__file__,
                '-i={}'.format(injection),
                '--save-vm={}'.format(result),
     ] + params
