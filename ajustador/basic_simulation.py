@@ -346,7 +346,7 @@ def main(args):
         neuron_graph.graphs(model,model.vmtab, param_sim.plot_current, param_sim.simtime, compartments=[0])
         util.block_if_noninteractive()
     if param_sim.save_vm:
-        elemname = '/data/Vm{}_0'.format(param_sim.neuron_type)
+        elemname = '/data/Vm{}_c0'.format(param_sim.neuron_type)
         np.save(param_sim.save_vm, moose.element(elemname).vector)
 
 if __name__ == '__main__':
