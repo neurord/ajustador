@@ -36,6 +36,7 @@ class trace(object):
         self.wave=np.rec.fromarrays((x, yvalue), names='x,y')
         #calculate features: baseline, peaktime, peak value
         start_index,basal=nrd_fitness.basal(x,yvalue,stim_time)
+        self.exp_basal=basal
         pt,peak=nrd_fitness.peak(x,yvalue,start_index)
         self.features={'basal':basal, 'stim_pt': start_index,'peaktime':pt,'peakval': peak}
 

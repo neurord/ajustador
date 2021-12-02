@@ -9,7 +9,7 @@ from scipy import stats, interpolate
 import pandas as pd
 from ajustador.nrd_output import PUVC
 
-from . import loader, fitnesses, utilities, xml, nrd_output, loadconc
+from . import loader, fitnesses, utilities, xml
 
 def _on_close(event):
     event.canvas.figure.closed = True
@@ -42,6 +42,7 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     return f
 
 def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
+    import nrd_output, loadconc
     #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
@@ -81,7 +82,8 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
                         axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0],label=labl,color=colr)
                 elif isinstance(stim_data,loadconc.CSV_conc):
                     if mol in list(stim_data.waves.keys()):
-                        ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
+                        #ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
+                        ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-stim_data.waves[mol].exp_basal)
                         axes[k].plot(stim_data.waves[mol].wave.x/ms_per_sec,ydata,color=colr,label=labl)
                 else:
                     print('drawing.py: new type of data format', type(measurement))
