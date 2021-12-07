@@ -35,14 +35,14 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
                 f.plot_counter += 1
             return f
     f = _GRAPHS[name] = pyplot.figure(figsize=figsize)
-    f.canvas.set_window_title(name)
+    f.canvas.manager.set_window_title(name)
     f.closed = False
     f.plot_counter = 0
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
 def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
-    import nrd_output, loadconc
+    from ajustador import nrd_output, loadconc
     #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
@@ -200,7 +200,7 @@ def plot_rectification(waves):
 
 def plot_shape(what, *group):
     f = _get_graph('shape')
-    f.canvas.set_window_title('shape for {}'.format(what))
+    f.canvas.manager.set_window_title('shape for {}'.format(what))
     ax = f.gca()
     op = operator.attrgetter(what)
     for waves in group:
@@ -240,7 +240,7 @@ def plot_param_space(group, measurement=None, *what, **options):
         fitness = [fitness_func(item, measurement) for item in group]
 
     f = _get_graph('param space')
-    f.canvas.set_window_title('3-param view for {}'.format(fitness_func.__name__))
+    f.canvas.manager.set_window_title('3-param view for {}'.format(fitness_func.__name__))
     ax = f.gca(projection='3d')
     if measurement is not None:
         sca = ax.scatter(*values.T, c=fitness)
@@ -364,7 +364,7 @@ def plot_param_view(group, measurement, *what, **options):
     fitness = [fitness_func(item, measurement) for item in group]
 
     f = _get_graph('param space')
-    f.canvas.set_window_title('2-param view for {}'.format(fitness_func.__name__))
+    f.canvas.manager.set_window_title('2-param view for {}'.format(fitness_func.__name__))
     ax = f.gca(projection='3d')
     sca = ax.scatter(values[:, 0], values[:, 1], fitness, c=fitness)
     f.colorbar(sca, shrink=0.5, aspect=10)
@@ -492,7 +492,7 @@ def cbdr(values, func, xnames, yname, order=None, debug=False):
         print('(axis {}) {}: {:{}} {}'.format(order[i], '-|'[i < dimsplit], xnames[order[i]], m, xs[i].flatten()))
 
     f = _get_graph('cbdr')
-    f.canvas.set_window_title('cbdr {} × {} → {}'
+    f.canvas.manager.set_window_title('cbdr {} × {} → {}'
                               .format('-'.join(xnames[i] for i in order[:dimsplit]),
                                       '-'.join(xnames[i] for i in order[dimsplit:]),
                                       yname))
@@ -583,7 +583,7 @@ def plot_map(group, measurement, *what, **options):
 
     yname = fitness_func.__name__
     f = _get_graph('param map')
-    f.canvas.set_window_title('params {} × {} → {}'.format(what[0], what[1], yname))
+    f.canvas.manager.set_window_title('params {} × {} → {}'.format(what[0], what[1], yname))
 
     values, fitness = find_min_values(values, fitness)
     grid_x, grid_y = _make_grid(values)
