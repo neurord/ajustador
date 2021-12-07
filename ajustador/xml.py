@@ -120,7 +120,8 @@ class NeurordSimulation(optimize.Simulation):
                  features=None,
                  params,
                  single=False,
-                 do_async=True):
+                 do_async=True,
+                 map_func=None):
 
         super().__init__(dir,
                          params=params,
@@ -128,6 +129,7 @@ class NeurordSimulation(optimize.Simulation):
         ####### Loop over each simulation in the set #######
         model_names=(glob.glob(model+"*.xml") if not model.endswith('.xml')
                      else [model])
+        print(model_names)
         model_set=[]
         fout_set=[]
         param_set=[]
@@ -167,14 +169,14 @@ class NeurordSimulation(optimize.Simulation):
         self.output=np.array(output,dtype=object)
 
     @classmethod
-    def make(cls, *, dir, model, measurement, params):
-        return cls(dir=dir, model=model, params=params)
+    def make(cls, *, dir, model, measurement, params,map_func=None):
+        return cls(dir=dir, model=model, params=params,map_func=None)
 
 def execute(p):
     modelfile, outfile, num = p
     home_path = os.path.expanduser("~")
     neurord_path = os.path.join(home_path,
-                                "neurord-3.2.3-all-deps.jar")
+                                "neurord-3.3.0-all-deps.jar")
 
     cmdline = ['java', '-jar', neurord_path, modelfile, outfile]
     print('+', ' '.join(shlex.quote(term) for term in cmdline), flush=True)
