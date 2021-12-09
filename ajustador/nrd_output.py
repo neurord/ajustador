@@ -50,7 +50,7 @@ def nrd_output_conc(sim_output,specie):
     pop1count = df.xs(specie,level=specie_index)
     volumes=sim_output.vols
     tot_vol=np.sum(volumes)
-    pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
+    pop1conc=pop1count.sum(axis=0,level=voxel_index)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
     return pop1conc
 
 def decode_species_names(array):
@@ -175,7 +175,7 @@ class Model(object):
         self._element = element
         try:
             self.dependencies = Dependencies(self._element['events'])
-        except tables.exceptions.NoSuchNodeError as e:
+        except KeyError as e:
             self.dependencies = None
         self.reactions=Reactions(self._element['reactions'])
 
@@ -210,28 +210,23 @@ class Model(object):
         array([ 2.])
 
         """
-        #volume_index=self._element['grid'].dtype.names.index('volume')
-        #volumes=[e[volumne_index] for e in self._element['grid'][:]]
-        return np.array(self._element['grid'])
-        #return self._element.grid.read().view(np.recarray)
+        #return np.array(self._element['grid'])
+        return self._element['grid'][:].view(np.recarray)
         
     def volumes(self):
         grid = self.grid()
-        volume_index=grid.dtype.names.index('volume')
-        volume=[e[volume_index] for e in grid[:]]
-        return volume
+        #volume_index=grid.dtype.names.index('volume')
+        #volume=[e[volume_index] for e in grid[:]]
+        #return volume
+        return grid.volume
 
     def element_regions(self):
         "Names of regions of elements (by index)"
-        region_index=self.element['grid'].dtype.names.index('region')
-        region_nums=[grid[region_index] for grid in element['grid']]
+        #region_index=self.element['grid'].dtype.names.index('region')
+        #region_nums=[grid[region_index] for grid in element['grid']]
         regions = np.array(self.region_names())
-        return regions[region_nums]
-        '''
-        region_name_index=self.element['grid'].dtype.names.index('region_name')
-        return [grid[region_name_index] for grid in element['grid']]
-        '''
-        #return regions[self.grid().region]
+        return regions[self.grid().region]
+        #return regions[region_nums]
 
     def indices(self):
         "Numbers of the elements"
@@ -258,7 +253,7 @@ class Model(object):
         if name == '__main__':
             try:
                 group = self._element['output']
-            except tables.exceptions.NoSuchNodeError:
+            except KeyError:
                 # fall back to old tree
                 element = self._element
             else:
@@ -292,20 +287,20 @@ class ModelOutputGroup(object):
         """
         try:
             return self._element['elements'][:] #indices of elements
-        except tables.exceptions.NoSuchNodeError: # FIXME nothing called dependencies.
+        except KeyError: # FIXME nothing called dependencies.
             grid = self._model.grid()
-            label_num=grid.dtype.names.index('label')
-            element_labels=[e[volume_index] for e in grid[:]]
+            element_labels=[r.decode('utf-8') for r in grid.labels]
             return range(len(element_labels))
+            #return self._element['dependencies']['elements'][:]
 
     def volumes(self):
         """Volumes of elements in this output group
         """
         elements = self.elements()
         grid = self._model.grid()
-        volume_index=grid.dtype.names.index('volume')
-        volumes=[e[volume_index] for e in grid[:]]
-        #volumes = grid[elements].volume
+        #volume_index=grid.dtype.names.index('volume')
+        #volumes=[e[volume_index] for e in grid[:]]
+        volumes = grid[elements].volume
         return volumes
 
 class OutputGroup(object):
@@ -321,7 +316,7 @@ class OutputGroup(object):
     def counts(self):
         try:
             data = self._element['population'][:] #file['trial0']['output']['__main__']['population']
-        except tables.exceptions.NoSuchNodeError:
+        except KeyError:
             # fall back to old tree
             data = self._element['concentrations'][:]
         ''' Panel depracated
@@ -392,7 +387,7 @@ class Simulation(object):
         if name == '__main__':
             try:
                 group = self._element['output']
-            except tables.exceptions.NoSuchNodeError:
+            except KeyError:
                 # fall back to old tree
                 element = self._element['simulation']
             else:
@@ -439,7 +434,7 @@ class Output(object):
         try:
             #element = self.file.root.model
             element=self.file['model']
-        except tables.exceptions.NoSuchNodeError:
+        except KeyError:
             #element = self.file.root.trial0.model
             element=self.file['trial0']['model']
         self.model = Model(element)
@@ -575,7 +570,7 @@ class Output(object):
         >>> out.concentrations().head(1)
                                  concentration
         voxel time specie trial               
-        0     0.0  A      0 d       1049.460511
+        0     0.0  A      0        1049.460511
         """
         counts = self.counts(output_group)
         volumes = self.model.volumes()*PUVC
