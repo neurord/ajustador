@@ -26,6 +26,7 @@ import operator
 import enum
 import math
 import tables
+import h5py
 import functools
 import numpy as np
 import pandas as pd
@@ -41,10 +42,15 @@ PUVC = AVOGADRO / 10
 
 def nrd_output_conc(sim_output,specie):
     #may need to add specification of trial and/or voxel
-    pop1count = sim_output.population.xs(specie,level=2)
+    df=sim_output.population
+    specie_index=df.index.names.index('specie')
+    #print('type',type(df),'size',len(df),'columns',df.columns)
+    #print('index',df.index.names,'which level',specie_index)
+    pop1count = df.xs(specie,level=specie_index)
+    time_index=pop1count.index.names.index('time')
     volumes=sim_output.vols
     tot_vol=np.sum(volumes)
-    pop1conc=pop1count.sum(axis=0,level=1)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
+    pop1conc=pop1count.sum(axis=0,level=time_index)/tot_vol/PUVC  #short for groupby(level=time_index).sum()
     return pop1conc
 
 def decode_species_names(array):
@@ -81,12 +87,12 @@ class Dependencies(object):
 
     def indices(self):
         "Numbers of the elements"
-        return range(self._element.descriptions.shape[0])
+        return range(self._element['descriptions'].shape[0])
 
     def descriptions(self):
         "A generator of descriptions of nodes (by index)"
         # pytables bug?
-        for row in self._element.descriptions[:]:
+        for row in self._element['descriptions'][:]:
             yield row.decode('utf-8')
 
     def elements(self):
@@ -94,19 +100,19 @@ class Dependencies(object):
 
         In case of diffusion, those are the originating voxels.
         """
-        return self._element.elements
+        return self._element['elements']
 
     def types(self):
         # pytables bug?
-        for row in self._element.types[:]:
+        for row in self._element['types'][:]:
             yield EventType(row)
-
+    '''
     def dependent(self):
         "A generator of lists of dependent nodes (by index)"
         # pytables bug?
-        for row in self._element.dependent[:]:
+        for row in self._element.dependent[:]:  #doesn't exist!!!
             yield list(n for n in row if n >= 0)
-
+    '''
 class Reactions(object):
     """Raw information about reactions
 
@@ -128,27 +134,27 @@ class Reactions(object):
 
     def reactants(self):
         "A generator of lists of reactants (by index)"
-        for row in self._element.reactants[:]:
+        for row in self._element['reactants'][:]:
             yield list(n for n in row if n >= 0)
-
+ 
     def reactant_stoichiometry(self):
         "A generator of lists of stoichiometries (by index)"
-        for row in self._element.reactant_stoichiometry[:]:
+        for row in self._element['reactant_stoichiometry'][:]:
             yield list(n for n in row if n >= 0)
 
     def products(self):
         "A generator of lists of products (by index)"
-        for row in self._element.products[:]:
+        for row in self._element['products'][:]:
             yield list(n for n in row if n >= 0)
 
     def product_stoichiometry(self):
         "A generator of lists of stoichiometries (by index)"
-        for row in self._element.product_stoichiometry[:]:
+        for row in self._element['product_stoichiometry'][:]:
             yield list(n for n in row if n >= 0)
 
     def rates(self):
         "Rates of the reactions"
-        return self._element.rates
+        return self._element['rates']
 
     def reversible_pairs(self):
         """Mapping to reverse reactions
@@ -157,7 +163,7 @@ class Reactions(object):
         gives the index of the reverse reaction. Reactions which do not have
         a reverse are not included.
         """
-        indices = self._element.reversible_pairs
+        indices = self._element['reversible_pairs']
         mapping = {i:indices[i] for i in range(len(indices))
                    if indices[i] >= 0}
         return mapping
@@ -168,10 +174,10 @@ class Model(object):
     def __init__(self, element):
         self._element = element
         try:
-            self.dependencies = Dependencies(self._element.events)
-        except tables.exceptions.NoSuchNodeError as e:
+            self.dependencies = Dependencies(self._element['events'])
+        except KeyError as e:
             self.dependencies = None
-        self.reactions = Reactions(self._element.reactions)
+        self.reactions=Reactions(self._element['reactions'])
 
     def species(self, indices=None):
         """List of specie names
@@ -183,7 +189,7 @@ class Model(object):
         >>> model.species()
         ['A', 'B', 'C', 'D']
         """
-        what = self._element.species[indices] if indices is not None else self._element.species
+        what = self._element['species'][indices] if indices is not None else self._element['species']
         return decode_species_names(what)
 
     def grid(self):
@@ -204,46 +210,57 @@ class Model(object):
         array([ 2.])
 
         """
-        return self._element.grid.read().view(np.recarray)
+        #return np.array(self._element['grid'])
+        return self._element['grid'][:].view(np.recarray)
+        
+    def volumes(self):
+        grid = self.grid()
+        #volume_index=grid.dtype.names.index('volume')
+        #volume=[e[volume_index] for e in grid[:]]
+        #return volume
+        return grid.volume
 
     def element_regions(self):
         "Names of regions of elements (by index)"
+        #region_index=self.element['grid'].dtype.names.index('region')
+        #region_nums=[grid[region_index] for grid in element['grid']]
         regions = np.array(self.region_names())
         return regions[self.grid().region]
+        #return regions[region_nums]
 
     def indices(self):
         "Numbers of the elements"
-        return range(self._element.grid.shape[0])
+        return range(self._element['grid'].shape[0])
 
     def neighbors(self):
         "A generator of lists of neighboring nodes (by index)"
         # pytables bug?
-        for row in self._element.neighbors[:]:
+        for row in self._element['neighbors'][:]:
             yield list(n for n in row if n >= 0)
 
     def couplings(self):
         "A generator of coupling strengths to neighboring nodes (by index)"
-        coupl = self._element.couplings
+        coupl = self._element['couplings']
         for i, neigh in enumerate(self.neighbors()):
             yield list(coupl[i][:len(neigh)])
 
     def region_names(self, indices=None):
         "Region names (by index)"
-        what = self._element.regions[indices] if indices is not None else self._element.regions
+        what = self._element['regions'][indices] if indices is not None else self._element['regions']
         return [row.decode('utf-8') for row in what]
 
     def output_group(self, name='__main__'):
         if name == '__main__':
             try:
-                group = self._element.output
-            except tables.exceptions.NoSuchNodeError:
+                group = self._element['output']
+            except KeyError:
                 # fall back to old tree
                 element = self._element
             else:
-                element = group._v_children[name]
+                element = group[name]
         else:
             # no fallback
-            element = self._element.output._v_children[name]
+            element = self._element['output'][name]
 
         return ModelOutputGroup(element, self)
 
@@ -262,22 +279,27 @@ class ModelOutputGroup(object):
         >>> output_model.species()
         ['A', 'B', 'C', 'D']
         """
-        what = self._element.species[indices] if indices is not None else self._element.species
+        what = self._element['species'][indices] if indices is not None else self._element['species']
         return decode_species_names(what)
 
     def elements(self):
         """List of element indices in this output group
         """
         try:
-            return self._element.elements[:]
-        except tables.exceptions.NoSuchNodeError:
-            return self._element.dependencies.elements[:]
+            return self._element['elements'][:] #indices of elements
+        except KeyError: # FIXME nothing called dependencies.
+            grid = self._model.grid()
+            element_labels=[r.decode('utf-8') for r in grid.labels]
+            return range(len(element_labels))
+            #return self._element['dependencies']['elements'][:]
 
     def volumes(self):
         """Volumes of elements in this output group
         """
         elements = self.elements()
         grid = self._model.grid()
+        #volume_index=grid.dtype.names.index('volume')
+        #volumes=[e[volume_index] for e in grid[:]]
         volumes = grid[elements].volume
         return volumes
 
@@ -287,21 +309,33 @@ class OutputGroup(object):
         self._output_model = output_model
 
     def times(self):
-        times = self._element.times[:]
+        times = self._element['times'][:] #file['trial0']['output']['__main__']['times']
         diff = times[1] - times[0]
         return np.round(times, decimals=max(-math.floor(math.log10(diff)), 0))
 
     def counts(self):
         try:
-            data = self._element.population
-        except tables.exceptions.NoSuchNodeError:
+            data = self._element['population'][:] #file['trial0']['output']['__main__']['population']
+        except KeyError:
             # fall back to old tree
-            data = self._element.concentrations
-        panel = pd.Panel(data.read(),
+            data = self._element['concentrations'][:]
+        ''' Panel depracated
+        panel = pd.Panel(data.read(),  #(times,voxel,species, e.g. (501,3,7)
                          items=self.times(),
-                         major_axis=self._output_model.elements(),
-                         minor_axis=self.species())
+-                         major_axis=self._output_model.elements(),
+-                         minor_axis=self.species())
         frame = panel.transpose(2, 1, 0).to_frame()
+        #transpose: items=species, major=voxels,minor=times
+        #to_frame: columns=item = species; index = majoraxis + minor axis = voxels+times
+        '''
+        voxels=self._output_model.elements()
+        assert len(voxels)==np.shape(data)[1]
+        assert len(self.times())==np.shape(data)[0]
+        data2D=data.T.reshape(len(self.species()),len(voxels)*len(self.times()))
+        # above: transpose to species 1st, e.g. (7,3,501), then reshape to ((7,1503);
+        # below: transpose to (times/voxels) as rows and species as columns
+        frame=pd.DataFrame(data2D.T,columns=self.species(), 
+                           index=pd.MultiIndex.from_product([voxels,self.times()]))
         frame.index.names = ['voxel', 'time']
         #print('######### OutputGroup.counts frame',frame)
         return frame
@@ -325,9 +359,10 @@ class OutputGroup(object):
 class Simulation(object):
     """Information about the results of a trial
     """
-    def __init__(self, element, model):
-        self._element = element
-        self.number = int(element._v_name[5:])
+    def __init__(self, node, element, model):
+        #print('** Simulation: element',element,'model',model)
+        self._element = element #file['trial0']
+        self.number = int(node[5:])
         self.model = model
 
     def config(self):
@@ -343,7 +378,7 @@ class Simulation(object):
         '2D'
         """
 
-        xml = self.model._element.serialized_config
+        xml = self.model.model['serialized_config']
         # FIXME: overwrite seed?
         return etree.fromstring(xml.read()[0])
 
@@ -351,15 +386,15 @@ class Simulation(object):
     def output_group(self, name='__main__'):
         if name == '__main__':
             try:
-                group = self._element.output
-            except tables.exceptions.NoSuchNodeError:
+                group = self._element['output']
+            except KeyError:
                 # fall back to old tree
-                element = self._element.simulation
+                element = self._element['simulation']
             else:
-                element = group._v_children[name]
+                element = group[name]
         else:
             # no fallback
-            element = self._element.output._v_children[name]
+            element = self._element['output'][name]
         return OutputGroup(element, self.model.output_group(name))
 
     def times(self, output_group='__main__'):
@@ -372,7 +407,7 @@ class Simulation(object):
         return self.output_group(output_group).concentrations()
 
     def events(self):
-        "A full history of events"
+        "A full history of events"  #no longer included
         times = self._element.events.times[:]
         waited = self._element.events.waited[:]
         original = self._element.events.original_wait[:]
@@ -394,13 +429,16 @@ class Output(object):
     >>> out = Output('model.h5')
     """
     def __init__(self, filename,stim_time):
-        self.file = tables.open_file(filename)
+        #self.file = tables.open_file(filename)
+        self.file=h5py.File(filename,mode='r')
         try:
-            element = self.file.root.model
-        except tables.exceptions.NoSuchNodeError:
-            element = self.file.root.trial0.model
+            #element = self.file.root.model
+            element=self.file['model']
+        except KeyError:
+            #element = self.file.root.trial0.model
+            element=self.file['trial0']['model']
         self.model = Model(element)
-        #add injection to object to allow aju.drawing to work,
+         #add injection to object to allow aju.drawing to work,
         #and also to allow set of files with different stimulation
         fname=os.path.basename(filename)
         if '-' in fname:
@@ -410,13 +448,14 @@ class Output(object):
         else:
             self.injection=0
 
-        self.vols=self.model.grid().volume
+        self.vols=self.model.volumes()
         self.specie_names=self.model.species()
         self.population=self.counts()
         self.stim_time=stim_time
         self.norm=None
         self._attributes = {'injection':self.injection,'stim_time':stim_time}
-        
+
+    ########## Basal and peak, as well as imports, can probably be deleted #########
     def basal(self,mol):
         conc=nrd_output_conc(self,mol)
         start,base=nrd_basal(conc.index.values,conc.values,self.stim_time)
@@ -449,14 +488,16 @@ class Output(object):
         >>> sim.config()
         <Element {http://stochdiff.textensor.org}SDRun at 0x...>
         """
-        trial = self.file.get_node('/trial{}'.format(num))
+        #trial = self.file.get_node('/trial{}'.format(num))
+        trial = self.file['/trial{}'.format(num)]
         return Simulation(trial, self.model)
 
     @functools.lru_cache()
     def simulations(self):
-        nodes = self.file.list_nodes('/')
-        sims = [Simulation(node, self.model) for node in nodes
-                if node._v_name.startswith('trial')]
+        #print('********** self.file',self.file)
+        nodes = self.file.keys() #self.file.list_nodes('/')
+        sims = [Simulation(node, self.file[node], self.model) for node in nodes
+                if node.startswith('trial')]
         sims.sort(key=operator.attrgetter('number'))
         return sims
 
@@ -492,12 +533,28 @@ class Output(object):
         """
         sims = self.simulations()
         #sims.counts executes OutputGroup.counts
+        '''  using Panel, which has been deprecated
+        #returns df with rows=times*voxels and columns = species
         data = dict((i, sim.counts(output_group))
                     for (i, sim) in enumerate(sims))
         #print('******* Output.counts, data dict',data)
-        panel = pd.Panel(data)
+        panel = pd.Panel(data) 
         series = panel.to_frame().stack()
         series.index.names = 'voxel time specie trial'.split()
+        #items = i (sim number), major axis=species, minor axis=times*voxels?
+        #to_frame combines major and minor axis into multi-index
+        #stack reshape dataframe with mutli-index
+        '''
+        #sim.counts(output_group).stack() produces series with multi-index=[voxel time species]
+        #need to add another level to multiindex which is sim number
+        #### FIXME: trial is now before specie - may cause problems????
+        alldf=[]
+        for (i,sim) in enumerate(sims):
+            df=sim.counts(output_group)
+            newdf=df.assign(trial=i).set_index('trial',append=True)
+            alldf.append(newdf.stack())
+        series=pd.concat(alldf)
+        series.index.names = 'voxel time trial specie'.split() 
         frame = pd.DataFrame(dict(count=series))
         return frame
 
@@ -516,7 +573,7 @@ class Output(object):
         0     0.0  A      0        1049.460511
         """
         counts = self.counts(output_group)
-        volumes = self.model.grid().volume*PUVC
+        volumes = self.model.volumes()*PUVC
         #print('******* Output.conc volumes:', volumes)#,'\noutput counts',counts)
         new_vols=np.repeat(volumes, counts.index.size/volumes.size)
         #print('******* Output.conc new_vols', np.shape(new_vols), np.shape(counts))
@@ -526,8 +583,8 @@ class Output(object):
         return ans
 
     def volumes(self, output_group='__main__'):
-        volumes = self.model.grid().volume
-        return volumes,PUVC
+        volumes = self.model.volumes()
+        return volumes
     
     @functools.lru_cache()
     def events(self):

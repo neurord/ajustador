@@ -23,7 +23,7 @@ c. use stim start in wave and sim to align data
 d. align the simulation with experiment in fitness function based on filename param, not just sorted
 '''
 
-def nrd_output_percent(sim_output,specie,stim_time,scale=1,basal=1):
+def nrd_output_percent(sim_output,specie,stim_time,scale=1,expbasal=1):
     pop1=nrd_output.nrd_output_conc(sim_output,specie)
     wave1y=pop1.values[:,0]
     wave1x=pop1.index
@@ -31,13 +31,10 @@ def nrd_output_percent(sim_output,specie,stim_time,scale=1,basal=1):
     if scale==1:
         wave1y=wave1y/wave1y_basal
     else:
-        wave1y=basal+(wave1y/wave1y_basal-1)/scale
+        wave1y=expbasal+(wave1y/wave1y_basal-1)/scale #specify expbasal=0 for FRET-FLIM
         #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ratio ~4.0 (not 0.4 as in fret)
         #perhaps should add ability to parse and execute arbitrary equation.  Invert this for data in drawing.plot_neurord_tog
         #wave1y=1+(wave1y/wave1y_basal-1)/scale
-        #kluge for FRET-FLIM which has 0 basal
-        #wave1y=(wave1y/wave1y_basal-1)/scale
-        #wave1y=1.0+wave1y/scale
     return wave1y,wave1x
 
 def yvalues(y):
@@ -83,7 +80,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                 else:  #measurement is experimental data, stored as CSV_conc_set
                     if norm=='percent':
                         wave1y,wave1x=nrd_output_percent(stim_set,species,stim_start,scale=measurement.data[j].waves[species].scale,
-                                                         basal=measurement.data[j].waves[species].exp_basal)
+                                                         expbasal=measurement.data[j].waves[species].exp_basal)
                         stim_set.norm=norm
                     else:
                         pop1=nrd_output.nrd_output_conc(stim_set,species)
@@ -95,7 +92,8 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                     # Note: np.interp(x1,x2,y2) returns values for y2 corresponding to x1 timepoints
                     #what if x1 is negative? - don't use relative time for data
                     pop1y=np.interp(pop2.x,wave1x,wave1y)
-                    logger.debug('wave1y sim= {}, len= {}, max= {}'.format(measurement.data[j].injection,len(wave1y),os.path.basename(stim_set.file.filename)))
+                    logger.debug('wave1y sim= {}, len= {}, file= {}'.format(measurement.data[j].injection,len(wave1y),stim_set.file))
+                    #os.path.basename(stim_set.file.filename doesn't work for some strange reason, maybe because file is <Closed HDF5 file>?
                     diff = pop2.y - pop1y
                 diffnorm = diff if max_mol==0 else diff/max_mol
                 fit_dict[species][stim_set.injection]=float((diffnorm**2).mean()**0.5)
