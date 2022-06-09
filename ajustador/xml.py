@@ -26,9 +26,9 @@ class XMLParamMechanism(optimize.ParamMechanism):
         self.xpath = xpath
 
 class XMLParam(optimize.AjuParam):
-    def __init__(self, name, value, *, min=None, max=None, fixed=False, xpath):
+    def __init__(self, name, value, *, min=None, max=None, fixed=False, multiplier=None, xpath):
         super().__init__(name, value, min=min, max=max,
-                         fixed=fixed,
+                         multiplier=multiplier, fixed=fixed,
                          mech=XMLParamMechanism(xpath))
 
 def open_model(fname):
