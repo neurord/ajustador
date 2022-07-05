@@ -108,11 +108,12 @@ def load_simulation(ivfile, simtime, junction_potential, features):
 
 
 class Simulation(loader.Attributable):
-    def __init__(self, dir, *, params, features):
+    def __init__(self, dir, *, params, constant=None, features):
         super().__init__(features=features)
 
         self.params = params
         self.features = features
+        self.constant=constant
 
         self.name = (', '.join('{}={}'.format(k,v) for k,v in self.params.items())
                      if self.params else 'unmodified')
@@ -325,11 +326,12 @@ class Param:
     """
     min = max = None
 
-    def __init__(self, name, value, fixed=True, mech=ParamMechanism.unspecified):
+    def __init__(self, name, value, fixed=True, constant=None, mech=ParamMechanism.unspecified):
         self.name = name
         assert isinstance(value, (float, int, str)), value
         self.value = value
         self.fixed = fixed
+        self.constant=constant
         self.mech = mech
 
     def __repr__(self):
@@ -363,15 +365,19 @@ class AjuParam(Param):
     used for simulation.
     """
     def __init__(self, name, value, *, min=None, max=None,
-                 fixed=False,
+                 fixed=False, constant=None,
                  mech=ParamMechanism.unspecified):
 
         super().__init__(name, value, fixed=fixed, mech=mech)
         self.min = min
         self.max = max
+        self.constant = constant
 
-        if fixed:
+        if fixed == 1:
             self._scaling = None
+        elif isinstance(fixed, str or list):
+            self.fixed=fixed
+            self.constant = constant
         else:
             # if starting value is less than 0.1 or more than 10, scale to that region
             # self._scaling property is set by logically assesing value input parameter along with inputs min, max.
@@ -433,6 +439,7 @@ class AjuParam(Param):
         return AjuParam(self.name, value,
                         min=self.min,
                         max=self.max,
+                        constant=self.constant,
                         fixed=self.fixed,
                         mech=self.mech)
 
@@ -440,9 +447,11 @@ class ParamSet:
     def __init__(self, *params, **other):
         other = tuple(Param(k, v) for k,v in other.items())
         self.params = params + other
-        self.fixedparams = tuple(p for p in self.params if p.fixed)
+        self.fixedparams = tuple(p for p in self.params if p.fixed == 1 or p.fixed == True)
+        self.constrainparams= tuple(p for p in self.params if isinstance(p.fixed,str))
+        self.summedparams = tuple(p for p in self. params if isinstance(p.fixed, dict))
         self.ajuparams = tuple(p for p in self.params if not p.fixed)
-
+        
     @property
     def scaled(self):
         return self.scale(p.value for p in self.ajuparams)
@@ -461,10 +470,24 @@ class ParamSet:
 
     def unscaled_dict(self, scaled_values):
         assert len(scaled_values) == len(self.ajuparams)
-        gen = itertools.chain(((p.name, p.unscale(v))
-                               for (p, v) in zip(self.ajuparams, scaled_values)),
-                              ((p.name, p.value)
-                               for p in self.fixedparams))
+        x=((p.name, p.unscale(v)) for (p,v) in zip(self.ajuparams, scaled_values))
+        y=((p.name, p.value) for p in self.fixedparams)
+        X={p.name : p.unscale(v) for (p,v) in zip(self.ajuparams, scaled_values)}
+        Y={p.name : p.value for p in self.fixedparams}
+        X.update(Y)
+        yy=((p.name, p.constant*X[p.fixed]) for p in self.constrainparams)
+        X.update({p.name: p.constant*X[p.fixed] for p in self.constrainparams})
+        Z={}
+        total=0
+        for param in self.summedparams:
+            for amount in param.fixed['molecules']:
+                if amount.endswith('dens') == True:
+                    total+=(X[amount]/param.fixed['radius'])
+                else:
+                    total+=X[amount]
+            Z.update({param.name: total})
+        z=((p.name, p.constant-Z[p.name]) for p in self.summedparams)
+        gen = itertools.chain(x,y,yy,z)
         return collections.OrderedDict(gen)
 
     def updated(self, **kwargs):

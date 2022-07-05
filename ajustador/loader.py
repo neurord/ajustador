@@ -256,7 +256,7 @@ def parse_data_header(text):
     from ajustador.helpers.scaling_factors import get_units_scale_factor
     parts = text.split(' ')
     if len(parts) != 2:
-        raise ValueError
+        raise ValueError('too many spaces in header columns')
     if parts[0].lower().startswith('t'):
        return parts[0], get_units_scale_factor(parts[1])
     return float(parts[0]) * get_units_scale_factor(parts[1])

@@ -66,6 +66,7 @@ def save_params(fitX, start = 0,threshold = np.inf,fn=None, sas=False, npz=True)
     feature_list.append('model='+fitX.model)
     if fitX.neuron_type is not None:
         feature_list.append('neuron='+fitX.neuron_type)
+    feature_list.append('dataname='+fitX.measurement.name)
     #
     #save as text file to read into sas
     if sas:
