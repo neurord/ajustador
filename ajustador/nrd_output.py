@@ -44,13 +44,13 @@ def nrd_output_conc(sim_output,specie):
     #may need to add specification of trial and/or voxel
     df=sim_output.population
     specie_index=df.index.names.index('specie')
-    voxel_index=df.index.names.index('voxel')
     #print('type',type(df),'size',len(df),'columns',df.columns)
     #print('index',df.index.names,'which level',specie_index)
     pop1count = df.xs(specie,level=specie_index)
+    time_index=pop1count.index.names.index('time')
     volumes=sim_output.vols
     tot_vol=np.sum(volumes)
-    pop1conc=pop1count.sum(axis=0,level=voxel_index)/tot_vol/PUVC  #sum across voxels, level=0 sums across time
+    pop1conc=pop1count.sum(axis=0,level=time_index)/tot_vol/PUVC  #short for groupby(level=time_index).sum()
     return pop1conc
 
 def decode_species_names(array):
