@@ -21,6 +21,7 @@ def calc_mean_slopes(array_item,slope_test_size,test_size):
 
 def converge_dict(fit_values,test_size,popsiz):
     generations=int(np.round(len(fit_values)/popsiz))
+    print(generations)
     means=np.zeros(generations)
     stdev=np.zeros(generations)
     for i in range(generations):
@@ -41,15 +42,18 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5
     #
     converge=False
     last_j=0
-    #print('iterate_fit.py: len of fitness',len(fitX))
+    print('iterate_fit.py: len of fitness',len(fitX))
     with open("convergence.dat","w") as fitfile:
         fitfile.write("data name: "+str(fitX.name)+"  test_size: "+str(test_size)+"\n")
         fitfile.write("iter mean_mean std_mean slope_mean mean_std std_std slope_std \n")
+        #calculation mean_dict, print to file, e.g. call print_dict(fitfile,conv_dict,last_j,slope_crit,std_crit,test_size,popsiz)
         while not converge and len(fitX) < max_evals:
+            #print('in while loop', converge,len(fitX),test_size,'optimizer.stop',fitX.optimizer.stop())
             fitX.do_fit(test_size, popsize=popsiz,seed=last_j*last_j)  #OPTIMIZE FOR ANOTHER TEST_SIZE GENERATIONS
             # calculate mean and std of the fitness values
             mean_dict, std_dict, CV = converge_dict(fitX._history, test_size, popsiz)
             for j in range(last_j,len(mean_dict['mean'])):
+                #print('in j loop',j,mean_dict['mean'])
                 line=str(j)+'  '   #write the latest fitness values to the file
                 for key in mean_dict.keys():
                         line=line+'   '+str(np.round(mean_dict[key][j],5))
@@ -61,6 +65,7 @@ def iterate_fit(fitX,test_size,popsiz,slope_crit=2e-3, std_crit=0.06,max_evals=5
                         converge=True                    #above tests the latest fitness value for convergence
                         print('*************** optimization converged at', j*test_size*popsiz, 'with m=',mean_dict['mean'][j] )
                 else:
+                        converge=False
                         print('**************  optimization NOT converged', j*test_size*popsiz,'m=',mean_dict['mean'][j])
             last_j=j+1
             #print('last_j',j,'new range', list(range(last_j,last_j+1)))

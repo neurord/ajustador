@@ -92,6 +92,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                     # Note: np.interp(x1,x2,y2) returns values for y2 corresponding to x1 timepoints
                     #what if x1 is negative? - don't use relative time for data
                     pop1y=np.interp(pop2.x,wave1x,wave1y)
+                    #print('wave1y sim= {}, len= {}, file= {}'.format(measurement.data[j].injection,len(wave1y),stim_set.file,'interpolated',pop1y,'nrd',pop2y)
                     logger.debug('wave1y sim= {}, len= {}, file= {}'.format(measurement.data[j].injection,len(wave1y),stim_set.file))
                     #os.path.basename(stim_set.file.filename doesn't work for some strange reason, maybe because file is <Closed HDF5 file>?
                     diff = pop2.y - pop1y

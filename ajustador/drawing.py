@@ -82,8 +82,11 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
                         axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0],label=labl,color=colr)
                 elif isinstance(stim_data,loadconc.CSV_conc):
                     if mol in list(stim_data.waves.keys()):
-                        #ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
-                        ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-stim_data.waves[mol].exp_basal)
+                        if norm=='percent':
+                            #ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
+                            ydata=stim_data.waves[mol].exp_basal+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-stim_data.waves[mol].exp_basal)
+                        else:
+                            ydata=stim_data.waves[mol].wave.y
                         axes[k].plot(stim_data.waves[mol].wave.x/ms_per_sec,ydata,color=colr,label=labl)
                 else:
                     print('drawing.py: new type of data format', type(measurement))
