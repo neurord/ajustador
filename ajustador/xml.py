@@ -42,7 +42,7 @@ def do_replacements(model, paramset):
         if isinstance(mech, XMLParamMechanism):
             elems = model.xpath(mech.xpath)
             if len(elems) != 1:
-                raise ValueError('xpath matched {} elements - wrong Reaction id specified'.format(len(elems)))
+                raise ValueError('xpath matched {} elements - wrong Reaction id specified {}'.format(len(elems), mech.xpath))
             #concentration (and surface density) sets have different format.
             #they have values and attrib, not text. May need to enhance this for region specific sets
             if elems[0].text==None:
