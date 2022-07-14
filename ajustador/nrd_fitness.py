@@ -22,11 +22,19 @@ ms_to_sec=1000
 c. use stim start in wave and sim to align data
 d. align the simulation with experiment in fitness function based on filename param, not just sorted
 '''
+def summed_species(stim_set, species_list):
+    for i,sp in enumerate(species_list.keys()):
+        pop1=nrd_output.nrd_output_conc(stim_set, sp)
+        wave1x=pop1.index
+        if i == 0:
+            wave1y=pop1.values[:,0]
+        else:
+            wave1y+=pop1.values[:,0]
+    return wave1y, wave1x
 
 def nrd_output_percent(sim_output,specie,stim_time,scale=1,expbasal=1):
-    pop1=nrd_output.nrd_output_conc(sim_output,specie)
-    wave1y=pop1.values[:,0]
-    wave1x=pop1.index
+    #pop1=nrd_output.nrd_output_conc(sim_output,specie)
+    wave1y, wave1x=summed_species(sim_output, specie)
     start_index,wave1y_basal=basal(wave1x,wave1y,stim_time)
     if scale==1:
         wave1y=wave1y/wave1y_basal
@@ -67,15 +75,17 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
         fitarray=np.zeros((len(species_list),len(sim.output)))
         fit_dict={}
         stim_start=sim.stim_time if start is None else start*ms_to_sec
-        for i,species in enumerate(species_list):
+        for i,species in enumerate(species_list.keys()):
             fit_dict[species]={}
             for j,stim_set in enumerate(sim.output):
                 if isinstance(measurement,xml.NeurordResult):
-                    pop1=nrd_output.nrd_output_conc(stim_set,species)
+                    #pop1=nrd_output.nrd_output_conc(stim_set,species)
+                    wave1y, wave1x= summed_species(stim_set, species)
                     stim_set.__exit__()
                     pop2 = nrd_output.nrd_output_conc(measurement.output[j],species)
-                    diff = pop2 - pop1
-                    max_mol=np.mean([np.max(pop1.values),np.max(pop2.values)])
+                    wave2y, wave2x= summed_species(measurement.output[j], species)
+                    diff = wave2y - wave1y
+                    max_mol=np.mean([np.max(wave1y),np.max(wave2y)])
                     logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
                     if norm=='percent':
@@ -83,12 +93,11 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                                                          expbasal=measurement.data[j].waves[species].exp_basal)
                         stim_set.norm=norm
                     else:
-                        pop1=nrd_output.nrd_output_conc(stim_set,species)
-                        wave1y=pop1.values[:,0]
-                        wave1x=pop1.index
+                        #pop1=nrd_output.nrd_output_conc(stim_set,species)
+                        wave1y, wave1x = summed_species(stim_set, species_list)
                     stim_set.__exit__()
                     pop2 = measurement.data[j].waves[species].wave
-                    max_mol=np.mean([np.max(wave1y),np.max(pop2.y)])
+                    max_mol=np.mean([np.max(wave1y),np.max(pop2.y)]) 
                     # Note: np.interp(x1,x2,y2) returns values for y2 corresponding to x1 timepoints
                     #what if x1 is negative? - don't use relative time for data
                     pop1y=np.interp(pop2.x,wave1x,wave1y)
