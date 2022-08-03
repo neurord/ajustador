@@ -16,8 +16,11 @@ class trace(object):
     def __init__(self, molname, x, y,stim_time):
         molname_parts=molname.split()
         self.molname=molname_parts[0]
+        self.norm=False
         if len(molname_parts)>1:
             self.units=molname_parts[1]
+            if '%' in self.units:
+                self.norm=True
             if len(molname_parts)>2:
                 #strip out any trailing non-numeric characteris
                 self.scale=int(''.join([c for c in molname_parts[2] if c.isdigit()]))

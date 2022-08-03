@@ -21,7 +21,6 @@ ms_to_sec=1000
 2. align experiments and simulations so that simulations can be shorter than experiments
 c. use stim start in wave and sim to align data
 d. align the simulation with experiment in fitness function based on filename param, not just sorted
-3. allow subset of molecules to be normalized? 
 '''
 def summed_species(stim_set, species_set): #called for each species, send in the  (values of dictionary)
     for i,sp in enumerate(species_set):  #loop over the list
@@ -91,7 +90,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                     max_mol=np.mean([np.max(wave1y),np.max(wave2y)])
                     logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
-                    if norm=='percent': #nrd_output_percent needs species_list, not species
+                    if measurement.data[j].waves[species].norm: #nrd_output_percent needs species_list, not species
                         wave1y,wave1x=nrd_output_percent(stim_set,species_set,stim_start,scale=measurement.data[j].waves[species].scale,
                                                          expbasal=measurement.data[j].waves[species].exp_basal)
                         stim_set.norm=norm
