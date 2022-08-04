@@ -41,8 +41,8 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
-def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
-    from ajustador import nrd_output, loadconc
+def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dict=None):
+    from ajustador import nrd_output, loadconc, nrd_fitness
     #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
     if fit_rpt:
@@ -56,7 +56,7 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
     else:
         mollist_exp=list(measurement.data[0].waves.keys())
         exp_data=measurement.data
-    mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim)))
+    mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim))) 
     #set up graph, either as one column or multiple columns depending on number of molecules
     if len(mol_list)>8:
         rows=int(np.round(np.sqrt(len(mol_list))))
@@ -75,18 +75,31 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None):
             #print('stimdata', stim_data.file.filename, stim_data.injection, 'color', colr)
             for k,mol in enumerate(mol_list):
                 if isinstance(stim_data,nrd_output.Output):
-                    if mol in stim_data.specie_names:
+                    if mol_dict:
+                        if exp_data[0].waves[mol].norm:
+                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,mol_dict[mol],stim_data.stim_time,exp_data[0].waves[mol].scale,exp_data[0].waves[mol].exp_basal)
+                        else:
+                            ploty,plotx=nrd_fitness.summed_species(stim_data, mol_dict[mol])
+                    else:
+                        if exp_data.waves[mol].norm:
+                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,[mol],stim_data.stim_time,exp_data[0].waves[mol].scale,exp_data[0].waves[mol].exp_basal)
+                        else:
+                            plotdata=nrd_output.nrd_output_conc(stim_data,mol)
+                            ploty=plotdata.values[:,0]
+                            plotx=plotdata.index.values
+                    '''if mol in stim_data.specie_names:
                         plotdata=nrd_output.nrd_output_conc(stim_data,mol)
                         if stim_data.norm=='percent' and norm=='percent':
-                            plotdata=nrd_output.nrd_output_conc(stim_data,mol)/stim_data.basal(mol)['basal']
-                        axes[k].plot(plotdata.index.values/ms_per_sec,plotdata.values[:,0],label=labl,color=colr)
+                            plotdata=nrd_output.nrd_output_conc(stim_data,mol)/stim_data.basal(mol)['basal']'''
+                    axes[k].plot(plotx/ms_per_sec,ploty,label=labl,color=colr)
                 elif isinstance(stim_data,loadconc.CSV_conc):
                     if mol in list(stim_data.waves.keys()):
+                        '''
                         if norm=='percent':
                             #ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
                             ydata=stim_data.waves[mol].exp_basal+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-stim_data.waves[mol].exp_basal)
-                        else:
-                            ydata=stim_data.waves[mol].wave.y
+                        else:'''
+                        ydata=stim_data.waves[mol].wave.y
                         axes[k].plot(stim_data.waves[mol].wave.x/ms_per_sec,ydata,color=colr,label=labl)
                 else:
                     print('drawing.py: new type of data format', type(measurement))
@@ -267,7 +280,8 @@ def plot_history(groups, measurement=None, *,
                  show_quit=False, labels=None, ymax=None, fitness=None,
                  clear=True,
                  newplot=False,
-                 Norm=None):
+                 Norm=None,
+                 mol_dict=None):
 
     if hasattr(groups[0], 'name'):
         groups = groups,
@@ -337,7 +351,7 @@ def plot_history(groups, measurement=None, *,
             print('Fitness report',fit_dict)
             f = plot_neurord_tog(measurement,sim,
                                  labels='iteration {}:{}'.format(x,' '.join(params)),
-                                 fit_rpt=texts,norm=Norm)
+                                 fit_rpt=texts,norm=Norm,mol_dict=mol_dict)
         else:
             if measurement:
                 # FIXME: map from artist to group
