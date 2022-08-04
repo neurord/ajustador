@@ -41,7 +41,7 @@ def _get_graph(name, figsize=None, clear=True, newplot=False):
     f.canvas.mpl_connect('close_event', _on_close)
     return f
 
-def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dict=None):
+def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dict=None): #delete norm=None
     from ajustador import nrd_output, loadconc, nrd_fitness
     #groups=(measurement, sim), so groups[0]=fit.measurement (exp_data), groups[1] is fit[x].output 
     f = _get_graph(measurement.name) #adding additional label in arbitrary place
@@ -80,12 +80,12 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dic
                 if isinstance(stim_data,nrd_output.Output):
                     if mol_dict:
                         if exp_data[0].waves[mol].norm:
-                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,mol_dict[mol],stim_data.stim_time,exp_data[0].waves[mol].scale,exp_data[0].waves[mol].exp_basal)
+                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,mol_dict[mol],stim_data.stim_time,exp_data[0].waves[mol])
                         else:
                             ploty,plotx=nrd_fitness.summed_species(stim_data, mol_dict[mol])
                     else:
                         if exp_data[0].waves[mol].norm:
-                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,[mol],stim_data.stim_time,exp_data[0].waves[mol].scale,exp_data[0].waves[mol].exp_basal)
+                            ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,[mol],stim_data.stim_time,exp_data[0].waves[mol])
                         else:
                             plotdata=nrd_output.nrd_output_conc(stim_data,mol)
                             ploty=plotdata.values[:,0]
@@ -283,7 +283,7 @@ def plot_history(groups, measurement=None, *,
                  clear=True,
                  newplot=False,
                  Norm=None,
-                 mol_dict=None):
+                 mol_dict=None): #eliminate Norm=None
 
     if hasattr(groups[0], 'name'):
         groups = groups,
@@ -353,7 +353,7 @@ def plot_history(groups, measurement=None, *,
             print('Fitness report',fit_dict)
             f = plot_neurord_tog(measurement,sim,
                                  labels='iteration {}:{}'.format(x,' '.join(params)),
-                                 fit_rpt=texts,norm=Norm,mol_dict=mol_dict)
+                                 fit_rpt=texts,norm=Norm,mol_dict=mol_dict) #eliminate norm=Norm
         else:
             if measurement:
                 # FIXME: map from artist to group

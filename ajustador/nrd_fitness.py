@@ -32,7 +32,9 @@ def summed_species(stim_set, species_set): #called for each species, send in the
             wave1y+=pop1.values[:,0]
     return wave1y, wave1x
 
-def nrd_output_percent(sim_output,specie_list,stim_time,scale=1,expbasal=1):
+def nrd_output_percent(sim_output,specie_list,stim_time,expdata): 
+    scale=expdata.scale
+    expbasal=expdata.exp_basal
     #pop1=nrd_output.nrd_output_conc(sim_output,specie)
     wave1y, wave1x=summed_species(sim_output, specie_list) #summed_species takes a list of molecules
     start_index,wave1y_basal=basal(wave1x,wave1y,stim_time)
@@ -41,10 +43,10 @@ def nrd_output_percent(sim_output,specie_list,stim_time,scale=1,expbasal=1):
     elif wave1y_basal > 0:
         wave1y=expbasal+(wave1y/wave1y_basal-1)/scale #specify expbasal=0 for FRET-FLIM
         #kluge just for FRET percent change optimization, because model peak to basal Epac1cAMP ratio ~4.0 (not 0.4 as in fret)
-        #perhaps should add ability to parse and execute arbitrary equation.  Invert this for data in drawing.plot_neurord_tog
-        #wave1y=1+(wave1y/wave1y_basal-1)/scale
-    else:
-        wave1y=wave1y #do not normalized if wave1y_basal is 0
+    else: #scale so that peaks match - can only fit dynamics
+        expmax=expdata.features['peakval'] #np.max(expdata.wave.y)
+        peakpt,peakval=peak(wave1x,wave1y,start_index)
+        wave1y=expmax*(wave1y/peakval) #normalized to max of experimant if wave1y_basal is 0
     return wave1y,wave1x
 
 def yvalues(y):
@@ -81,10 +83,8 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
             fit_dict[species]={}
             for j,stim_set in enumerate(sim.output):
                 if isinstance(measurement,xml.NeurordResult):
-                    #pop1=nrd_output.nrd_output_conc(stim_set,species)
                     wave1y, wave1x= summed_species(stim_set, species_set)
                     stim_set.__exit__()
-                    #pop2 = nrd_output.nrd_output_conc(measurement.output[j],species)
                     wave2y, wave2x= summed_species(measurement.output[j], species_set)
                     diff = wave2y - wave1y
                     max_mol=np.mean([np.max(wave1y),np.max(wave2y)])
@@ -92,11 +92,9 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                 else:  #measurement is experimental data, stored as CSV_conc_set
                     stim_set.stim_time=stim_start
                     if measurement.data[j].waves[species].norm: #nrd_output_percent needs species_list, not species
-                        wave1y,wave1x=nrd_output_percent(stim_set,species_set,stim_start,scale=measurement.data[j].waves[species].scale,
-                                                         expbasal=measurement.data[j].waves[species].exp_basal)
-                        stim_set.norm=norm
+                        wave1y,wave1x=nrd_output_percent(stim_set,species_set,stim_start,expdata=measurement.data[j].waves[species])
+                        stim_set.norm=norm #DELETE here and in drawing
                     else:
-                        #pop1=nrd_output.nrd_output_conc(stim_set,species)
                         wave1y, wave1x = summed_species(stim_set, species_set)
                     stim_set.__exit__()
                     pop2 = measurement.data[j].waves[species].wave
