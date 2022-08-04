@@ -76,7 +76,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
         logger.debug('sim type {}, exp type {}'.format(type(sim),type(measurement)))
         fitarray=np.zeros((len(species_list),len(sim.output)))
         fit_dict={}
-        stim_start=sim.stim_time if start is None else start*ms_to_sec
+        stim_start=sim.stim_time if start is None else start*ms_to_sec 
         for i,(species,species_set) in enumerate(species_list.items()): #species_list = dict values, sent into summed_species
             fit_dict[species]={}
             for j,stim_set in enumerate(sim.output):
@@ -90,6 +90,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                     max_mol=np.mean([np.max(wave1y),np.max(wave2y)])
                     logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
+                    stim_set.stim_time=stim_start
                     if measurement.data[j].waves[species].norm: #nrd_output_percent needs species_list, not species
                         wave1y,wave1x=nrd_output_percent(stim_set,species_set,stim_start,scale=measurement.data[j].waves[species].scale,
                                                          expbasal=measurement.data[j].waves[species].exp_basal)

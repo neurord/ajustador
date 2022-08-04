@@ -66,7 +66,7 @@ def write_model(model, fname):
         out.write(etree.tostring(model))
 
 class NeurordResult(optimize.SimulationResult):
-    def __init__(self, filename, features=[],stim_time=None):
+    def __init__(self, filename, features=[],stim_time=None): #FIXME: how to pass stim_time into this function?
         # model.h5 is used if only a directory is specified, but a .h5 file with different name can be specified
 
         print('NeurordResults', filename)
