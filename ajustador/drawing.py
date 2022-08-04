@@ -56,7 +56,10 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dic
     else:
         mollist_exp=list(measurement.data[0].waves.keys())
         exp_data=measurement.data
-    mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim))) 
+    if mol_dict:
+        mol_list=mol_dict.keys() #or mollist_exp should also work
+    else:
+        mol_list=list(set.intersection(set(mollist_exp),set(mollist_sim))) 
     #set up graph, either as one column or multiple columns depending on number of molecules
     if len(mol_list)>8:
         rows=int(np.round(np.sqrt(len(mol_list))))
@@ -81,7 +84,7 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dic
                         else:
                             ploty,plotx=nrd_fitness.summed_species(stim_data, mol_dict[mol])
                     else:
-                        if exp_data.waves[mol].norm:
+                        if exp_data[0].waves[mol].norm:
                             ploty,plotx=nrd_fitness.nrd_output_percent(stim_data,[mol],stim_data.stim_time,exp_data[0].waves[mol].scale,exp_data[0].waves[mol].exp_basal)
                         else:
                             plotdata=nrd_output.nrd_output_conc(stim_data,mol)
@@ -96,7 +99,6 @@ def plot_neurord_tog(measurement,sim, labels=None,fit_rpt=None,norm=None,mol_dic
                     if mol in list(stim_data.waves.keys()):
                         '''
                         if norm=='percent':
-                            #ydata=1+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-1)
                             ydata=stim_data.waves[mol].exp_basal+stim_data.waves[mol].scale*(stim_data.waves[mol].wave.y-stim_data.waves[mol].exp_basal)
                         else:'''
                         ydata=stim_data.waves[mol].wave.y
