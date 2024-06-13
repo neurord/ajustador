@@ -88,7 +88,7 @@ def specie_concentration_fitness(*, voxel=0, species_list, trial=0,start=None,no
                     wave2y, wave2x= summed_species(measurement.output[j], species_set)
                     diff = wave2y - wave1y
                     max_mol=np.mean([np.max(wave1y),np.max(wave2y)])
-                    logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
+                    #logger.debug('sim:{} exp:{}'.format(os.path.basename(stim_set.file.filename),os.path.basename(measurement.output[j].file.filename)))
                 else:  #measurement is experimental data, stored as CSV_conc_set
                     stim_set.stim_time=stim_start
                     if measurement.data[j].waves[species].norm: #nrd_output_percent needs species_list, not species

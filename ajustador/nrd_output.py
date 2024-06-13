@@ -50,7 +50,7 @@ def nrd_output_conc(sim_output,specie):
     time_index=pop1count.index.names.index('time')
     volumes=sim_output.vols
     tot_vol=np.sum(volumes)
-    pop1conc=pop1count.sum(axis=0,level=time_index)/tot_vol/PUVC  #short for groupby(level=time_index).sum()
+    pop1conc=pop1count.groupby(level=time_index).sum()/tot_vol/PUVC
     return pop1conc
 
 def decode_species_names(array):
